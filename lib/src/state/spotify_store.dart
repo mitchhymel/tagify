@@ -1,6 +1,6 @@
 part of tagify;
 
-class AuthStore extends ChangeNotifier {
+class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_CREDS';
   SpotifyApiCredentials _credentials;
   AuthorizationCodeGrant _grant;
@@ -27,9 +27,12 @@ class AuthStore extends ChangeNotifier {
   SpotifyApi _spotify;
   SpotifyApi get spotify => _spotify;
 
+  List<PlaylistSimple> _playlists = [];
+  List<PlaylistSimple> get playlists => _playlists;
+
   bool get isLoggedIn => _spotify != null;
 
-  AuthStore() {
+  SpotifyStore() {
     _credentials =
         SpotifyApiCredentials(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET);
     _grant = SpotifyApi.authorizationCodeGrant(_credentials);
@@ -48,6 +51,7 @@ class AuthStore extends ChangeNotifier {
     }
 
     _spotify = SpotifyApi(creds);
+    await _afterLogin();
     notifyListeners();
   }
 
@@ -56,8 +60,13 @@ class AuthStore extends ChangeNotifier {
     _spotify = SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
 
     await _cacheCreds();
+    await _afterLogin();
 
     notifyListeners();
+  }
+
+  Future<void> _afterLogin() async {
+    refreshPlaylists();
   }
 
   Future<void> _cacheCreds() async {
@@ -77,9 +86,16 @@ class AuthStore extends ChangeNotifier {
       print('no cached creds found');
       return null;
     }
-    
+
     String json = prefs.getString(_cachedCredsKey);
     var creds = SerializeableSpotifyApiCredentials.fromJson(json);
     return creds;
+  }
+
+  Future<void> refreshPlaylists() async {
+    var results = await _spotify.playlists.me.all();
+    _playlists = results.toList();
+    print(_playlists.length);
+    notifyListeners();
   }
 }

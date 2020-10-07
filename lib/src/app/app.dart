@@ -5,11 +5,12 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) => MultiProvider(
     providers: [
       ChangeNotifierProvider<AppStore>(create: (_) => AppStore()),
-      ChangeNotifierProvider<AuthStore>(create: (_) => AuthStore()),
+      ChangeNotifierProvider<SpotifyStore>(create: (_) => SpotifyStore()),
     ],
     child: MaterialApp(
       title: 'Tagify',
       home: AppWidget(),
+      theme: ThemeData.dark(),
     )
   );
 }
