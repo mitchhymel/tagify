@@ -4,7 +4,7 @@ class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_CREDS';
   SpotifyApiCredentials _credentials;
   AuthorizationCodeGrant _grant;
-  final String _redirectUri = 'https://localhost/callback';
+  final String _redirectUri = 'https://localhost/callback'; //'tagify://spotifycallback';
   final List<String> scopes = [
     'user-library-read',
     'user-read-recently-played',
@@ -27,10 +27,13 @@ class SpotifyStore extends ChangeNotifier {
   SpotifyApi _spotify;
   SpotifyApi get spotify => _spotify;
 
+  User _user;
+  User get user => _user;
+
   List<PlaylistSimple> _playlists = [];
   List<PlaylistSimple> get playlists => _playlists;
 
-  bool get isLoggedIn => _spotify != null;
+  bool get loggedIn => _spotify != null && _user != null;
 
   SpotifyStore() {
     _credentials =
@@ -38,7 +41,7 @@ class SpotifyStore extends ChangeNotifier {
     _grant = SpotifyApi.authorizationCodeGrant(_credentials);
     _authUri =
         _grant.getAuthorizationUrl(Uri.parse(_redirectUri), scopes: scopes);
-    print(_authUri);
+    //print(_authUri);
 
     tryLoginFromCachedCreds();
   }
@@ -52,7 +55,6 @@ class SpotifyStore extends ChangeNotifier {
 
     _spotify = SpotifyApi(creds);
     await _afterLogin();
-    notifyListeners();
   }
 
   Future<void> loginFromRedirectUri(Uri responseUri) async {
@@ -61,12 +63,31 @@ class SpotifyStore extends ChangeNotifier {
 
     await _cacheCreds();
     await _afterLogin();
+  }
 
+  Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool res = await prefs.remove(_cachedCredsKey);
+    if (!res) {
+      print('failed to delete creds from shared prefs');
+    }
+
+    _playlists.clear();
+    _user = null;
+    _spotify = null;
     notifyListeners();
   }
 
   Future<void> _afterLogin() async {
-    refreshPlaylists();
+
+    try {
+      _user = await _spotify.me.get();
+      refreshPlaylists();
+    } catch (ex) {
+      print('Exception when trying to fetch spotify user: $ex');
+    }
+
+    notifyListeners();
   }
 
   Future<void> _cacheCreds() async {

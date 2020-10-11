@@ -6,6 +6,7 @@ class App extends StatelessWidget {
     providers: [
       ChangeNotifierProvider<AppStore>(create: (_) => AppStore()),
       ChangeNotifierProvider<SpotifyStore>(create: (_) => SpotifyStore()),
+      ChangeNotifierProvider<LastFmStore>(create: (_) => LastFmStore()),
     ],
     child: MaterialApp(
       title: 'Tagify',

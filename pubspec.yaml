@@ -15,6 +15,9 @@ dependencies:
   provider:
   oauth2:
   shared_preferences:
+  url_launcher:
+  lastfm:
+    path: ../dart-lastfm_api/
 
 dev_dependencies:
   flutter_test:

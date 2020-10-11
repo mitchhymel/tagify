@@ -5,28 +5,26 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) => Consumer<SpotifyStore>(
     builder: (_, store, child) => Column(
       children: [
-        if (store.isLoggedIn)
-          Text('ay'),
-        if (store.isLoggedIn)
-          RaisedButton(
-            child: Text('ay'),
-            onPressed: () async {
-              var res = await store.spotify.me.recentlyPlayed();
-              res.forEach((element) => print(element.name));
-            }
+        Container(height: 10),
+        Material(
+          color: Colors.green,
+          elevation: 8.0,
+          borderRadius: BorderRadius.circular(20.0),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: SpotifyAccountWidget()
           ),
-        if (!store.isLoggedIn)
-          SelectableText(
-            store.authUri.toString(),
+        ),
+        Container(height: 10),
+        Material(
+          color: Colors.redAccent,
+          elevation: 8.0,
+          borderRadius: BorderRadius.circular(20.0),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: LastFmAccountWidget()
           ),
-        if (!store.isLoggedIn)
-          TextField(
-            showCursor: true,
-            autofocus: false,
-            onSubmitted: (str) {
-              store.loginFromRedirectUri(Uri.parse(str));
-            },
-          ),
+        ),
       ],
     )
   );
