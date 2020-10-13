@@ -22,6 +22,7 @@ part 'package:tagify/src/screens/main_container.dart';
 part 'package:tagify/src/screens/settings_screen.dart';
 part 'package:tagify/src/screens/spotify_playlist_screen.dart';
 part 'package:tagify/src/screens/last_fm_screen.dart';
+part 'package:tagify/src/screens/search_screen.dart';
 
 part 'package:tagify/src/state/app_store.dart';
 part 'package:tagify/src/state/spotify_store.dart';
@@ -38,3 +39,4 @@ part 'package:tagify/src/widgets/spotify/spotify_playlist_list.dart';
 part 'package:tagify/src/widgets/spotify/spotify_playlist_list_item.dart';
 part 'package:tagify/src/widgets/spotify/spotify_account_widget.dart';
 part 'package:tagify/src/widgets/mouse_wheel_scroll_listview.dart';
+part 'package:tagify/src/widgets/search_controls.dart';

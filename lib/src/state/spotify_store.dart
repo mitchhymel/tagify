@@ -41,7 +41,6 @@ class SpotifyStore extends ChangeNotifier {
     _grant = SpotifyApi.authorizationCodeGrant(_credentials);
     _authUri =
         _grant.getAuthorizationUrl(Uri.parse(_redirectUri), scopes: scopes);
-    //print(_authUri);
 
     tryLoginFromCachedCreds();
   }
@@ -78,13 +77,55 @@ class SpotifyStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _afterLogin() async {
-
+  /**
+   * Ensure our cached creds or whatever creds we just got are valid
+   * by fetching users data
+   */
+  Future<bool> _ensureValidCreds() async {
+    bool tryRefreshCreds = false;
     try {
       _user = await _spotify.me.get();
+      return true;
+    } catch (ex) {
+      if (ex is AuthorizationException) {
+        tryRefreshCreds = true;
+      }
+      else {
+        print('Exception when ensure valid creds: $ex');
+        return false;
+      }
+    }
+
+    if (tryRefreshCreds) {
+      try {
+        await _spotify.client.refreshCredentials();
+      } catch (ex) {
+        print('Exception when trying to refresh creds: $ex');
+        return false;
+      }
+
+      try {
+        _user = await _spotify.me.get();
+        return true;
+      } catch (ex) {
+        print('Exception when trying to get me after refreshing creds: $ex');
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> _afterLogin() async {
+    var valid = await _ensureValidCreds();
+    if (!valid) {
+      return;
+    }
+
+    try {
       refreshPlaylists();
     } catch (ex) {
-      print('Exception when trying to fetch spotify user: $ex');
+      print('Exception when trying to fetch spotify user data: $ex');
     }
 
     notifyListeners();
@@ -93,7 +134,6 @@ class SpotifyStore extends ChangeNotifier {
   Future<void> _cacheCreds() async {
     SpotifyApiCredentials creds = await _spotify.getCredentials();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print(creds.toJson());
     bool res = await prefs.setString(_cachedCredsKey, creds.toJson());
     if (!res) {
       print('Failed to save creds');
@@ -116,7 +156,6 @@ class SpotifyStore extends ChangeNotifier {
   Future<void> refreshPlaylists() async {
     var results = await _spotify.playlists.me.all();
     _playlists = results.toList();
-    print(_playlists.length);
     notifyListeners();
   }
 }

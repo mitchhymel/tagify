@@ -18,16 +18,22 @@ class MainContainerState extends State<MainContainer> {
       builder: (ctx) => SettingsScreen(),
     ),
     NavigationRailItem(
-      icon: Icons.headset_outlined,
-      selectedIcon: Icons.headset_sharp,
-      label: 'Spotify',
-      builder: (ctx) => SpotifyPlaylistScreen()
+      icon: Icons.search_outlined,
+      selectedIcon: Icons.search,
+      label: 'Search',
+      builder: (ctx) => SearchScreen(),
     ),
     NavigationRailItem(
       icon: Icons.music_note_outlined,
       selectedIcon: Icons.music_note,
       label: 'LastFm',
       builder: (ctx) => LastFmScreen(),
+    ),
+    NavigationRailItem(
+      icon: Icons.headset_outlined,
+      selectedIcon: Icons.headset_sharp,
+      label: 'Spotify',
+      builder: (ctx) => SpotifyPlaylistScreen()
     ),
   ];
 

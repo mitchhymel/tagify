@@ -12,7 +12,7 @@ class LastFmStore  extends ChangeNotifier {
   bool get loggedIn => _userSession != null;
 
   LastFmStore() {
-    _lastFm = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify', logger: new LastFmConsoleLogger());
+    _lastFm = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify');
 
     tryLoginFromCachedCreds();
   }
