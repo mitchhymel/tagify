@@ -2,13 +2,12 @@ library tagify;
 
 import 'dart:convert';
 import 'dart:core';
-import 'dart:math';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:spotify/spotify.dart';
+import 'package:spotify/spotify.dart' as spot;
 import 'package:provider/provider.dart';
 import 'package:oauth2/oauth2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +22,7 @@ part 'package:tagify/src/screens/settings_screen.dart';
 part 'package:tagify/src/screens/spotify_playlist_screen.dart';
 part 'package:tagify/src/screens/last_fm_screen.dart';
 part 'package:tagify/src/screens/search_screen.dart';
+part 'package:tagify/src/screens/history_screen.dart';
 
 part 'package:tagify/src/state/app_store.dart';
 part 'package:tagify/src/state/spotify_store.dart';
@@ -40,3 +40,4 @@ part 'package:tagify/src/widgets/spotify/spotify_playlist_list_item.dart';
 part 'package:tagify/src/widgets/spotify/spotify_account_widget.dart';
 part 'package:tagify/src/widgets/mouse_wheel_scroll_listview.dart';
 part 'package:tagify/src/widgets/search_controls.dart';
+part 'package:tagify/src/widgets/paginated_infinite_scroll_view.dart';

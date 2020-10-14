@@ -30,11 +30,17 @@ class MainContainerState extends State<MainContainer> {
       builder: (ctx) => LastFmScreen(),
     ),
     NavigationRailItem(
-      icon: Icons.headset_outlined,
-      selectedIcon: Icons.headset_sharp,
-      label: 'Spotify',
-      builder: (ctx) => SpotifyPlaylistScreen()
+      icon: Icons.history_outlined,
+      selectedIcon: Icons.history,
+      label: 'History',
+      builder: (ctx) => HistoryScreen(),
     ),
+    // NavigationRailItem(
+    //   icon: Icons.headset_outlined,
+    //   selectedIcon: Icons.headset_sharp,
+    //   label: 'Spotify',
+    //   builder: (ctx) => SpotifyPlaylistScreen()
+    // ),
   ];
 
   @override

@@ -33,7 +33,7 @@ class SearchScreenState extends State<SearchScreen> {
       _tracks = [];
     });
 
-    var store = Provider.of<LastFmStore>(context, listen: false);
+    var store = Provider.of<LastFmStore>(this.context, listen: false);
     var response = await store.lastFm.track.search(track,
       artist: artist,
     );
@@ -43,11 +43,7 @@ class SearchScreenState extends State<SearchScreen> {
       return;
     }
 
-    List<TrackSearchResult> tracks = [];
-    List maps = response.data['results']['trackmatches']['track'];
-    maps.forEach((element) {
-      tracks.add(TrackSearchResult.fromJson(element));
-     });
+    List<TrackSearchResult> tracks = TrackSearchResult.fromLastFmResponse(response);
 
     setState(() {
       _tracks = tracks;

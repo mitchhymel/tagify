@@ -2,7 +2,7 @@ part of tagify;
 
 class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_CREDS';
-  SpotifyApiCredentials _credentials;
+  spot.SpotifyApiCredentials _credentials;
   AuthorizationCodeGrant _grant;
   final String _redirectUri = 'https://localhost/callback'; //'tagify://spotifycallback';
   final List<String> scopes = [
@@ -24,25 +24,25 @@ class SpotifyStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  SpotifyApi _spotify;
-  SpotifyApi get spotify => _spotify;
+  spot.SpotifyApi _spotify;
+  spot.SpotifyApi get spotify => _spotify;
 
-  User _user;
-  User get user => _user;
+  spot.User _user;
+  spot.User get user => _user;
 
-  List<PlaylistSimple> _playlists = [];
-  List<PlaylistSimple> get playlists => _playlists;
+  List<spot.PlaylistSimple> _playlists = [];
+  List<spot.PlaylistSimple> get playlists => _playlists;
 
   bool get loggedIn => _spotify != null && _user != null;
 
   SpotifyStore() {
     _credentials =
-        SpotifyApiCredentials(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET);
-    _grant = SpotifyApi.authorizationCodeGrant(_credentials);
+        spot.SpotifyApiCredentials(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET);
+    _grant = spot.SpotifyApi.authorizationCodeGrant(_credentials);
     _authUri =
         _grant.getAuthorizationUrl(Uri.parse(_redirectUri), scopes: scopes);
 
-    tryLoginFromCachedCreds();
+    // tryLoginFromCachedCreds();
   }
 
   Future<void> tryLoginFromCachedCreds() async {
@@ -52,13 +52,13 @@ class SpotifyStore extends ChangeNotifier {
       return;
     }
 
-    _spotify = SpotifyApi(creds);
+    _spotify = spot.SpotifyApi(creds);
     await _afterLogin();
   }
 
   Future<void> loginFromRedirectUri(Uri responseUri) async {
     _responseUri = responseUri;
-    _spotify = SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
+    _spotify = spot.SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
 
     await _cacheCreds();
     await _afterLogin();
@@ -132,7 +132,7 @@ class SpotifyStore extends ChangeNotifier {
   }
 
   Future<void> _cacheCreds() async {
-    SpotifyApiCredentials creds = await _spotify.getCredentials();
+    spot.SpotifyApiCredentials creds = await _spotify.getCredentials();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool res = await prefs.setString(_cachedCredsKey, creds.toJson());
     if (!res) {
@@ -140,7 +140,7 @@ class SpotifyStore extends ChangeNotifier {
     }
   }
 
-  Future<SpotifyApiCredentials> _retrieveCredsFromCache() async {
+  Future<spot.SpotifyApiCredentials> _retrieveCredsFromCache() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (!prefs.containsKey(_cachedCredsKey)) {

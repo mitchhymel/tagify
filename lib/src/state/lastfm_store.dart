@@ -9,10 +9,16 @@ class LastFmStore  extends ChangeNotifier {
   UserSession _userSession;
   UserSession get userSession => _userSession;
 
+  List<RecentTracksResult> _recents = [];
+  List<RecentTracksResult> get recents => _recents;
+  bool fetchingRecents = false;
+
   bool get loggedIn => _userSession != null;
 
   LastFmStore() {
-    _lastFm = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify');
+    _lastFm = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify',
+      //logger: LastFmConsoleLogger()
+    );
 
     tryLoginFromCachedCreds();
   }
@@ -44,7 +50,7 @@ class LastFmStore  extends ChangeNotifier {
   }
 
   Future<void> _afterLogin() async {
-
+    await refreshRecents();
 
     notifyListeners();
   }
@@ -81,5 +87,50 @@ class LastFmStore  extends ChangeNotifier {
     String sessionJson = prefs.getString(_cachedCredsKey);
     UserSession session = UserSession.fromMap(jsonDecode(sessionJson));
     return session;
+  }
+
+  Future<void> refreshRecents() async {
+    _recents = [];
+    notifyListeners();
+
+    await fetchAndAddToRecents(1, 25);
+  }
+
+  Future<void> fetchAndAddToRecents(int page, int pageLimit) async {
+    if (fetchingRecents) {
+      print('already fetchingrecents, returning early');
+      return;
+    }
+
+    print('$page, $pageLimit');
+    var newRecents = await _fetchRecents(page, pageLimit);
+    _recents.addAll(newRecents);
+    print(_recents.length);
+    notifyListeners();
+  }
+
+  Future<List<RecentTracksResult>> _fetchRecents(int page, int pageLimit) async {
+    if (fetchingRecents) {
+      print('already fetchingrecents, returning early');
+      return [];
+    }
+    
+    fetchingRecents = true;
+
+    var res = await _lastFm.user.getRecentTracks(_userSession.userName,
+      page: page,
+      limit: pageLimit,
+    );
+    if (!res.isSuccess()) {
+      print(res);
+      print('error on fetching recenttracks');
+      return [];
+    }
+
+    var tracks = RecentTracksResult.fromLastFmResponse(res);
+
+    fetchingRecents = false;
+
+    return tracks;
   }
 }

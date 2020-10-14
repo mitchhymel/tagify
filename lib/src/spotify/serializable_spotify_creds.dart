@@ -1,13 +1,13 @@
 part of tagify;
 
-extension SerializeableSpotifyApiCredentials on SpotifyApiCredentials {
+extension SerializeableSpotifyApiCredentials on spot.SpotifyApiCredentials {
 
-  static SpotifyApiCredentials fromJson(String json) {
+  static spot.SpotifyApiCredentials fromJson(String json) {
     return fromMap(jsonDecode(json));
   }
 
-  static SpotifyApiCredentials fromMap(Map map) {
-    return new SpotifyApiCredentials(
+  static spot.SpotifyApiCredentials fromMap(Map map) {
+    return new spot.SpotifyApiCredentials(
       map['clientId'],
       map['clientSecret'],
       accessToken: map['accessToken'],

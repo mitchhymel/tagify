@@ -2,7 +2,7 @@ part of tagify;
 
 class SpotifyPlaylistListItem extends StatelessWidget {
 
-  final PlaylistSimple playlist;
+  final spot.PlaylistSimple playlist;
   SpotifyPlaylistListItem({@required this.playlist});
 
   BoxDecoration _getDecoration() {
