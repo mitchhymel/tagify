@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/spotify_store.dart';
+import 'package:tagify/src/widgets/common/custom_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SpotifyAccountWidget extends StatelessWidget {
@@ -9,7 +10,7 @@ class SpotifyAccountWidget extends StatelessWidget {
     builder: (_, store, child) {
 
       if (!store.loggedIn) {
-        return Column(
+        return CustomCard(child: Row(
           children: [
             RaisedButton(
               child: Text('Launch browser to login to Spotify'),
@@ -22,22 +23,25 @@ class SpotifyAccountWidget extends StatelessWidget {
                 }
               }
             ),
-            TextField(
-              showCursor: true,
-              autofocus: false,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                hintText: 'Paste the resulting redirect uri here',
+            Container(width: 10),
+            Expanded(
+              child: TextField(
+                showCursor: true,
+                autofocus: false,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  hintText: 'Paste the resulting redirect uri here',
+                ),
+                onSubmitted: (str) {
+                  store.loginFromRedirectUri(Uri.parse(str));
+                },
               ),
-              onSubmitted: (str) {
-                store.loginFromRedirectUri(Uri.parse(str));
-              },
-            ),
+            )
           ],
-        );
+        ));
       }
 
-      return Column (
+      return CustomCard(child: Column (
         children: [
           Container(
             height: 190,
@@ -45,17 +49,17 @@ class SpotifyAccountWidget extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                fit: BoxFit.fill,
-                image: NetworkImage(store.user.images[0].url)
+                  fit: BoxFit.fill,
+                  image: NetworkImage(store.user.images[0].url)
               )
             ),
           ),
           RaisedButton(
-            child: Text('Logout from Spotify'),
-            onPressed: () => store.logout()
+              child: Text('Logout from Spotify'),
+              onPressed: () => store.logout()
           ),
         ],
-      );
+      ));
     }
   );
 }

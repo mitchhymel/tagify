@@ -4,24 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tagify/src/lastfm/secrets.dart';
+import 'package:tagify/src/state/history_store.dart';
+
+var lastFm = new LastFmStore();
 
 class LastFmStore  extends ChangeNotifier {
   String _cachedCredsKey = 'LASTFM_CACHED_CREDS';
 
-  LastFmApi _lastFm;
-  LastFmApi get lastFm  => _lastFm;
+  LastFmApi _api;
+  LastFmApi get api  => _api;
 
   UserSession _userSession;
   UserSession get userSession => _userSession;
 
-  List<RecentTracksResult> _recents = [];
-  List<RecentTracksResult> get recents => _recents;
-  bool fetchingRecents = false;
-
   bool get loggedIn => _userSession != null;
 
   LastFmStore() {
-    _lastFm = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify',
+    _api = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify',
       //logger: LastFmConsoleLogger()
     );
 
@@ -29,7 +28,7 @@ class LastFmStore  extends ChangeNotifier {
   }
 
   Future<bool> login(String userName, String password) async {
-    var session = await _lastFm.loginWithUserNamePassword(userName, password);
+    var session = await _api.loginWithUserNamePassword(userName, password);
     if (session == null) {
       print('lastfm: could not login with username password');
       return false;
@@ -49,13 +48,14 @@ class LastFmStore  extends ChangeNotifier {
     }
 
     _userSession = creds;
-    _lastFm.loginWithSessionKey(creds.key);
+    _api.loginWithSessionKey(creds.key);
 
     await _afterLogin();
   }
 
   Future<void> _afterLogin() async {
-    await refreshRecents();
+
+    history.refreshRecents();
 
     notifyListeners();
   }
@@ -68,7 +68,7 @@ class LastFmStore  extends ChangeNotifier {
       print('lastfm: failed to delete creds from shared prefs');
     }
 
-    _lastFm.logout();
+    _api.logout();
     notifyListeners();
   }
 
@@ -92,50 +92,5 @@ class LastFmStore  extends ChangeNotifier {
     String sessionJson = prefs.getString(_cachedCredsKey);
     UserSession session = UserSession.fromMap(jsonDecode(sessionJson));
     return session;
-  }
-
-  Future<void> refreshRecents() async {
-    _recents = [];
-    notifyListeners();
-
-    await fetchAndAddToRecents(1, 25);
-  }
-
-  Future<void> fetchAndAddToRecents(int page, int pageLimit) async {
-    if (fetchingRecents) {
-      print('already fetchingrecents, returning early');
-      return;
-    }
-
-    print('$page, $pageLimit');
-    var newRecents = await _fetchRecents(page, pageLimit);
-    _recents.addAll(newRecents);
-    print(_recents.length);
-    notifyListeners();
-  }
-
-  Future<List<RecentTracksResult>> _fetchRecents(int page, int pageLimit) async {
-    if (fetchingRecents) {
-      print('already fetchingrecents, returning early');
-      return [];
-    }
-    
-    fetchingRecents = true;
-
-    var res = await _lastFm.user.getRecentTracks(_userSession.userName,
-      page: page,
-      limit: pageLimit,
-    );
-    if (!res.isSuccess()) {
-      print(res);
-      print('error on fetching recenttracks');
-      return [];
-    }
-
-    var tracks = RecentTracksResult.fromLastFmResponse(res);
-
-    fetchingRecents = false;
-
-    return tracks;
   }
 }

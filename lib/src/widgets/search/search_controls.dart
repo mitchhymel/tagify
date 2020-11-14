@@ -1,12 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:tagify/src/state/search_store.dart';
 
-enum SearchState {
-  Track,
-  Artist,
-  Album,
-}
+import '../common/custom_card.dart';
 
 typedef OnSearchTrack = Function(String, String);
 typedef OnSearchArtist = Function(String);
@@ -83,9 +80,7 @@ class SearchControlsState extends State<SearchControls> {
   );
 
   @override
-  Widget build(BuildContext context) => Card(
-    color: Colors.grey,
-    margin: EdgeInsets.all(10),
+  Widget build(BuildContext context) => CustomCard(
     child: Container(
       padding: EdgeInsets.all(20),
       child: Column(

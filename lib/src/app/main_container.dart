@@ -5,6 +5,8 @@ import 'package:tagify/src/screens/history_screen.dart';
 import 'package:tagify/src/screens/library_screen.dart';
 import 'package:tagify/src/screens/search_screen.dart';
 import 'package:tagify/src/screens/settings_screen.dart';
+import 'package:tagify/src/screens/spotify_playlist_screen.dart';
+import 'package:tagify/src/screens/tag_side_bar.dart';
 import 'package:tagify/src/screens/tags_screen.dart';
 
 class MainContainer extends StatefulWidget {
@@ -15,7 +17,7 @@ class MainContainer extends StatefulWidget {
 
 class MainContainerState extends State<MainContainer> {
 
-  int selectedIndex = 0;
+  int selectedIndex = 1;
 
   List<NavigationRailItem> railItems = [
     NavigationRailItem(
@@ -48,12 +50,12 @@ class MainContainerState extends State<MainContainer> {
       label: 'History',
       builder: (ctx) => HistoryScreen(),
     ),
-    // NavigationRailItem(
-    //   icon: Icons.headset_outlined,
-    //   selectedIcon: Icons.headset_sharp,
-    //   label: 'Spotify',
-    //   builder: (ctx) => SpotifyPlaylistScreen()
-    // ),
+    NavigationRailItem(
+      icon: Icons.headset_outlined,
+      selectedIcon: Icons.headset_sharp,
+      label: 'Spotify',
+      builder: (ctx) => SpotifyPlaylistScreen()
+    ),
   ];
 
   @override
@@ -71,8 +73,14 @@ class MainContainerState extends State<MainContainer> {
           destinations: railItems.map((e) => e.toDestination()).toList(),
         ),
         VerticalDivider(thickness: 1, width: 1),
-        Expanded(
+        Flexible(
+          flex: 4,
           child: railItems[selectedIndex].builder(context)
+        ),
+        VerticalDivider(thickness: 2, width: 2),
+        Flexible(
+          flex: 1,
+          child: TagSideBar(),
         )
       ]
     )

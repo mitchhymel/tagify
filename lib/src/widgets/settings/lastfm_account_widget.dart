@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
+import 'package:tagify/src/widgets/common/custom_card.dart';
 
 class LastFmAccountWidget extends StatefulWidget {
 
@@ -33,27 +34,33 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
     builder: (_, store, child) { 
 
       if (!store.loggedIn) {
-        return Column(
+        return CustomCard(child: Row(
           children: [
-            TextField(
-              showCursor: true,
-              autofocus: false,
-              textAlign: TextAlign.center,
-              controller: _userController,
-              decoration: InputDecoration(
-                hintText: 'Username',
+            Expanded(
+              child: TextField(
+                showCursor: true,
+                autofocus: false,
+                textAlign: TextAlign.center,
+                controller: _userController,
+                decoration: InputDecoration(
+                  hintText: 'Username',
+                ),
               ),
             ),
-            TextField(
-              showCursor: true,
-              autofocus: false,
-              textAlign: TextAlign.center,
-              controller: _passController,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: 'Password',
-              )
+            Container(width: 10),
+            Expanded(
+              child: TextField(
+                showCursor: true,
+                autofocus: false,
+                textAlign: TextAlign.center,
+                controller: _passController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: 'Password',
+                ),
+              ),
             ),
+            Container(width: 10),
             RaisedButton(
               child: Text('Login'),
               onPressed: () async {
@@ -73,10 +80,10 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
               },
             )
           ],
-        );
+        ));
       }
 
-      return Column(
+      return CustomCard(child: Column(
         children: [
           Container(
             height: 190,
@@ -87,16 +94,16 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
               shape: BoxShape.circle,
               // image: DecorationImage(
               //   fit: BoxFit.fill,
-              //   image: NetworkImage(store.user.images[0].url)
+              //   image: NetworkImage(store.images[0].url)
               // )
             ),
           ),
-           RaisedButton(
-            child: Text('Logout from Lastfm'),
-            onPressed: () => store.logout()
+          RaisedButton(
+              child: Text('Logout from Lastfm'),
+              onPressed: () => store.logout()
           ),
         ]
-      );
+      ));
     }
   );
 }

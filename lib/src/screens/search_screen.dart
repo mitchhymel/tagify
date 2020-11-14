@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:lastfm/lastfm_api.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/lastfm_store.dart';
-import 'package:tagify/src/widgets/search_controls.dart';
+import 'package:tagify/src/widgets/search/albums/search_albums_container.dart';
+import 'package:tagify/src/widgets/search/artists/search_artists_container.dart';
+import 'package:tagify/src/widgets/search/tracks/search_tracks_container.dart';
 
 class SearchScreen extends StatefulWidget {
 
@@ -10,13 +9,44 @@ class SearchScreen extends StatefulWidget {
   State createState() => new SearchScreenState();
 }
 
-class SearchScreenState extends State<SearchScreen> {
+class TabItem {
+  final IconData icon;
+  final String text;
+  final Widget child;
+  TabItem({
+    @required this.icon,
+    @required this.text,
+    @required this.child,
+  });
+}
 
-  List<TrackSearchResult> _tracks = [];
+class SearchScreenState extends State<SearchScreen>
+    with SingleTickerProviderStateMixin{
+
+  TabController controller;
+
+  List<TabItem> tabs = [
+    TabItem(
+      icon: Icons.audiotrack,
+      text: 'Tracks',
+      child: SearchTracksContainer(),
+    ),
+    TabItem(
+      icon: Icons.person,
+      text: 'Artists',
+      child: SearchArtistsContainer(),
+    ),
+    TabItem(
+      icon: Icons.album,
+      text: 'Albums',
+      child: SearchAlbumsContainer(),
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
+    controller = new TabController(length: tabs.length, vsync: this);
   }
 
   @override
@@ -24,51 +54,24 @@ class SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  _onSearchAlbum(String album) {
-
-  }
-
-  _onSearchArtist(String artist) {
-
-  }
-
-  _onSearchTrack(String track, String artist) async {
-    setState(() {
-      _tracks = [];
-    });
-
-    var store = Provider.of<LastFmStore>(this.context, listen: false);
-    var response = await store.lastFm.track.search(track,
-      artist: artist,
-    );
-
-    if (response.error != null) {
-      print(response.error);
-      return;
-    }
-
-    List<TrackSearchResult> tracks = TrackSearchResult.fromLastFmResponse(response);
-
-    setState(() {
-      _tracks = tracks;
-    });
-  }
-
 
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      SearchControls(
-        onSearchAlbum: _onSearchAlbum,
-        onSearchArtist: _onSearchArtist,
-        onSearchTrack: _onSearchTrack,
+      TabBar(
+        controller: controller,
+        tabs: tabs.map((e) => Tab(
+            icon: Icon(e.icon),
+            text: e.text
+        )).toList(),
       ),
       Expanded(
-        child: ListView.builder(
-          itemCount: _tracks.length,
-          itemBuilder: (ctx, index) => Text(_tracks[index].name),
+        child: TabBarView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: controller,
+          children: tabs.map((e) => e.child).toList()
         )
-      ),
+      )
     ],
   );
 }
