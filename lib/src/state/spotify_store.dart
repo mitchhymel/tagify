@@ -1,4 +1,9 @@
-part of tagify;
+import 'package:flutter/material.dart';
+import 'package:oauth2/oauth2.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:spotify/spotify.dart' as spot;
+import 'package:tagify/src/spotify/secrets.dart';
+import 'package:tagify/src/spotify/serializable_spotify_creds.dart';
 
 class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_CREDS';

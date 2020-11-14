@@ -1,4 +1,8 @@
-part of tagify;
+
+
+import 'package:flutter/material.dart';
+
+import 'main_container.dart';
 
 class AppWidget extends StatelessWidget {
   @override

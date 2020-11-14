@@ -1,4 +1,6 @@
-part of tagify;
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tagify/src/state/lastfm_store.dart';
 
 class LastFmAccountWidget extends StatefulWidget {
 

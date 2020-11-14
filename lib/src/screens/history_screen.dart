@@ -1,4 +1,9 @@
-part of tagify;
+
+
+import 'package:flutter/material.dart';
+import 'package:lastfm/lastfm_api.dart';
+import 'package:provider/provider.dart';
+import 'package:tagify/src/state/lastfm_store.dart';
 
 class HistoryScreen extends StatefulWidget {
   @override

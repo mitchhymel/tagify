@@ -1,4 +1,8 @@
-part of tagify;
+import 'package:flutter/material.dart';
+import 'package:lastfm/lastfm_api.dart';
+import 'package:provider/provider.dart';
+import 'package:tagify/src/state/lastfm_store.dart';
+import 'package:tagify/src/widgets/search_controls.dart';
 
 class SearchScreen extends StatefulWidget {
 

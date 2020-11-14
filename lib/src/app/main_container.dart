@@ -1,4 +1,11 @@
-part of tagify;
+
+
+import 'package:flutter/material.dart';
+import 'package:tagify/src/screens/history_screen.dart';
+import 'package:tagify/src/screens/library_screen.dart';
+import 'package:tagify/src/screens/search_screen.dart';
+import 'package:tagify/src/screens/settings_screen.dart';
+import 'package:tagify/src/screens/tags_screen.dart';
 
 class MainContainer extends StatefulWidget {
   
@@ -24,10 +31,16 @@ class MainContainerState extends State<MainContainer> {
       builder: (ctx) => SearchScreen(),
     ),
     NavigationRailItem(
-      icon: Icons.music_note_outlined,
-      selectedIcon: Icons.music_note,
-      label: 'LastFm',
-      builder: (ctx) => LastFmScreen(),
+      icon: Icons.library_music_outlined,
+      selectedIcon: Icons.library_music,
+      label: 'Library',
+      builder: (ctx) => LibraryScreen(),
+    ),
+    NavigationRailItem(
+      icon: Icons.tag,
+      selectedIcon: Icons.tag,
+      label: 'Tags',
+      builder: (ctx) => TagsScreen(),
     ),
     NavigationRailItem(
       icon: Icons.history_outlined,

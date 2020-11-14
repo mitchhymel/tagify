@@ -1,4 +1,9 @@
-part of tagify;
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:lastfm/lastfm_api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tagify/src/lastfm/secrets.dart';
 
 class LastFmStore  extends ChangeNotifier {
   String _cachedCredsKey = 'LASTFM_CACHED_CREDS';

@@ -1,4 +1,5 @@
-part of tagify;
+import 'package:flutter/material.dart';
+import 'package:spotify/spotify.dart' as spot;
 
 class SpotifyPlaylistListItem extends StatelessWidget {
 

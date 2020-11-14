@@ -1,4 +1,8 @@
-part of tagify;
+import 'dart:async';
+
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 typedef ListViewBuilder = Widget Function(PageController);
 

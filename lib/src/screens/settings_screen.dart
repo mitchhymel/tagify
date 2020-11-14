@@ -1,4 +1,8 @@
-part of tagify;
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tagify/src/state/spotify_store.dart';
+import 'package:tagify/src/widgets/lastfm/lastfm_account_widget.dart';
+import 'package:tagify/src/widgets/spotify/spotify_account_widget.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override

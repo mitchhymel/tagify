@@ -1,4 +1,6 @@
-part of tagify;
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 
 enum SearchState {
   Track,

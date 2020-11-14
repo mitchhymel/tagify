@@ -1,4 +1,6 @@
-part of tagify;
+import 'dart:convert';
+
+import 'package:spotify/spotify.dart' as spot;
 
 extension SerializeableSpotifyApiCredentials on spot.SpotifyApiCredentials {
 

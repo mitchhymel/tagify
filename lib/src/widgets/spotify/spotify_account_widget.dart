@@ -1,4 +1,7 @@
-part of tagify;
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tagify/src/state/spotify_store.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SpotifyAccountWidget extends StatelessWidget {
   @override
