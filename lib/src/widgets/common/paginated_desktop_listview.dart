@@ -13,6 +13,7 @@ class PaginatedDesktopListView extends StatelessWidget {
   final FetchPageRequest fetchMore;
   final int pageSize;
   final int additionalPageCheck;
+  final bool hasMore;
 
   PaginatedDesktopListView({
     @required this.onRefresh,
@@ -20,6 +21,7 @@ class PaginatedDesktopListView extends StatelessWidget {
     @required this.itemBuilder,
     @required this.fetchMore,
     @required this.pageSize,
+    @required this.hasMore,
     this.additionalPageCheck=0,
   });
 
@@ -29,7 +31,7 @@ class PaginatedDesktopListView extends StatelessWidget {
     child: DesktopListView(
       itemCount: itemCount,
       itemBuilder: (_, index) {
-        if (index + 1 >= itemCount) {
+        if (index + 1 >= itemCount && hasMore) {
 
           int page = ((itemCount + additionalPageCheck) / pageSize).ceil();
 

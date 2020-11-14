@@ -16,6 +16,7 @@ class HistoryList extends StatelessWidget {
       onRefresh: () => store.refreshRecents(),
       additionalPageCheck: 1, // recents returns the nowplaying track
       itemBuilder: (___, index) => HistoryListItem(store.recents[index]),
+      hasMore: store.hasMore,
     )
   );
 }

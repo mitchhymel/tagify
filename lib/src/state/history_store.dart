@@ -2,16 +2,23 @@
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
+import 'package:tagify/src/state/log_store.dart';
 
 var history = new HistoryStore();
 
 class HistoryStore extends ChangeNotifier {
   List<RecentTracksResult> _recents = [];
   List<RecentTracksResult> get recents => _recents;
-  bool fetchingRecents = false;
+
 
   RecentTracksResult _nowPlaying;
   RecentTracksResult get nowPlaying => _nowPlaying;
+
+  bool _hasMore = false;
+  bool get hasMore => _hasMore;
+
+  bool _fetching = false;
+  bool get fetching => _fetching;
 
   Future<void> refreshRecents() async {
     _recents = [];
@@ -21,13 +28,17 @@ class HistoryStore extends ChangeNotifier {
   }
 
   Future<void> fetchAndAddToRecents(int page, int pageLimit) async {
-    if (fetchingRecents) {
-      print('already fetchingrecents, returning early');
+    if (_fetching) {
+      log('Already fetching requests... returning early');
       return;
     }
 
-    print('$page, $pageLimit');
+    log('Fetching recents for page $page with a limit of $pageLimit');
+
     var newRecents = await _fetchRecents(page, pageLimit);
+
+    // adds currently playing track as 1 more than the limit we request
+    _hasMore = newRecents.length == pageLimit + 1;
 
     // the currently playing track will always be the first
     if (newRecents.first.attr.nowplaying) {
@@ -35,20 +46,15 @@ class HistoryStore extends ChangeNotifier {
       newRecents.removeAt(0);
     }
     _recents.addAll(newRecents);
-    print(_recents.length);
     notifyListeners();
   }
 
   Future<List<RecentTracksResult>> _fetchRecents(int page, int pageLimit) async {
-    if (fetchingRecents) {
-      print('already fetchingrecents, returning early');
-      return [];
-    }
-
-    fetchingRecents = true;
+    _fetching = true;
+    notifyListeners();
 
     if (!lastFm.loggedIn) {
-      print('not logged in');
+      log('Unable to fetch recents due to not being logged in to lastFm');
       return [];
     }
 
@@ -56,15 +62,17 @@ class HistoryStore extends ChangeNotifier {
       page: page,
       limit: pageLimit,
     );
+
+    _fetching = false;
+    notifyListeners();
+
     if (!res.isSuccess()) {
-      print(res);
-      print('error on fetching recenttracks');
+      log('Error when fetching recents: $res');
       return [];
     }
 
     var tracks = RecentTracksResult.fromLastFmResponse(res);
 
-    fetchingRecents = false;
 
     return tracks;
   }

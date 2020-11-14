@@ -2,9 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/app_store.dart';
 import 'package:tagify/src/state/history_store.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
+import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/state/search_tracks_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 
 import 'app_widget.dart';
@@ -15,10 +16,11 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiProvider(
     providers: [
-      ChangeNotifierProvider<AppStore>(create: (_) => AppStore()),
+      ChangeNotifierProvider<LogStore>(create: (_) => logStore),
       ChangeNotifierProvider<SpotifyStore>(create: (_) => SpotifyStore()),
       ChangeNotifierProvider<LastFmStore>(create: (_) => lastFm),
       ChangeNotifierProvider<HistoryStore>(create: (_) => history),
+      ChangeNotifierProvider<SearchTracksStore>(create: (_) => SearchTracksStore()),
     ],
     child: MaterialApp(
       title: 'Tagify',

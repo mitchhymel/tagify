@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:tagify/src/screens/history_screen.dart';
 import 'package:tagify/src/screens/library_screen.dart';
+import 'package:tagify/src/screens/log_screen.dart';
 import 'package:tagify/src/screens/search_screen.dart';
 import 'package:tagify/src/screens/settings_screen.dart';
 import 'package:tagify/src/screens/spotify_playlist_screen.dart';
@@ -17,7 +18,7 @@ class MainContainer extends StatefulWidget {
 
 class MainContainerState extends State<MainContainer> {
 
-  int selectedIndex = 1;
+  int selectedIndex = 2;
 
   List<NavigationRailItem> railItems = [
     NavigationRailItem(
@@ -25,6 +26,12 @@ class MainContainerState extends State<MainContainer> {
       selectedIcon: Icons.settings_applications,
       label: 'Settings',
       builder: (ctx) => SettingsScreen(),
+    ),
+    NavigationRailItem(
+      icon: Icons.text_snippet_outlined,
+      selectedIcon: Icons.text_snippet,
+      label: 'Logs',
+      builder: (ctx) => LogScreen(),
     ),
     NavigationRailItem(
       icon: Icons.search_outlined,
@@ -55,7 +62,7 @@ class MainContainerState extends State<MainContainer> {
       selectedIcon: Icons.headset_sharp,
       label: 'Spotify',
       builder: (ctx) => SpotifyPlaylistScreen()
-    ),
+    )
   ];
 
   @override

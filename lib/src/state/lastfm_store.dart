@@ -5,6 +5,7 @@ import 'package:lastfm/lastfm_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tagify/src/lastfm/secrets.dart';
 import 'package:tagify/src/state/history_store.dart';
+import 'package:tagify/src/state/log_store.dart';
 
 var lastFm = new LastFmStore();
 
@@ -30,7 +31,7 @@ class LastFmStore  extends ChangeNotifier {
   Future<bool> login(String userName, String password) async {
     var session = await _api.loginWithUserNamePassword(userName, password);
     if (session == null) {
-      print('lastfm: could not login with username password');
+      log('LastFm could not login with username password');
       return false;
     }
 
@@ -43,12 +44,14 @@ class LastFmStore  extends ChangeNotifier {
   Future<void> tryLoginFromCachedCreds() async {
     var creds = await _retrieveCredsFromCache();
     if (creds == null) {
-      print('lastfm: failed to retrieve cached creds');
+      log('Unable to login to LastFm from cached credentials');
       return;
     }
 
     _userSession = creds;
     _api.loginWithSessionKey(creds.key);
+    log('Successfully logged in to LastFm with cached credentials');
+
 
     await _afterLogin();
   }
@@ -65,10 +68,11 @@ class LastFmStore  extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool res = await prefs.remove(_cachedCredsKey);
     if (!res) {
-      print('lastfm: failed to delete creds from shared prefs');
+      log('Failed to delete LastFm credentials from cache');
     }
 
     _api.logout();
+    log('Successfully deleted LastFm credentials from cache');
     notifyListeners();
   }
 
@@ -77,7 +81,7 @@ class LastFmStore  extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool res = await prefs.setString(_cachedCredsKey, _userSession.toString());
     if (!res) {
-      print('lastfm: Failed to save creds');
+      log('Failed to save LastFm credentials to cache');
     }
   }
 
@@ -85,7 +89,7 @@ class LastFmStore  extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (!prefs.containsKey(_cachedCredsKey)) {
-      print('lastfm: no cached creds found');
+      log('Failed to find LastFm credentials in cache');
       return null;
     }
 
