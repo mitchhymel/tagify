@@ -33,7 +33,7 @@ class PaginatedDesktopListView extends StatelessWidget {
       itemBuilder: (_, index) {
         if (index + 1 >= itemCount && hasMore) {
 
-          int page = ((itemCount + additionalPageCheck) / pageSize).ceil();
+          int page = ((1 + itemCount + additionalPageCheck) / pageSize).ceil();
 
           return RaisedButton(
             child: Text('Load more'),

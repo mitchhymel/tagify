@@ -19,8 +19,8 @@ class SearchTracksStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<TrackSearchResult> _tracks = [];
-  List<TrackSearchResult> get tracks => _tracks;
+  List<Track> _tracks = [];
+  List<Track> get tracks => _tracks;
 
   bool _searching = false;
   bool get searching => _searching;
@@ -67,8 +67,7 @@ class SearchTracksStore extends ChangeNotifier {
       return;
     }
 
-    List<TrackSearchResult> tracks = TrackSearchResult.fromLastFmResponse(
-        response);
+    List<Track> tracks = response.data.results.tracks.tracks;
     _tracks.addAll(tracks);
     _hasMore = tracks.length == limit;
 

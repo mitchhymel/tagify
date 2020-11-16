@@ -7,7 +7,7 @@ import 'package:tagify/src/widgets/common/custom_card.dart';
 
 class HistoryListItem extends StatelessWidget {
 
-  final RecentTracksResult track;
+  final Track track;
   HistoryListItem(this.track);
 
   @override
@@ -15,7 +15,7 @@ class HistoryListItem extends StatelessWidget {
     color: track.nowPlaying ? Colors.blueAccent : Colors.black12,
     child: Row(
       children: [
-        Expanded(child: Image.network(track.image[0].text,
+        Expanded(child: Image.network(track.images[0].text,
           height: 50,
           width: 50,
         )),

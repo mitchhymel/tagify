@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tagify/src/lastfm/secrets.dart';
 import 'package:tagify/src/state/history_store.dart';
 import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/state/tags_store.dart';
 
 var lastFm = new LastFmStore();
 
@@ -58,7 +59,8 @@ class LastFmStore  extends ChangeNotifier {
 
   Future<void> _afterLogin() async {
 
-    history.refreshRecents();
+    history.refresh();
+    tags.refresh();
 
     notifyListeners();
   }
@@ -79,7 +81,7 @@ class LastFmStore  extends ChangeNotifier {
 
   Future<void> _cacheCreds() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool res = await prefs.setString(_cachedCredsKey, _userSession.toString());
+    bool res = await prefs.setString(_cachedCredsKey, jsonEncode(_userSession.toJson()));
     if (!res) {
       log('Failed to save LastFm credentials to cache');
     }
@@ -94,7 +96,7 @@ class LastFmStore  extends ChangeNotifier {
     }
 
     String sessionJson = prefs.getString(_cachedCredsKey);
-    UserSession session = UserSession.fromMap(jsonDecode(sessionJson));
+    UserSession session = UserSession.fromJson(jsonDecode(sessionJson));
     return session;
   }
 }

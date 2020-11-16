@@ -20,6 +20,7 @@ class LogStore extends ChangeNotifier {
   List<LogLine> get lines => _lines;
 
   log(dynamic object) {
+    print(object.toString());
     _lines.add(new LogLine(DateTime.now(), object.toString()));
     notifyListeners();
   }

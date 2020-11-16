@@ -82,10 +82,9 @@ class SpotifyStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  /**
-   * Ensure our cached creds or whatever creds we just got are valid
-   * by fetching users data
-   */
+  ///
+  /// Ensure our cached creds or whatever creds we just got are valid
+  /// by fetching users data
   Future<bool> _ensureValidCreds() async {
     bool tryRefreshCreds = false;
     try {

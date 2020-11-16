@@ -18,7 +18,7 @@ dependencies:
   url_launcher:
   draggable_scrollbar:
   lastfm:
-    path: ../dart-lastfm_api/
+    path: ../lastfm/
 
 dev_dependencies:
   flutter_test:

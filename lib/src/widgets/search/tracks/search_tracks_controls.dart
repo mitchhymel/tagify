@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/search_tracks_store.dart';
+import 'package:tagify/src/state/search/search_tracks_store.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 import 'package:tagify/src/widgets/common/custom_text_field.dart';
 
@@ -15,7 +15,7 @@ class SearchTracksControls extends StatelessWidget {
           Expanded(
             child: CustomTextField(
               initialText: store.trackQuery,
-              hint: 'Enter track name',
+              hint: 'Search by track name',
               onChanged: (x) => store.trackQuery = x,
               onSubmitted: (x) => store.refresh(),
             )
@@ -24,7 +24,7 @@ class SearchTracksControls extends StatelessWidget {
           Expanded(
             child: CustomTextField(
               initialText: store.artistQuery,
-              hint: 'Optionally, enter artist name',
+              hint: 'Optionally, include artist name for track',
               onChanged: (x) => store.artistQuery = x,
               onSubmitted: (x) => store.refresh(),
             )

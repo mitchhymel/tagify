@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:tagify/src/screens/history_screen.dart';
-import 'package:tagify/src/screens/library_screen.dart';
 import 'package:tagify/src/screens/log_screen.dart';
 import 'package:tagify/src/screens/search_screen.dart';
 import 'package:tagify/src/screens/settings_screen.dart';
@@ -39,12 +38,12 @@ class MainContainerState extends State<MainContainer> {
       label: 'Search',
       builder: (ctx) => SearchScreen(),
     ),
-    NavigationRailItem(
-      icon: Icons.library_music_outlined,
-      selectedIcon: Icons.library_music,
-      label: 'Library',
-      builder: (ctx) => LibraryScreen(),
-    ),
+    // NavigationRailItem(
+    //   icon: Icons.library_music_outlined,
+    //   selectedIcon: Icons.library_music,
+    //   label: 'Library',
+    //   builder: (ctx) => LibraryScreen(),
+    // ),
     NavigationRailItem(
       icon: Icons.tag,
       selectedIcon: Icons.tag,

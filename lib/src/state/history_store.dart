@@ -7,12 +7,12 @@ import 'package:tagify/src/state/log_store.dart';
 var history = new HistoryStore();
 
 class HistoryStore extends ChangeNotifier {
-  List<RecentTracksResult> _recents = [];
-  List<RecentTracksResult> get recents => _recents;
+  List<Track> _recents = [];
+  List<Track> get recents => _recents;
 
 
-  RecentTracksResult _nowPlaying;
-  RecentTracksResult get nowPlaying => _nowPlaying;
+  Track _nowPlaying;
+  Track get nowPlaying => _nowPlaying;
 
   bool _hasMore = false;
   bool get hasMore => _hasMore;
@@ -20,7 +20,7 @@ class HistoryStore extends ChangeNotifier {
   bool _fetching = false;
   bool get fetching => _fetching;
 
-  Future<void> refreshRecents() async {
+  Future<void> refresh() async {
     _recents = [];
     notifyListeners();
 
@@ -41,7 +41,7 @@ class HistoryStore extends ChangeNotifier {
     _hasMore = newRecents.length == pageLimit + 1;
 
     // the currently playing track will always be the first
-    if (newRecents.first.attr.nowplaying) {
+    if (newRecents.first.nowPlaying) {
       _nowPlaying = newRecents.first;
       newRecents.removeAt(0);
     }
@@ -49,7 +49,7 @@ class HistoryStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<RecentTracksResult>> _fetchRecents(int page, int pageLimit) async {
+  Future<List<Track>> _fetchRecents(int page, int pageLimit) async {
     _fetching = true;
     notifyListeners();
 
@@ -71,8 +71,7 @@ class HistoryStore extends ChangeNotifier {
       return [];
     }
 
-    var tracks = RecentTracksResult.fromLastFmResponse(res);
-
+    var tracks = res.data.recentTracks.tracks;
 
     return tracks;
   }

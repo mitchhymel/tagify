@@ -131,7 +131,7 @@ packages:
   lastfm:
     dependency: "direct main"
     description:
-      path: "../dart-lastfm_api"
+      path: "../lastfm"
       relative: true
     source: path
     version: "0.0.1"

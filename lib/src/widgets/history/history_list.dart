@@ -13,7 +13,7 @@ class HistoryList extends StatelessWidget {
       pageSize: 25,
       itemCount: store.recents.length,
       fetchMore: (page, pageLimit) => store.fetchAndAddToRecents(page, pageLimit),
-      onRefresh: () => store.refreshRecents(),
+      onRefresh: () => store.refresh(),
       additionalPageCheck: 1, // recents returns the nowplaying track
       itemBuilder: (___, index) => HistoryListItem(store.recents[index]),
       hasMore: store.hasMore,
