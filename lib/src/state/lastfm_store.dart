@@ -257,11 +257,17 @@ class LastFmStore  extends ChangeNotifier {
 
     var artistResp = await api.user.getPersonalTags(
         userSession.userName, tag.name, 'artist');
+    var artistIds = artistResp.data.taggings.artists.items
+        .map((e) => e.name).toSet();
     var artistTags = artistResp.data.taggings.artists.items;
+    artistTags.retainWhere((x) => artistIds.remove(x.name));
 
     var albumResp = await api.user.getPersonalTags(
         userSession.userName, tag.name, 'album');
+    var albumIds = albumResp.data.taggings.albums.items
+        .map((e) => e.name).toSet();
     var albumTags = albumResp.data.taggings.albums.items;
+    albumTags.retainWhere((x) => albumIds.remove(x.name));
 
     var tagResult = new TagResult(
       artists: artistTags,
