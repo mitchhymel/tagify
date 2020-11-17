@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:provider/provider.dart';
@@ -15,10 +17,18 @@ class TagsListItem extends StatelessWidget {
     builder: (_, store, __) => CustomCard(
       onTap: () => store.tagsSelected = tag,
       color: store.tagsSelected == tag ? Colors.redAccent : Colors.black12,
-      child: Row(
+      child: Platform.isWindows ? Row(
         children: [
           Text(tag.name),
           Flexible(child: Container()),
+          Text(tag.count.toString(),
+            textAlign: TextAlign.right,
+          ),
+        ],
+      ) : Column(
+        children: [
+          Text(tag.name),
+          Container(height: 5),
           Text(tag.count.toString(),
             textAlign: TextAlign.right,
           ),

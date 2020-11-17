@@ -20,9 +20,25 @@ class TrackCard extends StatelessWidget {
       maxWidth: 800,
       maxHeight: 300,
     ),
-    onTap: !draggable ? (){} :
-        () => Provider.of<LastFmStore>(context, listen: false)
-            .addTrackToQueue(track),
+    onTap: !draggable ? (){} : () {
+      bool success = Provider.of<LastFmStore>(context, listen: false)
+          .addTrackToQueue(track);
+      if (success) {
+        Scaffold.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.blueAccent,
+          action: SnackBarAction(
+            label: 'dismiss',
+            textColor: Colors.white,
+            onPressed: () {},
+          ),
+          content: Text('Added "${track.name}" by "$trackArtistName" to track tag queue',
+            style: TextStyle(
+              color: Colors.white,
+            )
+          ),
+        ));
+      }
+    },
     color: track.nowPlaying ? Colors.blueAccent : Colors.black12,
     child: Row(
       children: [

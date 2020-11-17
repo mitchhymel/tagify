@@ -1,4 +1,4 @@
-import 'dart:collection';
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -41,11 +41,12 @@ class LastFmStore  extends ChangeNotifier {
   User _user;
   User get user => _user;
 
-  bool get loggedIn => _userSession != null;
+  bool get loggedIn => _userSession != null && _userSession.key != null &&
+    _userSession.name != null;
 
   LastFmStore() {
     _api = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify',
-      logger: LastFmConsoleLogger()
+      // logger: LastFmConsoleLogger()
     );
 
     tryLoginFromCachedCreds();
@@ -61,6 +62,20 @@ class LastFmStore  extends ChangeNotifier {
     }
 
     _userSession = session;
+    await _cacheCreds();
+    await _afterLogin();
+    return true;
+  }
+
+  Future<bool> loginFromSession(String session) async {
+    var resp = await _api.auth.getSession(session);
+    if (!resp.isSuccess()) {
+      log('Could not login from session: $resp');
+      return false;
+    }
+
+    _userSession = resp.data.session;
+    _api.loginWithSessionKey(_userSession.key);
     await _cacheCreds();
     await _afterLogin();
     return true;
@@ -163,7 +178,7 @@ class LastFmStore  extends ChangeNotifier {
     notifyListeners();
 
     var res = await api.user.getRecentTracks(
-      userSession.userName,
+      userSession.name,
       page: page,
       limit: pageLimit,
     );
@@ -241,7 +256,7 @@ class LastFmStore  extends ChangeNotifier {
 
     log('GetTopTags with results for page $page with limit $limit');
 
-    var response = await api.user.getTopTags(userSession.userName);
+    var response = await api.user.getTopTags(userSession.name);
 
     _tagsFetching = false;
     notifyListeners();
@@ -264,18 +279,18 @@ class LastFmStore  extends ChangeNotifier {
     notifyListeners();
 
     var trackResp = await api.user.getPersonalTags(
-        userSession.userName, tag.name, 'track');
+        userSession.name, tag.name, 'track');
     var trackTags = trackResp.data.taggings.tracks.items;
 
     var artistResp = await api.user.getPersonalTags(
-        userSession.userName, tag.name, 'artist');
+        userSession.name, tag.name, 'artist');
     var artistIds = artistResp.data.taggings.artists.items
         .map((e) => e.name).toSet();
     var artistTags = artistResp.data.taggings.artists.items;
     artistTags.retainWhere((x) => artistIds.remove(x.name));
 
     var albumResp = await api.user.getPersonalTags(
-        userSession.userName, tag.name, 'album');
+        userSession.name, tag.name, 'album');
     var albumIds = albumResp.data.taggings.albums.items
         .map((e) => e.name).toSet();
     var albumTags = albumResp.data.taggings.albums.items;
@@ -389,12 +404,15 @@ class LastFmStore  extends ChangeNotifier {
   int _taggedSoFar = 0;
   int get taggedSoFar => _taggedSoFar;
 
-  void addTrackToQueue(Track track) {
+  bool addTrackToQueue(Track track) {
     if (!_queuedTracks.contains(track)) {
       _queuedTracks.add(QueueEntry<Track>(data: track));
       resetProgress();
       notifyListeners();
+      return true;
     }
+
+    return false;
   }
 
   void removeTrackFromQueue(QueueEntry<Track> track) {
