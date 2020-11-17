@@ -121,17 +121,17 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
 
       return CustomCard(child: Column(
         children: [
-          Container(
+          Text(store.userSession.name),
+          if (store.user != null && store.user.images != null) Container(
             height: 190,
             width: 190,
-            child: Text(store.userSession.name),
             decoration: BoxDecoration(
               color: Colors.amber,
               shape: BoxShape.circle,
-              // image: DecorationImage(
-              //   fit: BoxFit.fill,
-              //   image: NetworkImage(store.images[0].url)
-              // )
+              image: DecorationImage(
+                fit: BoxFit.fill,
+                image: NetworkImage(store.user.images[3].text)
+              )
             ),
           ),
           RaisedButton(

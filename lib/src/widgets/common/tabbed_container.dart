@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class TabItem {
@@ -49,7 +51,7 @@ class _TabbedContainerState extends State<TabbedContainer>
       ),
       Expanded(
         child: TabBarView(
-          physics: NeverScrollableScrollPhysics(),
+          physics: Platform.isWindows ? NeverScrollableScrollPhysics() : null,
           controller: controller,
           children: widget.tabs.map((e) => e.child).toList()
         )

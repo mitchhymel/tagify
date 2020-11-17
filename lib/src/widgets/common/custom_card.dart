@@ -17,6 +17,9 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     margin: EdgeInsets.all(10),
     color: color,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8))
+    ),
     child: InkWell(
       onTap: onTap,
       child: Container(

@@ -141,7 +141,14 @@ class LastFmStore  extends ChangeNotifier {
   }
 
   Future<void> userRefresh() async {
+    var res = await _api.user.getInfo(_userSession.name);
+    if (!res.isSuccess()) {
+      log('Failed to get user info: $res');
+      return;
+    }
 
+    _user = res.data.user;
+    notifyListeners();
   }
 
   //#endregion auth
