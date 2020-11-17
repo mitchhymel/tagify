@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/tags_store.dart';
+import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';
 import 'package:tagify/src/widgets/common/tabbed_container.dart';
 import 'package:tagify/src/widgets/tags/albums/tags_albums_container.dart';
@@ -15,8 +15,8 @@ class TagsScreen extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: [
       TagsControls(),
-      Consumer<TagsStore>(
-        builder: (_, store, __) => CustomLoadingIndicator(store.fetching),
+      Consumer<LastFmStore>(
+        builder: (_, store, __) => CustomLoadingIndicator(store.tagsFetching),
       ),
       Expanded(
         child: Row(

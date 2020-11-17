@@ -80,7 +80,7 @@ class MainContainerState extends State<MainContainer> {
         ),
         VerticalDivider(thickness: 1, width: 1),
         Flexible(
-          flex: 4,
+          flex: 2,
           child: railItems[selectedIndex].builder(context)
         ),
         VerticalDivider(thickness: 2, width: 2),

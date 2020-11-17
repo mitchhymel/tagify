@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/tags_store.dart';
+import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 
 class TagsListItem extends StatelessWidget {
@@ -11,10 +11,10 @@ class TagsListItem extends StatelessWidget {
   TagsListItem(this.tag);
 
   @override
-  Widget build(BuildContext context) => Consumer<TagsStore>(
+  Widget build(BuildContext context) => Consumer<LastFmStore>(
     builder: (_, store, __) => CustomCard(
-      onTap: () => store.selected = tag,
-      color: store.selected == tag ? Colors.redAccent : Colors.black12,
+      onTap: () => store.tagsSelected = tag,
+      color: store.tagsSelected == tag ? Colors.redAccent : Colors.black12,
       child: Row(
         children: [
           Text(tag.name),

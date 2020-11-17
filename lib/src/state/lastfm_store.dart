@@ -4,11 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tagify/src/lastfm/secrets.dart';
-import 'package:tagify/src/state/history_store.dart';
 import 'package:tagify/src/state/log_store.dart';
-import 'package:tagify/src/state/tags_store.dart';
 
-var lastFm = new LastFmStore();
+class TagResult {
+  final List<Artist> artists;
+  final List<Track> tracks;
+  final List<Album> albums;
+
+  TagResult({
+    @required this.artists,
+    @required this.tracks,
+    @required this.albums,
+  });
+}
 
 class LastFmStore  extends ChangeNotifier {
   String _cachedCredsKey = 'LASTFM_CACHED_CREDS';
@@ -18,6 +26,8 @@ class LastFmStore  extends ChangeNotifier {
 
   UserSession _userSession;
   UserSession get userSession => _userSession;
+  User _user;
+  User get user => _user;
 
   bool get loggedIn => _userSession != null;
 
@@ -28,6 +38,8 @@ class LastFmStore  extends ChangeNotifier {
 
     tryLoginFromCachedCreds();
   }
+
+  //#region auth
 
   Future<bool> login(String userName, String password) async {
     var session = await _api.loginWithUserNamePassword(userName, password);
@@ -59,8 +71,9 @@ class LastFmStore  extends ChangeNotifier {
 
   Future<void> _afterLogin() async {
 
-    history.refresh();
-    tags.refresh();
+    await userRefresh();
+    await recentsRefresh();
+    await tagsRefresh();
 
     notifyListeners();
   }
@@ -99,4 +112,238 @@ class LastFmStore  extends ChangeNotifier {
     UserSession session = UserSession.fromJson(jsonDecode(sessionJson));
     return session;
   }
+
+  Future<void> userRefresh() async {
+
+  }
+
+  //#endregion auth
+
+  //#region recents
+  List<Track> _recents = [];
+  List<Track> get recents => _recents;
+
+  Track _nowPlaying;
+  Track get nowPlaying => _nowPlaying;
+
+  bool _recentsHasMore = false;
+  bool get recentsHasMore => _recentsHasMore;
+
+  bool _recentsFetching = false;
+  bool get recentsFetching => _recentsFetching;
+
+  Future<void> recentsRefresh() async {
+    _recents = [];
+    notifyListeners();
+
+    await recentsFetch(1, 25);
+  }
+
+  Future<void> recentsFetch(int page, int pageLimit) async {
+    if (_recentsFetching) {
+      log('Already fetching requests... returning early');
+      return;
+    }
+
+    log('Fetching recents for page $page with a limit of $pageLimit');
+
+    _recentsFetching = true;
+    notifyListeners();
+
+    var res = await api.user.getRecentTracks(
+      userSession.userName,
+      page: page,
+      limit: pageLimit,
+    );
+
+    _recentsFetching = false;
+    notifyListeners();
+
+    if (!res.isSuccess()) {
+      log('Error when fetching recents');
+      return;
+    }
+
+    var newRecents = res.data.recenttracks.items;
+
+    // adds currently playing track as 1 more than the limit we request
+    _recentsHasMore = newRecents.length == pageLimit + 1;
+
+    // the currently playing track will always be the first
+    if (newRecents.first.nowPlaying) {
+      _nowPlaying = newRecents.first;
+      newRecents.removeAt(0);
+    }
+    _recents.addAll(newRecents);
+    notifyListeners();
+  }
+
+
+  //#endregion recents
+
+  //#region tags
+  String _tagsFilter = '';
+  String get tagsFilter => _tagsFilter;
+  set tagsFilter(String other) {
+    _tagsFilter = other;
+    notifyListeners();
+  }
+
+  bool _tagsHasMore = false;
+  bool get tagsHasMore => _tagsHasMore;
+
+  bool _tagsFetching = false;
+  bool get tagsFetching => _tagsFetching;
+
+  List<Tag> _tags = [];
+  List<Tag> get tags => _tags.where((x) => x.name.toLowerCase()
+      .contains(_tagsFilter.toLowerCase())).toList();
+
+  Map<Tag, TagResult> _tagsCache = {};
+  Map<Tag, TagResult> get tagsCache => _tagsCache;
+
+  Tag _tagsSelected;
+  Tag get tagsSelected => _tagsSelected;
+  set tagsSelected(Tag other) {
+    _tagsSelected = other;
+    notifyListeners();
+
+    if (!_tagsCache.containsKey(_tagsSelected)) {
+      refreshForTag(_tagsSelected);
+    }
+    else {
+
+    }
+  }
+  TagResult get tagsSelectedResult => _tagsCache[_tagsSelected];
+
+  Future<void> tagsRefresh() async {
+    _tags = [];
+    notifyListeners();
+    await tagsFetch(1);
+  }
+
+  Future<void> tagsFetch(int page, {int limit=25}) async {
+    _tagsFetching = true;
+    notifyListeners();
+
+    log('GetTopTags with results for page $page with limit $limit');
+
+    var response = await api.user.getTopTags(userSession.userName);
+
+    _tagsFetching = false;
+    notifyListeners();
+
+    if (!response.isSuccess()) {
+      log('Error when fetching tags: $response');
+      return;
+    }
+
+    List<Tag> tags = response.data.toptags.items;
+    _tags.addAll(tags);
+    _tagsHasMore = tags.length == limit;
+
+    log('GetTopTags found ${tags.length} results');
+    notifyListeners();
+  }
+
+  Future<void> refreshForTag(Tag tag) async {
+    _tagsFetching = true;
+    notifyListeners();
+
+    var trackResp = await api.user.getPersonalTags(
+        userSession.userName, tag.name, 'track');
+    var trackTags = trackResp.data.taggings.tracks.items;
+
+    var artistResp = await api.user.getPersonalTags(
+        userSession.userName, tag.name, 'artist');
+    var artistTags = artistResp.data.taggings.artists.items;
+
+    var albumResp = await api.user.getPersonalTags(
+        userSession.userName, tag.name, 'album');
+    var albumTags = albumResp.data.taggings.albums.items;
+
+    var tagResult = new TagResult(
+      artists: artistTags,
+      albums: albumTags,
+      tracks: trackTags,
+    );
+
+    _tagsCache.putIfAbsent(tag, () => tagResult);
+
+    _tagsFetching = false;
+    notifyListeners();
+  }
+  //#endregion tags
+
+  //#region search
+  String _trackQuery ='';
+  String get trackQuery => _trackQuery;
+  set trackQuery(String other) {
+    _trackQuery = other;
+    notifyListeners();
+  }
+  String _artistQuery = '';
+  String get artistQuery => _artistQuery;
+  set artistQuery(String other) {
+    _artistQuery = other;
+    notifyListeners();
+  }
+
+  List<Track> _searchTracks = [];
+  List<Track> get searchTracks => _searchTracks;
+
+  bool _searching = false;
+  bool get searching => _searching;
+
+  bool _searchHasMore = false;
+  bool get searchHasMore => _searchHasMore;
+
+  Future<void> searchRefresh() async {
+    _searchTracks = [];
+    notifyListeners();
+    await searchTrack(1);
+  }
+
+  Future<void> searchTrack(int page, {int limit=25}) async {
+    if (_trackQuery.isEmpty) {
+      log('Search track query is empty, so will not make a request');
+      return;
+    }
+
+    _searching = true;
+    notifyListeners();
+
+    log('Searching for track "$_trackQuery", artist "$_artistQuery", with results for page $page with limit $limit');
+    LastFmResponse response;
+    if (_artistQuery.isEmpty) {
+      response = await api.track.search(_trackQuery,
+        page: page,
+        limit: limit
+      );
+    }
+    else {
+      response = await api.track.search(_trackQuery,
+        artist: _artistQuery,
+        page: page,
+        limit: limit
+      );
+    }
+
+    _searching = false;
+    notifyListeners();
+
+    if (response.error != null) {
+      log('Error when searching: $response');
+      return;
+    }
+
+    List<Track> tracks = response.data.results.tracks.items;
+    _searchTracks.addAll(tracks);
+    _searchHasMore = tracks.length == limit;
+
+    log('Search found ${tracks.length} results');
+    notifyListeners();
+  }
+  //#endregion search
 }

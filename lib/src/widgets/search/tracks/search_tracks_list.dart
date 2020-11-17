@@ -1,21 +1,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/search/search_tracks_store.dart';
+import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/widgets/common/paginated_desktop_listview.dart';
-import 'package:tagify/src/widgets/search/tracks/search_tracks_list_item.dart';
+import 'package:tagify/src/widgets/lastfm/track_card.dart';
 
 class SearchTracksList extends StatelessWidget {
 
   @override
-  Widget build(BuildContext context) => Consumer<SearchTracksStore>(
+  Widget build(BuildContext context) => Consumer<LastFmStore>(
     builder: (_, store, __) => PaginatedDesktopListView(
-      onRefresh: store.refresh,
-      fetchMore: (page, limit) => store.search(page, limit: limit),
-      itemCount: store.tracks.length,
+      onRefresh: store.searchRefresh,
+      fetchMore: (page, limit) => store.searchTrack(page, limit: limit),
+      itemCount: store.searchTracks.length,
       pageSize: 25,
-      itemBuilder: (___, index) => SearchTracksListItem(store.tracks[index]),
-      hasMore: store.hasMore,
+      itemBuilder: (___, index) => TrackCard(store.searchTracks[index]),
+      hasMore: store.searchHasMore,
     )
   );
 }
