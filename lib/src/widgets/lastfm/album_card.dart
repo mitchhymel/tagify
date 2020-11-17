@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
@@ -29,9 +31,10 @@ class AlbumCard extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => !draggable ? _getCard() : Draggable(
+  Widget build(BuildContext context) => (draggable && Platform.isWindows) ?
+  Draggable(
     data: album,
     feedback: _getCard(),
     child: _getCard()
-  );
+  ) : _getCard();
 }

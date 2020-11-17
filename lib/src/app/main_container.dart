@@ -1,5 +1,7 @@
 
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:tagify/src/screens/history_screen.dart';
 import 'package:tagify/src/screens/log_screen.dart';
@@ -61,35 +63,53 @@ class MainContainerState extends State<MainContainer> {
       selectedIcon: Icons.headset_sharp,
       label: 'Spotify',
       builder: (ctx) => SpotifyPlaylistScreen()
+    ),
+    if (!Platform.isWindows) NavigationRailItem(
+      icon: Icons.queue_outlined,
+      selectedIcon: Icons.queue,
+      label: 'Queue',
+      builder: (ctx) => TagSideBar(),
     )
   ];
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Row(
-      children: [
-        NavigationRail(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: (int index) {
-            setState((){
-              selectedIndex = index;
-            });
-          },
-          labelType: NavigationRailLabelType.selected,
-          destinations: railItems.map((e) => e.toDestination()).toList(),
-        ),
-        VerticalDivider(thickness: 1, width: 1),
-        Flexible(
-          flex: 2,
-          child: railItems[selectedIndex].builder(context)
-        ),
-        VerticalDivider(thickness: 2, width: 2),
-        Flexible(
-          flex: 1,
-          child: TagSideBar(),
-        )
-      ]
-    )
+    body: SafeArea(
+      child: Row(
+        children: [
+          if (Platform.isWindows) NavigationRail(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (int index) {
+              setState((){
+                selectedIndex = index;
+              });
+            },
+            labelType: NavigationRailLabelType.selected,
+            destinations: railItems.map((e) => e.toDestination()).toList(),
+          ),
+          if (Platform.isWindows) VerticalDivider(thickness: 1, width: 1),
+          Flexible(
+              flex: 2,
+              child: railItems[selectedIndex].builder(context)
+          ),
+          if (Platform.isWindows) VerticalDivider(thickness: 2, width: 2),
+          if (Platform.isWindows) Flexible(
+            flex: 1,
+            child: TagSideBar(),
+          )
+        ]
+      )
+    ),
+    bottomNavigationBar: Platform.isWindows ? null : BottomNavigationBar(
+      items: railItems.map((e) => e.toItem()).toList(),
+      currentIndex: selectedIndex,
+      selectedItemColor: Colors.redAccent,
+      onTap: (int index) {
+        setState(() {
+          selectedIndex = index;
+        });
+      },
+    ),
   );
 }
 
@@ -109,6 +129,12 @@ class NavigationRailItem {
     icon: Icon(icon),
     selectedIcon: Icon(selectedIcon),
     label: Text(label),
+  );
+
+  BottomNavigationBarItem toItem() => BottomNavigationBarItem(
+    icon: Icon(icon),
+    activeIcon: Icon(selectedIcon),
+    label: label,
   );
 
 }

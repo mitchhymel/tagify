@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:provider/provider.dart';
@@ -37,9 +39,10 @@ class TrackCard extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => !draggable ? _getCard(context) : Draggable(
+  Widget build(BuildContext context) => (draggable && Platform.isWindows) ?
+  Draggable(
     data: track,
     feedback: _getCard(context),
     child: _getCard(context)
-  );
+  ) : _getCard(context);
 }
