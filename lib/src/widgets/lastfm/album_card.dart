@@ -5,8 +5,9 @@ import 'package:tagify/src/widgets/common/custom_card.dart';
 
 class AlbumCard extends StatelessWidget {
 
+  final bool draggable;
   final Album album;
-  AlbumCard(this.album);
+  AlbumCard(this.album, {this.draggable=true});
 
   Widget _getCard() => CustomCard(
     constraints: BoxConstraints(
@@ -28,7 +29,7 @@ class AlbumCard extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => Draggable(
+  Widget build(BuildContext context) => !draggable ? _getCard() : Draggable(
     data: album,
     feedback: _getCard(),
     child: _getCard()

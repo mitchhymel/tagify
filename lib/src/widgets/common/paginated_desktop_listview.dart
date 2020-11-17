@@ -16,12 +16,12 @@ class PaginatedDesktopListView extends StatelessWidget {
   final bool hasMore;
 
   PaginatedDesktopListView({
-    @required this.onRefresh,
     @required this.itemCount,
     @required this.itemBuilder,
     @required this.fetchMore,
     @required this.pageSize,
-    @required this.hasMore,
+    @required this.onRefresh,
+    this.hasMore=false,
     this.additionalPageCheck=0,
   });
 

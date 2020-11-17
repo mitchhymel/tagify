@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,17 @@ class TagResult {
   });
 }
 
+class QueueEntry<T> {
+
+  final T data;
+  bool processed;
+  QueueEntry({
+    this.data,
+    this.processed=false,
+  });
+}
+
+
 class LastFmStore  extends ChangeNotifier {
   String _cachedCredsKey = 'LASTFM_CACHED_CREDS';
 
@@ -33,7 +45,7 @@ class LastFmStore  extends ChangeNotifier {
 
   LastFmStore() {
     _api = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify',
-      //logger: LastFmConsoleLogger()
+      logger: LastFmConsoleLogger()
     );
 
     tryLoginFromCachedCreds();
@@ -352,4 +364,111 @@ class LastFmStore  extends ChangeNotifier {
     notifyListeners();
   }
   //#endregion search
+
+  //#region queue
+  List<QueueEntry<Track>> _queuedTracks = [];
+  List<QueueEntry<Track>> get queuedTracks => _queuedTracks;
+  bool _taggingTracks = false;
+  bool get taggingTracks => _taggingTracks;
+
+  List<String> _trackTags = [];
+  List<String> get trackTags => _trackTags;
+  void addTrackTag(String tag) {
+    if (!_trackTags.contains(tag)) {
+      _trackTags.add(tag);
+      notifyListeners();
+    }
+  }
+  void removeTrackTag(String tag) {
+    _trackTags.remove(tag);
+    notifyListeners();
+  }
+
+  int _totalToTag = 1;
+  int get totalToTag => _totalToTag;
+  int _taggedSoFar = 0;
+  int get taggedSoFar => _taggedSoFar;
+
+  void addTrackToQueue(Track track) {
+    if (!_queuedTracks.contains(track)) {
+      _queuedTracks.add(QueueEntry<Track>(data: track));
+      resetProgress();
+      notifyListeners();
+    }
+  }
+
+  void removeTrackFromQueue(QueueEntry<Track> track) {
+    _queuedTracks.remove(track);
+    resetProgress();
+    notifyListeners();
+  }
+
+  void clearQueue() {
+    _queuedTracks = [];
+    resetProgress();
+    notifyListeners();
+  }
+
+  void resetProgress() {
+    _totalToTag = 1;
+    _taggedSoFar = 0;
+    notifyListeners();
+  }
+
+  Future<void> tagTracks() async {
+    if (_trackTags.isEmpty) {
+      return;
+    }
+
+    _taggingTracks = true;
+    notifyListeners();
+
+    _totalToTag = _queuedTracks.length;
+    _taggedSoFar = 0;
+    log('Beginning to tag $_totalToTag tracks');
+    notifyListeners();
+
+    String tagsStr = _trackTags.join(',');
+    for (var entry in _queuedTracks) {
+      String artist = entry.data.artist.text??entry.data.artist.name;
+      String name = entry.data.name;
+      log('Tagging "$name" by "$artist" with "$tagsStr"');
+      var res = await api.track.addTags(
+        artist,
+        name,
+        _trackTags,
+      );
+
+      if (!res.isSuccess()) {
+        log('Error while trying to tag tracks: $res');
+        _taggingTracks = false;
+        notifyListeners();
+        return;
+      }
+
+      entry.processed = true;
+      _taggedSoFar ++;
+      notifyListeners();
+    }
+
+    log('Successfully tagged tracks');
+    _taggingTracks = false;
+    notifyListeners();
+  }
+
+  void stopTaggingTracks() {
+    _taggingTracks = false;
+    notifyListeners();
+  }
+
+  void addAlbumToQueue(Album album) {
+
+  }
+
+  void addArtistToQueue(Artist artist) {
+
+  }
+
+
+  //#endregion queue
 }
