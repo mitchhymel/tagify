@@ -16,7 +16,9 @@ class QueueTracksControls extends StatelessWidget {
       start: store.tagTracks,
       stop: store.stopTaggingTracks,
       progressSoFar: store.taggedSoFar,
-      totalProgress: store.totalToTag,
+      totalProgress: store.queuedTracks.length,
+      startRemove: store.removeTagsFromTracks,
+      stopRemove: store.stopTaggingTracks,
     )
   );
 }

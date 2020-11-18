@@ -15,15 +15,15 @@ class TrackCard extends StatelessWidget {
 
   String get trackArtistName => track.artist.name ?? track.artist.text;
 
-  Widget _getCard(BuildContext context) => CustomCard(
-    constraints: BoxConstraints(
+  Widget _getCard(BuildContext context, {bool feedback=false}) => CustomCard(
+    constraints: !feedback ? null : BoxConstraints(
       maxWidth: 800,
       maxHeight: 300,
     ),
     onTap: !draggable ? (){} : () {
       bool success = Provider.of<LastFmStore>(context, listen: false)
           .addTrackToQueue(track);
-      if (success) {
+      if (success && !Platform.isWindows) {
         Scaffold.of(context).showSnackBar(SnackBar(
           backgroundColor: Colors.blueAccent,
           action: SnackBarAction(
@@ -39,7 +39,7 @@ class TrackCard extends StatelessWidget {
         ));
       }
     },
-    color: track.nowPlaying ? Colors.blueAccent : Colors.black12,
+    color: track.nowPlaying ? Colors.blueGrey : Colors.black12,
     child: Row(
       children: [
         if (track.images.isNotEmpty) Expanded(
@@ -58,7 +58,7 @@ class TrackCard extends StatelessWidget {
   Widget build(BuildContext context) => (draggable && Platform.isWindows) ?
   Draggable(
     data: track,
-    feedback: _getCard(context),
+    feedback: _getCard(context, feedback: true),
     child: _getCard(context)
   ) : _getCard(context);
 }

@@ -18,7 +18,6 @@ class TrackQueueCard extends StatelessWidget {
       maxHeight: 300,
     ),
     onTap: (){},
-    color: entry.data.nowPlaying ? Colors.blueAccent : Colors.black12,
     child: Row(
       children: [
         if (entry.data.images.isNotEmpty) Expanded(

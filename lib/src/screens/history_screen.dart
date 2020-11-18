@@ -11,7 +11,18 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      NowPlayingCard(),
+      Row(
+        children: [
+          NowPlayingCard(),
+          Consumer<LastFmStore>(
+            builder: (_, store, __) => ElevatedButton(
+              child: Icon(Icons.refresh),
+              onPressed: store.recentsRefresh,
+            )
+          ),
+          Container(width: 5),
+        ],
+      ),
       Consumer<LastFmStore>(
         builder: (_, store, __) => CustomLoadingIndicator(store.recentsFetching),
       ),

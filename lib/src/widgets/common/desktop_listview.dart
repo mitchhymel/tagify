@@ -10,10 +10,12 @@ class DesktopListView extends StatelessWidget {
   final int columns;
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
+  final double scrollPercent;
   DesktopListView({
     @required this.itemCount,
     @required this.itemBuilder,
-    this.columns=1
+    this.columns=1,
+    this.scrollPercent=0,
   });
 
   @override
@@ -27,6 +29,7 @@ class DesktopListView extends StatelessWidget {
       itemCount: itemCount,
       itemBuilder: itemBuilder,
       columns: columns,
+      scrollPercent: scrollPercent,
     );
   }
 }
@@ -36,10 +39,12 @@ class _DesktopListViewWrap extends StatefulWidget {
   final int columns;
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
+  final double scrollPercent;
   _DesktopListViewWrap({
     @required this.itemCount,
     @required this.itemBuilder,
     @required this.columns,
+    @required this.scrollPercent,
   });
 
   @override
@@ -97,28 +102,38 @@ class _DesktopListViewWrapState extends State<_DesktopListViewWrap> {
   }
 
   @override
-  Widget build(BuildContext context) => Listener(
+  Widget build(BuildContext context) {
+
+    if (widget.scrollPercent != 0) {
+      Future.delayed(Duration.zero, () {
+        controller.jumpTo(widget.scrollPercent *
+            controller.position.maxScrollExtent);
+      });
+    }
+
+    return Listener(
       onPointerSignal: _handlePointerSignal,
       child: _IgnorePointerSignal(
-          child: DraggableScrollbar.semicircle(
+        child: DraggableScrollbar.semicircle(
+          controller: controller,
+          child: widget.columns == 1 ? ListView.builder(
             controller: controller,
-            child: widget.columns == 1 ? ListView.builder(
-              controller: controller,
-              itemBuilder: widget.itemBuilder,
-              itemCount: widget.itemCount,
-            ) : GridView.builder(
-              itemCount: widget.itemCount,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: widget.columns,
-                  childAspectRatio: MediaQuery.of(context).size.width /
-                      (MediaQuery.of(context).size.height / 3)
-              ),
-              itemBuilder: widget.itemBuilder,
-              controller: controller,
+            itemBuilder: widget.itemBuilder,
+            itemCount: widget.itemCount,
+          ) : GridView.builder(
+            itemCount: widget.itemCount,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: widget.columns,
+              childAspectRatio: MediaQuery.of(context).size.width /
+                  (MediaQuery.of(context).size.height / 3)
             ),
-          )
+            itemBuilder: widget.itemBuilder,
+            controller: controller,
+          ),
+        )
       )
-  );
+    );
+  }
 }
 
 // workaround https://github.com/flutter/flutter/issues/35723

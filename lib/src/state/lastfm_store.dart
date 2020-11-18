@@ -208,6 +208,9 @@ class LastFmStore  extends ChangeNotifier {
       _nowPlaying = newRecents.first;
       newRecents.removeAt(0);
     }
+    else {
+      _recentsHasMore = newRecents.length == pageLimit;
+    }
     _recents.addAll(newRecents);
     notifyListeners();
   }
@@ -253,6 +256,7 @@ class LastFmStore  extends ChangeNotifier {
 
   Future<void> tagsRefresh() async {
     _tags = [];
+    _tagsSelected = null;
     notifyListeners();
     await tagsFetch(1);
   }
@@ -412,7 +416,9 @@ class LastFmStore  extends ChangeNotifier {
   int get taggedSoFar => _taggedSoFar;
 
   bool addTrackToQueue(Track track) {
-    if (!_queuedTracks.contains(track)) {
+    bool trackNotInQueue = _queuedTracks.where((element) =>
+      element.data.name == track.name).isEmpty;
+    if (trackNotInQueue) {
       _queuedTracks.add(QueueEntry<Track>(data: track));
       resetProgress();
       notifyListeners();
@@ -440,6 +446,48 @@ class LastFmStore  extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> removeTagsFromTracks() async {
+    if (_trackTags.isEmpty) {
+      return;
+    }
+
+    _taggingTracks = true;
+    notifyListeners();
+
+    _totalToTag = _queuedTracks.length;
+    _taggedSoFar = 0;
+    log('Beginning to remove tags from $_totalToTag tracks');
+    notifyListeners();
+
+    for (var entry in _queuedTracks) {
+      for (var tag in _trackTags) {
+        String artist = entry.data.artist.text??entry.data.artist.name;
+        String name = entry.data.name;
+        log('Removing tag $tag from "$name" by "$artist"');
+        var res = await _api.track.removeTag(
+          artist,
+          name,
+          tag
+        );
+
+        if (!res.isSuccess()) {
+          log('Error while trying to remove tag on tracks: $res');
+          _taggingTracks = false;
+          notifyListeners();
+          return;
+        }
+
+        entry.processed = true;
+        _taggedSoFar ++;
+        notifyListeners();
+      }
+    }
+
+    log('Finished removing tags from tracks');
+    _taggingTracks = false;
+    notifyListeners();
+  }
+
   Future<void> tagTracks() async {
     if (_trackTags.isEmpty) {
       return;
@@ -455,6 +503,10 @@ class LastFmStore  extends ChangeNotifier {
 
     String tagsStr = _trackTags.join(',');
     for (var entry in _queuedTracks) {
+      if (!_taggingTracks) {
+        break;
+      }
+
       String artist = entry.data.artist.text??entry.data.artist.name;
       String name = entry.data.name;
       log('Tagging "$name" by "$artist" with "$tagsStr"');
@@ -476,7 +528,7 @@ class LastFmStore  extends ChangeNotifier {
       notifyListeners();
     }
 
-    log('Successfully tagged tracks');
+    log('Finished tagged tracks');
     _taggingTracks = false;
     notifyListeners();
   }

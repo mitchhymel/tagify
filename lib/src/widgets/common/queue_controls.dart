@@ -1,12 +1,15 @@
 
 import 'package:flutter/material.dart';
-import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';
+import 'package:tagify/src/widgets/common/custom_progress_indicator.dart';
+import 'package:tagify/src/widgets/common/tag_chip_list.dart';
 
 import 'custom_card.dart';
 
 class QueueControls extends StatefulWidget {
   final Function start;
   final Function stop;
+  final Function startRemove;
+  final Function stopRemove;
   final Function clearQueue;
   final int totalProgress;
   final int progressSoFar;
@@ -22,6 +25,8 @@ class QueueControls extends StatefulWidget {
     @required this.clearQueue,
     @required this.start,
     @required this.stop,
+    @required this.startRemove,
+    @required this.stopRemove,
     this.totalProgress=1,
     this.progressSoFar=0,
   });
@@ -52,8 +57,9 @@ class _QueueControlsState extends State<QueueControls> {
   @override
   Widget build(BuildContext context) => CustomCard(
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
+        IntrinsicHeight(
           child: TextFormField(
             textAlign: TextAlign.center,
             controller: controller,
@@ -67,38 +73,44 @@ class _QueueControlsState extends State<QueueControls> {
           )
         ),
         Container(height: 5),
-        Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          crossAxisAlignment: WrapCrossAlignment.start,
-          children: widget.tags.map((x) => Chip(
-            label: Text(x),
-            onDeleted: () => widget.onRemoveTag(x),
-          )).toList()
+        TagChipList(
+          tags: widget.tags,
+          onRemoveTag: widget.onRemoveTag,
         ),
         Container(height: 10),
-        Expanded(
+        IntrinsicHeight(
           child: Row(
             children: [
               ElevatedButton(
                 child: Icon(Icons.clear_all),
                 onPressed: widget.showProgress ? null : widget.clearQueue,
               ),
-              Flexible(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 5.0),
-                  child: LinearProgressIndicator(
-                    value: widget.progressSoFar / widget.totalProgress,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green)
-                  ),
-                )
+              Flexible(child: Container()),
+              ElevatedButton.icon(
+                label: Text('Remove Tags'),
+                icon: Icon(widget.showProgress ? Icons.pause : Icons.delete),
+                onPressed: widget.tags.isEmpty ? null :
+                  widget.showProgress ? widget.stopRemove : widget.startRemove,
               ),
-              ElevatedButton(
-                child: Icon(widget.showProgress ? Icons.pause : Icons.play_arrow),
-                onPressed: widget.showProgress ? widget.stop : widget.start,
+              // ElevatedButton(
+              //   child: Icon(widget.showProgress ? Icons.pause : Icons.delete),
+              //   onPressed: widget.showProgress ? widget.stop : widget.start,
+              // ),
+              Flexible(child: Container()),
+              ElevatedButton.icon(
+                label: Text('Add Tags'),
+                icon: Icon(widget.showProgress ? Icons.pause : Icons.add),
+                onPressed: widget.tags.isEmpty ? null :
+                  widget.showProgress ? widget.stop : widget.start,
               )
             ],
           ),
         ),
+        Container(height: 4),
+        CustomProgressIndicator(
+          totalProgress: widget.totalProgress,
+          progressSoFar: widget.progressSoFar,
+        )
       ],
     )
   );

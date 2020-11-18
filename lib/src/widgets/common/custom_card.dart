@@ -26,6 +26,9 @@ class CustomCard extends StatelessWidget {
         constraints: constraints,
         margin: EdgeInsets.all(10),
         child: child,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(20))
+        ),
       ),
     ),
   );

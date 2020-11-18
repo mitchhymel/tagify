@@ -12,14 +12,15 @@ class QueueTracksContainer extends StatelessWidget {
   Widget build(BuildContext context) => WrapDropTargetTrack(
     child: Column(
       children: [
-        Flexible(
-          flex: 2,
+        IntrinsicHeight(
           child: QueueTracksControls()
         ),
         Flexible(
           flex: 5,
           child: Consumer<LastFmStore>(
             builder: (_, store, __) => DesktopListView(
+              scrollPercent: store.taggingTracks ?
+                (store.taggedSoFar / store.totalToTag) : 1,
               itemCount: store.queuedTracks.length,
               itemBuilder: (___, index) => TrackQueueCard(
                 store.queuedTracks[index],
