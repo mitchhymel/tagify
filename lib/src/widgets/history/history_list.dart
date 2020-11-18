@@ -11,11 +11,11 @@ class HistoryList extends StatelessWidget {
   Widget build(BuildContext context) => Consumer<LastFmStore>(
     builder: (_, store, __) => PaginatedDesktopListView(
       pageSize: 25,
-      itemCount: store.recents.length,
+      itemCount: store.recentTracks.length,
       fetchMore: (page, pageLimit) => store.recentsFetch(page, pageLimit),
       onRefresh: () => store.recentsRefresh(),
       additionalPageCheck: 1, // recents returns the nowplaying track
-      itemBuilder: (___, index) => TrackCard(store.recents[index]),
+      itemBuilder: (___, index) => TrackCard(store.recentTracks[index]),
       hasMore: store.recentsHasMore,
     )
   );

@@ -8,6 +8,7 @@ class LogContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer<LogStore>(
     builder: (_, store, child) => DesktopListView(
+      scrollPercent: 1,
       itemCount: store.lines.length,
       itemBuilder: (__, index) => SelectableText.rich(
         TextSpan(

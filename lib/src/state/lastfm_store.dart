@@ -9,7 +9,7 @@ import 'package:tagify/src/state/log_store.dart';
 
 class TagResult {
   final List<Artist> artists;
-  final List<Track> tracks;
+  final List<TrackCacheEntry> tracks;
   final List<Album> albums;
 
   TagResult({
@@ -17,6 +17,47 @@ class TagResult {
     @required this.tracks,
     @required this.albums,
   });
+}
+
+class TrackCacheEntry{
+  List<String> tags;
+  Track track;
+  TrackCacheEntry({
+    this.tags,
+    this.track
+  });
+}
+
+class TrackCacheKey {
+  final String name;
+  final String artist;
+  TrackCacheKey({
+    @required this.name,
+    @required this.artist,
+  });
+
+  TrackCacheKey.fromTrack(Track track) :
+      name=track.name,
+      artist=track.artist.name??track.artist.text;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    if (!(other is TrackCacheEntry)) {
+      return false;
+    }
+
+    return name.compareTo(other) == 0 &&
+      artist.compareTo(other) == 0;
+  }
+
+  @override
+  // TODO: implement hashCode
+  int get hashCode => super.hashCode;
+
 }
 
 class QueueEntry<T> {
@@ -46,7 +87,7 @@ class LastFmStore  extends ChangeNotifier {
 
   LastFmStore() {
     _api = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify',
-      // logger: LastFmConsoleLogger()
+      //logger: LastFmConsoleLogger()
     );
 
     tryLoginFromCachedCreds();
@@ -154,11 +195,9 @@ class LastFmStore  extends ChangeNotifier {
   //#endregion auth
 
   //#region recents
-  List<Track> _recents = [];
-  List<Track> get recents => _recents;
 
-  Track _nowPlaying;
-  Track get nowPlaying => _nowPlaying;
+  TrackCacheKey _nowPlaying;
+  TrackCacheEntry get nowPlaying => _trackCache[_nowPlaying];
 
   bool _recentsHasMore = false;
   bool get recentsHasMore => _recentsHasMore;
@@ -167,13 +206,15 @@ class LastFmStore  extends ChangeNotifier {
   bool get recentsFetching => _recentsFetching;
 
   Future<void> recentsRefresh() async {
-    _recents = [];
+    _recentTracks = [];
     notifyListeners();
 
-    await recentsFetch(1, 25);
+    await recentsFetch(1, 5, refreshCache: true);
   }
 
-  Future<void> recentsFetch(int page, int pageLimit) async {
+  Future<void> recentsFetch(int page, int pageLimit, {
+    bool refreshCache=false,
+  }) async {
     if (_recentsFetching) {
       log('Already fetching requests... returning early');
       return;
@@ -190,11 +231,10 @@ class LastFmStore  extends ChangeNotifier {
       limit: pageLimit,
     );
 
-    _recentsFetching = false;
-    notifyListeners();
-
     if (!res.isSuccess()) {
       log('Error when fetching recents');
+      _recentsFetching = false;
+      notifyListeners();
       return;
     }
 
@@ -204,14 +244,37 @@ class LastFmStore  extends ChangeNotifier {
     _recentsHasMore = newRecents.length == pageLimit + 1;
 
     // the currently playing track will always be the first
-    if (newRecents.first.nowPlaying) {
-      _nowPlaying = newRecents.first;
+    if (newRecents.isNotEmpty && newRecents.first.nowPlaying) {
+      var newKey = TrackCacheKey.fromTrack(newRecents.first);
+      var cached = await _ensureCached(newKey,
+        refreshCache: refreshCache,
+        augmentCache: newRecents.first
+      );
+      if (cached != null) {
+        _nowPlaying = newKey;
+      }
       newRecents.removeAt(0);
     }
     else {
       _recentsHasMore = newRecents.length == pageLimit;
     }
-    _recents.addAll(newRecents);
+
+    List<TrackCacheKey> keys = [];
+    for (Track track in newRecents) {
+      var key = new TrackCacheKey.fromTrack(track);
+      var cached = await _ensureCached(key,
+        refreshCache: refreshCache,
+        augmentCache: track,
+      );
+      if (cached != null) {
+        keys.add(key);
+      }
+    }
+
+    _recentTracks.addAll(keys);
+
+    _recentsFetching = false;
+    notifyListeners();
     notifyListeners();
   }
 
@@ -292,6 +355,7 @@ class LastFmStore  extends ChangeNotifier {
     var trackResp = await api.user.getPersonalTags(
         userSession.name, tag.name, 'track');
     var trackTags = trackResp.data.taggings.tracks.items;
+    var trackCacheEntries = await _ensureTracksCached(trackTags);
 
     var artistResp = await api.user.getPersonalTags(
         userSession.name, tag.name, 'artist');
@@ -310,7 +374,7 @@ class LastFmStore  extends ChangeNotifier {
     var tagResult = new TagResult(
       artists: artistTags,
       albums: albumTags,
-      tracks: trackTags,
+      tracks: trackCacheEntries,
     );
 
     _tagsCache.putIfAbsent(tag, () => tagResult);
@@ -463,7 +527,7 @@ class LastFmStore  extends ChangeNotifier {
       for (var tag in _trackTags) {
         String artist = entry.data.artist.text??entry.data.artist.name;
         String name = entry.data.name;
-        log('Removing tag $tag from "$name" by "$artist"');
+        log('Removing tag "$tag" from "$name" by "$artist"');
         var res = await _api.track.removeTag(
           artist,
           name,
@@ -548,4 +612,130 @@ class LastFmStore  extends ChangeNotifier {
 
 
   //#endregion queue
+
+  //#region trackcache
+  Map<TrackCacheKey, TrackCacheEntry> _trackCache = {};
+  Map<TrackCacheKey, TrackCacheEntry> get trackCache => _trackCache;
+
+  List<TrackCacheKey> _recentTracks = [];
+  List<TrackCacheEntry> get recentTracks =>
+    _recentTracks.map((e) => _trackCache[e]).toList();
+
+  Future<List<TrackCacheEntry>> _ensureTracksCached(List<Track> tracks, {
+    bool refreshCache=false,
+  }) async {
+    List<TrackCacheEntry> entries = [];
+    for (var track in tracks) {
+      var entry = await _ensureCached(new TrackCacheKey(
+        name: track.name,
+        artist: track.artist.name??track.artist.text,
+      ), refreshCache: refreshCache, augmentCache: track);
+      if (entry != null) {
+        entries.add(entry);
+      }
+    }
+
+    return entries;
+  }
+
+  Future<TrackCacheEntry> _ensureCached(TrackCacheKey key, {
+    bool refreshCache=false, Track augmentCache
+  }) async {
+    if (!refreshCache && _trackCache.containsKey(key)) {
+      return _trackCache[key];
+    }
+
+    var fetchedEntry = await _fetchTrack(key);
+    TrackCacheEntry entryToReturn = fetchedEntry;
+    if (entryToReturn != null) {
+      if (augmentCache != null) {
+        // create a new track combining the fetched and augmented...
+        // this is needed because for some tracks, track.getInfo
+        // does not return album art... but it does when fetching
+        // user.getRecentTracks
+
+        entryToReturn = new TrackCacheEntry(
+          tags: fetchedEntry.tags,
+          track: entryToReturn.track.copyWith(
+            images: augmentCache.images
+          ),
+        );
+      }
+
+      _trackCache[key] = entryToReturn;
+    }
+
+    return entryToReturn;
+  }
+
+  Future<TrackCacheEntry> _fetchTrack(TrackCacheKey key) async {
+    String artist = key.artist;
+    String name = key.name;
+    var res = await _api.track.getInfo(
+      artist: artist,
+      track: name,
+      userName: _user.name,
+    );
+
+    String trackIdentifier = '"$name" by "$artist"';
+    log('Fetching info for track $trackIdentifier');
+    if (res.hasError()) {
+      log('Error when fetching info for track $trackIdentifier: $res');
+      return null;
+    }
+
+    Track track = res.data.track;
+
+    res = await _api.track.getTags(
+      artist: artist,
+      track: name,
+      user: _user.name,
+    );
+
+    log('Fetching tags for track $trackIdentifier');
+    if (res.hasError()) {
+      log('Error when fetching tags for track $trackIdentifier: $res');
+      return null;
+    }
+
+    List<String> tags = [];
+    if (!(res.data.tags.items == null)) {
+      tags = res.data.tags.items.map((x) => x.name).toList();
+    }
+
+    return new TrackCacheEntry(
+      tags: tags,
+      track: track
+    );
+  }
+
+  Future<void> removeTagFromTrack(TrackCacheEntry entry, String tag) async {
+
+    String artist = entry.track.artist.name??entry.track.artist.text;
+    String track = entry.track.name;
+    String entryId = '"$track" by "$artist"';
+    log('Removing tag "$tag" from $entryId');
+    var res = await _api.track.removeTag(
+      entry.track.artist.name??entry.track.artist.text,
+      entry.track.name,
+      tag,
+    );
+    if (res.hasError()) {
+      log('Error when trying to remove tag "$tag" from $entryId');
+      return;
+    }
+
+    List<String> newTags = []..addAll(entry.tags)..remove(tag);
+    var key = TrackCacheKey.fromTrack(entry.track);
+    _trackCache.remove(key);
+    _trackCache[key] = new TrackCacheEntry(
+      tags: newTags,
+      track: entry.track,
+    );
+    log('Removed tag "$tag" from $entryId');
+    notifyListeners();
+  }
+
+
+  //#endregion
 }
