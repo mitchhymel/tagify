@@ -40,18 +40,25 @@ class TrackCacheKey {
       name=track.name,
       artist=track.artist.name??track.artist.text;
 
+  Map toMap() => {
+    'name': name,
+    'artist': artist,
+  };
+  @override
+  String toString() => jsonEncode(toMap());
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
 
-    if (!(other is TrackCacheEntry)) {
-      return false;
+    if (other is TrackCacheKey) {
+      return name.compareTo(other.name) == 0 &&
+          artist.compareTo(other.artist) == 0;
     }
 
-    return name.compareTo(other) == 0 &&
-      artist.compareTo(other) == 0;
+    return false;
   }
 
   @override
@@ -725,13 +732,24 @@ class LastFmStore  extends ChangeNotifier {
       return;
     }
 
+    // create a new tag list minus the one we removed
     List<String> newTags = []..addAll(entry.tags)..remove(tag);
+
+    // create a new key for the cache
     var key = TrackCacheKey.fromTrack(entry.track);
-    _trackCache.remove(key);
+
+    // cache objects are immutable... update entry
     _trackCache[key] = new TrackCacheEntry(
       tags: newTags,
       track: entry.track,
     );
+
+    // finally, update _recentTracks if the track was in it
+    int index = _recentTracks.indexWhere((x) => x == key);
+    if (index >= 0) {
+      _recentTracks.replaceRange(index, index, [key]);
+    }
+
     log('Removed tag "$tag" from $entryId');
     notifyListeners();
   }
