@@ -9,7 +9,7 @@ import 'package:tagify/src/state/log_store.dart';
 
 class TagResult {
   final List<Artist> artists;
-  final List<TrackCacheEntry> tracks;
+  final List<TrackCacheKey> tracks;
   final List<Album> albums;
 
   TagResult({
@@ -306,12 +306,12 @@ class LastFmStore  extends ChangeNotifier {
   List<Tag> get tags => _tags.where((x) => x.name.toLowerCase()
       .contains(_tagsFilter.toLowerCase())).toList();
 
-  Map<Tag, TagResult> _tagsCache = {};
-  Map<Tag, TagResult> get tagsCache => _tagsCache;
+  Map<String, TagResult> _tagsCache = {};
+  Map<String, TagResult> get tagsCache => _tagsCache;
 
-  Tag _tagsSelected;
-  Tag get tagsSelected => _tagsSelected;
-  set tagsSelected(Tag other) {
+  String _tagsSelected;
+  String get tagsSelected => _tagsSelected;
+  set tagsSelected(String other) {
     _tagsSelected = other;
     notifyListeners();
 
@@ -322,7 +322,23 @@ class LastFmStore  extends ChangeNotifier {
 
     }
   }
+
   TagResult get tagsSelectedResult => _tagsCache[_tagsSelected];
+  List<Album> get selectedTagAlbums => _tagsCache[_tagsSelected].albums;
+  List<Artist> get selectedTagArtists => _tagsCache[_tagsSelected].artists;
+
+  List<TrackCacheEntry> get selectedTagTracks {
+    if (_tagsSelected == null) {
+      return [];
+    }
+
+    if (!_tagsCache.containsKey(_tagsSelected)) {
+      return [];
+    }
+
+    return _tagsCache[_tagsSelected].tracks
+        .map((x) => _trackCache[x]).toList();
+  }
 
   Future<void> tagsRefresh() async {
     _tags = [];
@@ -355,24 +371,24 @@ class LastFmStore  extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> refreshForTag(Tag tag) async {
+  Future<void> refreshForTag(String tag) async {
     _tagsFetching = true;
     notifyListeners();
 
     var trackResp = await api.user.getPersonalTags(
-        userSession.name, tag.name, 'track');
+        userSession.name, tag, 'track');
     var trackTags = trackResp.data.taggings.tracks.items;
-    var trackCacheEntries = await _ensureTracksCached(trackTags);
+    var trackCacheKeys = await _ensureTracksCached(trackTags);
 
     var artistResp = await api.user.getPersonalTags(
-        userSession.name, tag.name, 'artist');
+        userSession.name, tag, 'artist');
     var artistIds = artistResp.data.taggings.artists.items
         .map((e) => e.name).toSet();
     var artistTags = artistResp.data.taggings.artists.items;
     artistTags.retainWhere((x) => artistIds.remove(x.name));
 
     var albumResp = await api.user.getPersonalTags(
-        userSession.name, tag.name, 'album');
+        userSession.name, tag, 'album');
     var albumIds = albumResp.data.taggings.albums.items
         .map((e) => e.name).toSet();
     var albumTags = albumResp.data.taggings.albums.items;
@@ -381,7 +397,7 @@ class LastFmStore  extends ChangeNotifier {
     var tagResult = new TagResult(
       artists: artistTags,
       albums: albumTags,
-      tracks: trackCacheEntries,
+      tracks: trackCacheKeys,
     );
 
     _tagsCache.putIfAbsent(tag, () => tagResult);
@@ -628,21 +644,23 @@ class LastFmStore  extends ChangeNotifier {
   List<TrackCacheEntry> get recentTracks =>
     _recentTracks.map((e) => _trackCache[e]).toList();
 
-  Future<List<TrackCacheEntry>> _ensureTracksCached(List<Track> tracks, {
+  Future<List<TrackCacheKey>> _ensureTracksCached(List<Track> tracks, {
     bool refreshCache=false,
   }) async {
-    List<TrackCacheEntry> entries = [];
+    List<TrackCacheKey> keys = [];
     for (var track in tracks) {
-      var entry = await _ensureCached(new TrackCacheKey(
+      var newKey = new TrackCacheKey(
         name: track.name,
         artist: track.artist.name??track.artist.text,
-      ), refreshCache: refreshCache, augmentCache: track);
+      );
+      var entry = await _ensureCached(newKey,
+        refreshCache: refreshCache, augmentCache: track);
       if (entry != null) {
-        entries.add(entry);
+        keys.add(newKey);
       }
     }
 
-    return entries;
+    return keys;
   }
 
   Future<TrackCacheEntry> _ensureCached(TrackCacheKey key, {
@@ -744,10 +762,27 @@ class LastFmStore  extends ChangeNotifier {
       track: entry.track,
     );
 
-    // finally, update _recentTracks if the track was in it
+    // update _recentTracks if the track was in it
     int index = _recentTracks.indexWhere((x) => x == key);
     if (index >= 0) {
-      _recentTracks.replaceRange(index, index, [key]);
+      _recentTracks.replaceRange(index, index+1, [key]);
+    }
+
+    // update tags cache
+    _tagsCache[tag].tracks.removeWhere((x) => x == key);
+
+    // update tag count
+    index = _tags.indexWhere((x) => x.name == tag);
+    if (index >= 0) {
+      Tag oldTag = _tags[index];
+      int newCount = oldTag.count-1;
+      if (newCount == 0) {
+        _tags.removeAt(index);
+      }
+      else {
+        Tag newTag = oldTag.copyWith(count: newCount);
+        _tags.replaceRange(index, index+1, [newTag]);
+      }
     }
 
     log('Removed tag "$tag" from $entryId');

@@ -12,10 +12,10 @@ class TagsArtistsList extends StatelessWidget {
       PaginatedDesktopListView(
         onRefresh: store.tagsRefresh,
         fetchMore: (page, limit) => print('ay'),
-        itemCount: store.tagsSelectedResult.artists.length,
+        itemCount: store.selectedTagArtists.length,
         pageSize: 25,
         itemBuilder: (___, index) => ArtistCard(
-          store.tagsSelectedResult.artists[index]),
+          store.selectedTagArtists[index]),
         hasMore: store.tagsHasMore,
       )
   );

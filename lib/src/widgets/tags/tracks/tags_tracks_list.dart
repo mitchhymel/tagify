@@ -12,10 +12,10 @@ class TagsTracksList extends StatelessWidget {
       PaginatedDesktopListView(
         onRefresh: store.tagsRefresh,
         fetchMore: (page, limit) => print('ay'),
-        itemCount: store.tagsSelectedResult.tracks.length,
+        itemCount: store.selectedTagTracks.length,
         pageSize: 25,
         itemBuilder: (___, index) => TrackCard(
-            store.tagsSelectedResult.tracks[index]),
+            store.selectedTagTracks[index]),
         hasMore: store.tagsHasMore,
       )
   );

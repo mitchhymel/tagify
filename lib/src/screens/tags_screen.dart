@@ -23,7 +23,14 @@ class TagsScreen extends StatelessWidget {
           children: [
             Flexible(
               flex: 1,
-              child: TagsList()
+              child: Column(
+                children: [
+                  Icon(Icons.tag),
+                  Expanded(
+                    child: TagsList()
+                  )
+                ],
+              )
             ),
             Flexible(
               flex: 3,

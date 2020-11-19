@@ -15,8 +15,8 @@ class TagsListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
     builder: (_, store, __) => CustomCard(
-      onTap: () => store.tagsSelected = tag,
-      color: store.tagsSelected == tag ? Colors.redAccent : Colors.black12,
+      onTap: () => store.tagsSelected = tag.name,
+      color: store.tagsSelected == tag.name ? Colors.redAccent : Colors.black12,
       child: Platform.isWindows ? Row(
         children: [
           Text(tag.name),

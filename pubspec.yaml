@@ -17,6 +17,7 @@ dependencies:
   shared_preferences:
   url_launcher:
   draggable_scrollbar:
+  flutter_hooks:
   lastfm:
     path: ../lastfm/
 
