@@ -14,10 +14,7 @@ class SearchTracksList extends StatelessWidget {
       fetchMore: (page, limit) => store.searchTrack(page, limit: limit),
       itemCount: store.searchTracks.length,
       pageSize: 25,
-      itemBuilder: (___, index) => TrackCard(new TrackCacheEntry(
-        track: store.searchTracks[index],
-        tags: []
-      )),
+      itemBuilder: (___, index) => TrackCard(store.searchTracks[index]),
       hasMore: store.searchHasMore,
     )
   );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
+import 'package:tagify/src/state/models.dart';
 
 typedef DropTargetCallback<T> = void Function(DragTargetDetails<T>);
 class WrapDropTarget<T> extends StatelessWidget {
@@ -34,7 +35,7 @@ class WrapDropTargetTrack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
-    builder: (_, store, c) => WrapDropTarget<Track>(
+    builder: (_, store, c) => WrapDropTarget<TrackCacheKey>(
       child: child,
       onAcceptWithDetails: (details) => store.addTrackToQueue(details.data),
     )
