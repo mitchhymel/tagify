@@ -16,7 +16,7 @@ class TrackQueueCard extends StatelessWidget {
     @required bool processed
   }) {
 
-    bool hasImage = entry.imageUrl != null;
+    bool hasImage = entry.imageUrl != null && entry.imageUrl != '';
 
     return CustomCard(
       constraints: BoxConstraints(
@@ -26,14 +26,14 @@ class TrackQueueCard extends StatelessWidget {
       onTap: (){},
       child: Row(
         children: [
-          if (hasImage) Expanded(
-              child: Image.network(entry.imageUrl,
-                height: 50,
-                width: 50,
-              )
-          ),
-          Expanded(child: Text(entry.name)),
-          Expanded(child: Text(entry.artist)),
+          // if (hasImage) Expanded(
+          //   child: Image.network(entry.imageUrl,
+          //     height: 50,
+          //     width: 50,
+          //   )
+          // ),
+          Expanded(child: Text(entry.name,)),
+          Expanded(child: Text(entry.artist,)),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: processed ?
@@ -52,9 +52,10 @@ class TrackQueueCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
     builder: (_, store, __) => _getCard(
-      context: _,
+      context: context,
       entry: store.trackCache[cacheKey],
-      processed: store.trackQueue[cacheKey],
+      processed: store.trackQueue.containsKey(cacheKey) ?
+        store.trackQueue[cacheKey] : false,
     ),
   );
 }

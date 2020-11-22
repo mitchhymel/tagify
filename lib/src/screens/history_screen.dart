@@ -9,25 +9,28 @@ import 'package:tagify/src/widgets/history/now_playing_card.dart';
 class HistoryScreen extends StatelessWidget {
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context) => Stack(
     children: [
-      Row(
+      Column(
         children: [
           NowPlayingCard(),
           Consumer<LastFmStore>(
-            builder: (_, store, __) => ElevatedButton(
-              child: Icon(Icons.refresh),
-              onPressed: store.recentsRefresh,
-            )
+            builder: (_, store, __) => CustomLoadingIndicator(store.recentsFetching),
           ),
-          Container(width: 5),
+          Expanded(
+            child: HistoryList(),
+          )
         ],
       ),
-      Consumer<LastFmStore>(
-        builder: (_, store, __) => CustomLoadingIndicator(store.recentsFetching),
-      ),
-      Expanded(
-        child: HistoryList(),
+      Positioned(
+        right: 10,
+        bottom: 10,
+        child: Consumer<LastFmStore>(
+          builder: (_, store, __) => FloatingActionButton(
+            onPressed: store.recentsRefresh,
+            child: Icon(Icons.refresh),
+          )
+        )
       )
     ],
   );

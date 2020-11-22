@@ -9,17 +9,15 @@ class NowPlayingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
     builder: (_, store, __) => store.nowPlaying == null ? Container() :
-      Expanded(
-        child: Stack(
-          children: [
-            TrackCard(store.nowPlaying),
-            Positioned(
-              left: 0,
-              top: .5,
-              child: Icon(Icons.star)
-            )
-          ],
-        )
+      Stack(
+        children: [
+          TrackCard(store.nowPlaying),
+          Positioned(
+            left: 0,
+            top: .5,
+            child: Icon(Icons.star)
+          )
+        ],
       )
   );
 }

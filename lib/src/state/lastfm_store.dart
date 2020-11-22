@@ -102,6 +102,10 @@ class LastFmStore  extends ChangeNotifier {
       set.remove(key);
     }
     _tagToTracks[tag] = set;
+
+    if (set.isEmpty) {
+      _tagToTracks.remove(tag);
+    }
     notifyListeners();
   }
   bool _taggingTracks = false;
@@ -263,7 +267,7 @@ class LastFmStore  extends ChangeNotifier {
     _recents = [];
     notifyListeners();
 
-    await recentsFetch(1, 5, refreshCache: true);
+    await recentsFetch(1, 25, refreshCache: true);
   }
 
   Future<void> recentsFetch(int page, int pageLimit, {

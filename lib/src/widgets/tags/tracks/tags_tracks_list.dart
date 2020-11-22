@@ -8,7 +8,8 @@ import 'package:tagify/src/widgets/lastfm/track_card.dart';
 class TagsTracksList extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
-      builder: (_, store, __) => store.selectedTag == null ? Container() :
+      builder: (_, store, __) => store.selectedTag == null ||
+        !store.tagToTracks.containsKey(store.selectedTag) ? Container() :
       PaginatedDesktopListView(
         onRefresh: store.tagsRefresh,
         fetchMore: (page, limit) => print('ay'),

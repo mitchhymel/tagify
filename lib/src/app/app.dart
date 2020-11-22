@@ -33,7 +33,11 @@ class App extends StatelessWidget {
               color: accentColor
             )
         ),
-        toggleableActiveColor: accentColor
+        toggleableActiveColor: accentColor,
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        )
       ),
     )
   );
