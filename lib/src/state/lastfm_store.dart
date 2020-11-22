@@ -209,7 +209,7 @@ class LastFmStore  extends ChangeNotifier {
 
     await userRefresh();
     await recentsRefresh();
-    await tagsRefresh();
+    await tagsFetch(1); //dont want to lose tags to tracks from recents
 
     notifyListeners();
   }

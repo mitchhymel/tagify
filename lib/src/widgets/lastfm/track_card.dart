@@ -45,6 +45,7 @@ class TrackCard extends StatelessWidget {
 
     bool hasImage = Utils.stringIsNotNullOrEmpty(entry.imageUrl);
     bool nowPlaying = Provider.of<LastFmStore>(context).nowPlaying == cacheKey;
+    bool isInQueue = Provider.of<LastFmStore>(context).trackQueue.containsKey(cacheKey);
 
     return CustomCard(
         constraints: !feedback ? null : BoxConstraints(
@@ -52,7 +53,7 @@ class TrackCard extends StatelessWidget {
           maxHeight: 300,
         ),
         onTap: !draggable ? (){} : () => _onTap(context),
-        color: nowPlaying ? Colors.blueGrey : Colors.black12,
+        color: isInQueue ? Colors.blueAccent : nowPlaying ? Colors.blueGrey : Colors.black12,
         child: IntrinsicHeight(
           child: Stack(
             children: [

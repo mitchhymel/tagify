@@ -19,20 +19,20 @@ class MainContainer extends StatefulWidget {
 
 class MainContainerState extends State<MainContainer> {
 
-  int selectedIndex = 2;
+  int selectedIndex = 3;
 
   List<NavigationRailItem> railItems = [
-    NavigationRailItem(
-      icon: Icons.settings_applications_outlined,
-      selectedIcon: Icons.settings_applications,
-      label: 'Settings',
-      builder: (ctx) => SettingsScreen(),
-    ),
     NavigationRailItem(
       icon: Icons.text_snippet_outlined,
       selectedIcon: Icons.text_snippet,
       label: 'Logs',
       builder: (ctx) => LogScreen(),
+    ),
+    NavigationRailItem(
+      icon: Icons.settings_applications_outlined,
+      selectedIcon: Icons.settings_applications,
+      label: 'Settings',
+      builder: (ctx) => SettingsScreen(),
     ),
     NavigationRailItem(
       icon: Icons.search_outlined,
@@ -47,29 +47,29 @@ class MainContainerState extends State<MainContainer> {
     //   builder: (ctx) => LibraryScreen(),
     // ),
     NavigationRailItem(
-      icon: Icons.tag,
-      selectedIcon: Icons.tag,
-      label: 'Tags',
-      builder: (ctx) => TagsScreen(),
-    ),
-    NavigationRailItem(
       icon: Icons.history_outlined,
       selectedIcon: Icons.history,
       label: 'History',
       builder: (ctx) => HistoryScreen(),
     ),
     NavigationRailItem(
-      icon: Icons.headset_outlined,
-      selectedIcon: Icons.headset_sharp,
-      label: 'Spotify',
-      builder: (ctx) => SpotifyPlaylistScreen()
+      icon: Icons.tag,
+      selectedIcon: Icons.tag,
+      label: 'Tags',
+      builder: (ctx) => TagsScreen(),
     ),
     if (!Platform.isWindows) NavigationRailItem(
       icon: Icons.queue_outlined,
       selectedIcon: Icons.queue,
       label: 'Queue',
       builder: (ctx) => TagSideBar(),
-    )
+    ),
+    NavigationRailItem(
+        icon: Icons.headset_outlined,
+        selectedIcon: Icons.headset_sharp,
+        label: 'Spotify',
+        builder: (ctx) => SpotifyPlaylistScreen()
+    ),
   ];
 
   @override

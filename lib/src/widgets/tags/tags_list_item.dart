@@ -29,7 +29,7 @@ class TagsListItem extends StatelessWidget {
         children: [
           Text(tag),
           Container(height: 5),
-          Text(tag.toString(),
+          Text(tagged.toString(),
             textAlign: TextAlign.right,
           ),
         ],
