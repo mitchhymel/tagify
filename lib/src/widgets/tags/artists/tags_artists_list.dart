@@ -8,14 +8,15 @@ import 'package:tagify/src/widgets/lastfm/artist_card.dart';
 class TagsArtistsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
-      builder: (_, store, __) => store.tagsSelectedResult == null ? Container() :
+      builder: (_, store, __) => store.selectedTag == null ||
+          !store.tagToArtists.containsKey(store.selectedTag)? Container() :
       PaginatedDesktopListView(
         onRefresh: store.tagsRefresh,
         fetchMore: (page, limit) => print('ay'),
-        itemCount: store.selectedTagArtists.length,
+        itemCount: store.tagToArtists[store.selectedTag].length,
         pageSize: 25,
         itemBuilder: (___, index) => ArtistCard(
-          store.selectedTagArtists[index]),
+          store.tagToArtists[store.selectedTag].toList()[index]),
         hasMore: store.tagsHasMore,
       )
   );

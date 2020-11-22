@@ -21,9 +21,9 @@ class QueueTracksContainer extends StatelessWidget {
             builder: (_, store, __) => DesktopListView(
               scrollPercent: store.taggingTracks ?
                 (store.taggedSoFar / store.totalToTag) : 1,
-              itemCount: store.queuedTracks.length,
+              itemCount: store.trackQueue.length,
               itemBuilder: (___, index) => TrackQueueCard(
-                store.queuedTracks[index],
+                store.trackQueue.keys.toList()[index],
               ),
             )
           )

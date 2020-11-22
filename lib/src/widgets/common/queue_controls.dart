@@ -16,7 +16,7 @@ class QueueControls extends StatefulWidget {
   final bool showProgress;
   final Function(String) onAddTag;
   final Function onRemoveTag;
-  final List<String> tags;
+  final Set<String> tags;
   QueueControls({
     @required this.onAddTag,
     @required this.onRemoveTag,

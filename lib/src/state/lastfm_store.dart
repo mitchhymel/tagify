@@ -1,4 +1,5 @@
 
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tagify/src/lastfm/secrets.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
+import 'package:tagify/src/utils/utils.dart';
 
 
 class LastFmStore  extends ChangeNotifier {
@@ -15,13 +17,137 @@ class LastFmStore  extends ChangeNotifier {
   LastFmApi _api;
   LastFmApi get api  => _api;
 
+  // User / Auth state
   UserSession _userSession;
   UserSession get userSession => _userSession;
   User _user;
   User get user => _user;
-
   bool get loggedIn => _userSession != null && _userSession.key != null &&
     _userSession.name != null;
+
+  // App wide cache state
+  Map<TrackCacheKey, TrackCacheEntry> _trackCache = {};
+  Map<TrackCacheKey, TrackCacheEntry> get trackCache => _trackCache;
+  Map<TrackCacheKey, bool> _favorites = {};
+  Map<TrackCacheKey, bool> get favorites => _favorites;
+  Map<TrackCacheKey, Set<String>> _trackToTags = {};
+  Map<TrackCacheKey, Set<String>> get trackToTags => _trackToTags;
+  void updateTrackToTags(bool isAdd, TrackCacheKey key, String tag) {
+    Set<String> set;
+    if (!_trackToTags.containsKey(key)) {
+      set = new Set<String>();
+    }
+    else {
+      set = _trackToTags[key];
+    }
+
+    if (isAdd) {
+      set.add(tag);
+    }
+    else {
+      set.remove(tag);
+    }
+    _trackToTags[key] = set;
+    notifyListeners();
+  }
+  LinkedHashMap<TrackCacheKey, bool> _trackQueue = new LinkedHashMap();
+  LinkedHashMap<TrackCacheKey, bool> get trackQueue => _trackQueue;
+
+  // Recents screen state
+  List<TrackCacheKey> _recents = [];
+  List<TrackCacheKey> get recents => _recents;
+  bool _recentsHasMore = false;
+  bool get recentsHasMore => _recentsHasMore;
+  bool _recentsFetching = false;
+  bool get recentsFetching => _recentsFetching;
+  TrackCacheKey _nowPlaying;
+  TrackCacheKey get nowPlaying => _nowPlaying;
+
+  // Search screen state
+  String _trackQuery ='';
+  String get trackQuery => _trackQuery;
+  set trackQuery(String other) {
+    _trackQuery = other;
+    notifyListeners();
+  }
+  String _artistQuery = '';
+  String get artistQuery => _artistQuery;
+  set artistQuery(String other) {
+    _artistQuery = other;
+    notifyListeners();
+  }
+  bool _searching = false;
+  bool get searching => _searching;
+  bool _trackSearchHasMore = false;
+  bool get trackSearchHasMore => _trackSearchHasMore;
+  List<TrackCacheKey> _trackSearchResults = [];
+  List<TrackCacheKey> get trackSearchResults => _trackSearchResults;
+
+  // Tag screen state
+  Map<String, Set<TrackCacheKey>> _tagToTracks = {};
+  Map<String, Set<TrackCacheKey>> get tagToTracks => _tagToTracks;
+  void updateTagToTracks(bool isAdd, String tag, TrackCacheKey key) {
+    Set<TrackCacheKey> set;
+    if (!_tagToTracks.containsKey(tag)) {
+      set = new Set<TrackCacheKey>();
+    }
+    else {
+      set = _tagToTracks[tag];
+    }
+
+    if (isAdd) {
+      set.add(key);
+    }
+    else {
+      set.remove(key);
+    }
+    _tagToTracks[tag] = set;
+    notifyListeners();
+  }
+  bool _taggingTracks = false;
+  bool get taggingTracks => _taggingTracks;
+  String _tagsFilter = '';
+  String get tagsFilter => _tagsFilter;
+  set tagsFilter(String other) {
+    _tagsFilter = other;
+    notifyListeners();
+  }
+  bool _tagsHasMore = false;
+  bool get tagsHasMore => _tagsHasMore;
+  bool _tagsFetching = false;
+  bool get tagsFetching => _tagsFetching;
+  String _selectedTag;
+  String get selectedTag => _selectedTag;
+  set selectedTag(String other) {
+    _selectedTag = other;
+    notifyListeners();
+
+    if (!_tagToTracks.containsKey(_selectedTag)) {
+      refreshForTag(_selectedTag);
+    }
+  }
+  Map<String, Set<Artist>> _tagToArtists = {};
+  Map<String, Set<Artist>> get tagToArtists => _tagToArtists;
+  Map<String, Set<Album>> _tagToAlbums = {};
+  Map<String, Set<Album>> get tagToAlbums => _tagToAlbums;
+
+
+  // Queue screen state
+  int _totalToTag = 1;
+  int get totalToTag => _totalToTag;
+  int _taggedSoFar = 0;
+  int get taggedSoFar => _taggedSoFar;
+  Set<String> _tagsToTagTracksWith = new Set<String>();
+  Set<String> get tagsToTagTracksWith => _tagsToTagTracksWith;
+  void addTagToTagList(String tag) {
+    _tagsToTagTracksWith.add(tag);
+    notifyListeners();
+  }
+  void removeTagFromTagList(String tag) {
+    _tagsToTagTracksWith.remove(tag);
+    notifyListeners();
+  }
+
 
   LastFmStore() {
     _api = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify',
@@ -133,18 +259,8 @@ class LastFmStore  extends ChangeNotifier {
   //#endregion auth
 
   //#region recents
-
-  TrackCacheKey _nowPlaying;
-  TrackCacheKey get nowPlaying => _nowPlaying;
-
-  bool _recentsHasMore = false;
-  bool get recentsHasMore => _recentsHasMore;
-
-  bool _recentsFetching = false;
-  bool get recentsFetching => _recentsFetching;
-
   Future<void> recentsRefresh() async {
-    _recentTracks = [];
+    _recents = [];
     notifyListeners();
 
     await recentsFetch(1, 5, refreshCache: true);
@@ -179,14 +295,13 @@ class LastFmStore  extends ChangeNotifier {
     var newRecents = res.data.recenttracks.items;
 
     // adds currently playing track as 1 more than the limit we request
-    _recentsHasMore = newRecents.length == pageLimit + 1;
+    _recentsHasMore = (newRecents.length == pageLimit + 1);
 
     // the currently playing track will always be the first
     if (newRecents.isNotEmpty && newRecents.first.nowPlaying) {
       var newKey = TrackCacheKey.fromTrack(newRecents.first);
       var cached = await _ensureCached(newKey,
         refreshCache: refreshCache,
-        augmentCache: newRecents.first
       );
       if (cached != null) {
         _nowPlaying = newKey;
@@ -194,7 +309,7 @@ class LastFmStore  extends ChangeNotifier {
       newRecents.removeAt(0);
     }
     else {
-      _recentsHasMore = newRecents.length == pageLimit;
+      _recentsHasMore = (newRecents.length == pageLimit);
     }
 
     List<TrackCacheKey> keys = [];
@@ -202,66 +317,25 @@ class LastFmStore  extends ChangeNotifier {
       var key = new TrackCacheKey.fromTrack(track);
       var cached = await _ensureCached(key,
         refreshCache: refreshCache,
-        augmentCache: track,
       );
       if (cached != null) {
         keys.add(key);
       }
     }
 
-    _recentTracks.addAll(keys);
+    _recents.addAll(keys);
 
     _recentsFetching = false;
     notifyListeners();
     notifyListeners();
   }
 
-
   //#endregion recents
 
   //#region tags
-  String _tagsFilter = '';
-  String get tagsFilter => _tagsFilter;
-  set tagsFilter(String other) {
-    _tagsFilter = other;
-    notifyListeners();
-  }
-
-  bool _tagsHasMore = false;
-  bool get tagsHasMore => _tagsHasMore;
-
-  bool _tagsFetching = false;
-  bool get tagsFetching => _tagsFetching;
-
-  List<Tag> _tags = [];
-  List<Tag> get tags => _tags.where((x) => x.name.toLowerCase()
-      .contains(_tagsFilter.toLowerCase())).toList();
-
-  Map<String, TagResult> _tagsCache = {};
-  Map<String, TagResult> get tagsCache => _tagsCache;
-
-  String _tagsSelected;
-  String get tagsSelected => _tagsSelected;
-  set tagsSelected(String other) {
-    _tagsSelected = other;
-    notifyListeners();
-
-    if (!_tagsCache.containsKey(_tagsSelected)) {
-      refreshForTag(_tagsSelected);
-    }
-    else {
-
-    }
-  }
-
-  TagResult get tagsSelectedResult => _tagsCache[_tagsSelected];
-  List<TrackCacheKey> get selectedTagTracks => _tagsCache[_tagsSelected].tracks;
-  List<Album> get selectedTagAlbums => _tagsCache[_tagsSelected].albums;
-  List<Artist> get selectedTagArtists => _tagsCache[_tagsSelected].artists;
-
   Future<void> tagsRefresh() async {
-    _tags = [];
-    _tagsSelected = null;
+    _tagToTracks = {};
+    _selectedTag = null;
     notifyListeners();
     await tagsFetch(1);
   }
@@ -274,52 +348,59 @@ class LastFmStore  extends ChangeNotifier {
 
     var response = await api.user.getTopTags(userSession.name);
 
-    _tagsFetching = false;
-    notifyListeners();
-
     if (!response.isSuccess()) {
       log('Error when fetching tags: $response');
+      _tagsFetching = false;
+      notifyListeners();
       return;
     }
 
     List<Tag> tags = response.data.toptags.items;
-    _tags.addAll(tags);
     _tagsHasMore = tags.length == limit;
+    for (Tag tag in tags) {
+      await refreshForTag(tag.name);
+    }
 
     log('GetTopTags found ${tags.length} results');
+    _tagsFetching = false;
     notifyListeners();
   }
 
-  Future<void> refreshForTag(String tag) async {
+  Future<void> refreshForTag(String tag, {int page=1, int limit=25}) async {
     _tagsFetching = true;
     notifyListeners();
 
     var trackResp = await api.user.getPersonalTags(
-        userSession.name, tag, 'track');
+      userSession.name, tag, 'track',
+      page: page,
+      limit: limit
+    );
     var trackTags = trackResp.data.taggings.tracks.items;
     var trackCacheKeys = await _ensureTracksCached(trackTags);
+    for (var key in trackCacheKeys) {
+      updateTrackToTags(true, key, tag);
+      updateTagToTracks(true, tag, key);
+    }
 
-    var artistResp = await api.user.getPersonalTags(
-        userSession.name, tag, 'artist');
-    var artistIds = artistResp.data.taggings.artists.items
-        .map((e) => e.name).toSet();
-    var artistTags = artistResp.data.taggings.artists.items;
-    artistTags.retainWhere((x) => artistIds.remove(x.name));
+    // var artistResp = await api.user.getPersonalTags(
+    //     userSession.name, tag, 'artist');
+    // var artistIds = artistResp.data.taggings.artists.items
+    //     .map((e) => e.name).toSet();
+    // var artistTags = artistResp.data.taggings.artists.items;
+    // artistTags.retainWhere((x) => artistIds.remove(x.name));
+    //
+    // var albumResp = await api.user.getPersonalTags(
+    //     userSession.name, tag, 'album');
+    // var albumIds = albumResp.data.taggings.albums.items
+    //     .map((e) => e.name).toSet();
+    // var albumTags = albumResp.data.taggings.albums.items;
+    // albumTags.retainWhere((x) => albumIds.remove(x.name));
 
-    var albumResp = await api.user.getPersonalTags(
-        userSession.name, tag, 'album');
-    var albumIds = albumResp.data.taggings.albums.items
-        .map((e) => e.name).toSet();
-    var albumTags = albumResp.data.taggings.albums.items;
-    albumTags.retainWhere((x) => albumIds.remove(x.name));
-
-    var tagResult = new TagResult(
-      artists: artistTags,
-      albums: albumTags,
-      tracks: trackCacheKeys,
-    );
-
-    _tagsCache.putIfAbsent(tag, () => tagResult);
+    // var tagResult = new TagResult(
+    //   artists: artistTags,
+    //   albums: albumTags,
+    //   tracks: trackCacheKeys,
+    // );
 
     _tagsFetching = false;
     notifyListeners();
@@ -336,50 +417,15 @@ class LastFmStore  extends ChangeNotifier {
       return;
     }
 
-    TrackCacheEntry entry = _trackCache[key];
-    Track newTrack = entry.track.copyWith(userloved: isLike);
-    TrackCacheEntry newEntry = new TrackCacheEntry(
-      track: newTrack,
-      tags: entry.tags,
-    );
-    _trackCache[key] = newEntry;
-
-    // update _recentTracks if the track was in it
-    int index = _recentTracks.indexWhere((x) => x == key);
-    if (index >= 0) {
-      _recentTracks.replaceRange(index, index+1, [key]);
-    }
-
+    _favorites[key] = isLike;
 
     notifyListeners();
   }
   //#endregion tags
 
   //#region search
-  String _trackQuery ='';
-  String get trackQuery => _trackQuery;
-  set trackQuery(String other) {
-    _trackQuery = other;
-    notifyListeners();
-  }
-  String _artistQuery = '';
-  String get artistQuery => _artistQuery;
-  set artistQuery(String other) {
-    _artistQuery = other;
-    notifyListeners();
-  }
-
-  List<TrackCacheKey> _searchTracks = [];
-  List<TrackCacheKey> get searchTracks => _searchTracks;
-
-  bool _searching = false;
-  bool get searching => _searching;
-
-  bool _searchHasMore = false;
-  bool get searchHasMore => _searchHasMore;
-
   Future<void> searchRefresh() async {
-    _searchTracks = [];
+    _trackSearchResults = [];
     notifyListeners();
     await searchTrack(1, refreshCache: true);
   }
@@ -423,9 +469,8 @@ class LastFmStore  extends ChangeNotifier {
       refreshCache: refreshCache,
     );
 
-    _searchTracks.addAll(cachedTracks);
-    _searchHasMore = tracks.length == limit;
-
+    _trackSearchResults.addAll(cachedTracks);
+    _trackSearchHasMore = tracks.length == limit;
     _searching = false;
     log('Search found ${tracks.length} results');
     notifyListeners();
@@ -433,54 +478,27 @@ class LastFmStore  extends ChangeNotifier {
   //#endregion search
 
   //#region queue
-  List<QueueEntry<TrackCacheKey>> _queuedTracks = [];
-  List<QueueEntry<TrackCacheKey>> get queuedTracks => _queuedTracks;
-
-  bool _taggingTracks = false;
-  bool get taggingTracks => _taggingTracks;
-
-  List<String> _trackTags = [];
-  List<String> get trackTags => _trackTags;
-  void addTrackTag(String tag) {
-    if (!_trackTags.contains(tag)) {
-      _trackTags.add(tag);
-      notifyListeners();
-    }
-  }
-  void removeTrackTag(String tag) {
-    _trackTags.remove(tag);
-    notifyListeners();
-  }
-
-  int _totalToTag = 1;
-  int get totalToTag => _totalToTag;
-  int _taggedSoFar = 0;
-  int get taggedSoFar => _taggedSoFar;
-
   bool addTrackToQueue(TrackCacheKey key) {
-    bool trackNotInQueue = _queuedTracks.where((element) =>
-      element.data == key).isEmpty;
+    bool trackNotInQueue = _trackQueue.containsKey(key);
+    _trackQueue[key] = false;
     if (trackNotInQueue) {
-      _queuedTracks.add(QueueEntry<TrackCacheKey>(data: key));
-      print(_queuedTracks);
-      print(queuedTracks);
-      print(_trackCache);
       resetProgress();
       notifyListeners();
       return true;
     }
 
+    notifyListeners();
     return false;
   }
 
   void removeTrackFromQueue(TrackCacheKey key) {
-    _queuedTracks.removeWhere((x) => x.data == key);
+    _trackQueue.remove(key);
     resetProgress();
     notifyListeners();
   }
 
   void clearQueue() {
-    _queuedTracks = [];
+    _trackQueue = new LinkedHashMap();
     resetProgress();
     notifyListeners();
   }
@@ -492,21 +510,21 @@ class LastFmStore  extends ChangeNotifier {
   }
 
   Future<void> removeTagsFromTracks() async {
-    if (_trackTags.isEmpty) {
+    if (_tagsToTagTracksWith.isEmpty) {
       return;
     }
 
     _taggingTracks = true;
     notifyListeners();
 
-    _totalToTag = _queuedTracks.length;
+    _totalToTag = _trackQueue.keys.length;
     _taggedSoFar = 0;
     log('Beginning to remove tags from $_totalToTag tracks');
     notifyListeners();
 
-    for (var entry in _queuedTracks) {
-      for (var tag in _trackTags) {
-        var success = await removeTagFromTrack(entry.data, tag);
+    for (var entry in _trackQueue.entries) {
+      for (var tag in _tagsToTagTracksWith) {
+        var success = await removeTagFromTrack(entry.key, tag);
         if (!success) {
           // in error case, removeTagFromTrack will log error
           _taggingTracks = false;
@@ -514,7 +532,7 @@ class LastFmStore  extends ChangeNotifier {
           return;
         }
 
-        entry.processed = true;
+        _trackQueue[entry.key] = true;
         _taggedSoFar ++;
         notifyListeners();
       }
@@ -526,25 +544,25 @@ class LastFmStore  extends ChangeNotifier {
   }
 
   Future<void> tagTracks() async {
-    if (_trackTags.isEmpty) {
+    if (_tagsToTagTracksWith.isEmpty) {
       return;
     }
 
     _taggingTracks = true;
     notifyListeners();
 
-    _totalToTag = _queuedTracks.length;
+    _totalToTag = _trackQueue.keys.length;
     _taggedSoFar = 0;
-    String tagsStr = _trackTags.join(',');
+    String tagsStr = _tagsToTagTracksWith.join(',');
     log('Beginning to tag $_totalToTag tracks with "$tagsStr"');
     notifyListeners();
 
-    for (var entry in _queuedTracks) {
+    for (var entry in _trackQueue.entries) {
       if (!_taggingTracks) {
         break;
       }
 
-      bool success = await addTagsToTrack(entry.data, _trackTags);
+      bool success = await addTagsToTrack(entry.key, _tagsToTagTracksWith);
 
       if (!success) {
         _taggingTracks = false;
@@ -552,7 +570,7 @@ class LastFmStore  extends ChangeNotifier {
         return;
       }
 
-      entry.processed = true;
+      _trackQueue[entry.key] = true;
       _taggedSoFar ++;
       notifyListeners();
     }
@@ -579,11 +597,6 @@ class LastFmStore  extends ChangeNotifier {
   //#endregion queue
 
   //#region trackcache
-  Map<TrackCacheKey, TrackCacheEntry> _trackCache = {};
-  Map<TrackCacheKey, TrackCacheEntry> get trackCache => _trackCache;
-
-  List<TrackCacheKey> _recentTracks = [];
-  List<TrackCacheKey> get recentTracks => _recentTracks;
 
   Future<List<TrackCacheKey>> _ensureTracksCached(List<Track> tracks, {
     bool refreshCache=false,
@@ -591,8 +604,7 @@ class LastFmStore  extends ChangeNotifier {
     List<TrackCacheKey> keys = [];
     for (var track in tracks) {
       var newKey = new TrackCacheKey.fromTrack(track);
-      var entry = await _ensureCached(newKey,
-        refreshCache: refreshCache, augmentCache: track);
+      var entry = await _ensureCached(newKey, refreshCache: refreshCache);
       if (entry != null) {
         keys.add(newKey);
       }
@@ -602,160 +614,126 @@ class LastFmStore  extends ChangeNotifier {
   }
 
   Future<TrackCacheEntry> _ensureCached(TrackCacheKey key, {
-    bool refreshCache=false, Track augmentCache
+    bool refreshCache=false
   }) async {
     if (!refreshCache && _trackCache.containsKey(key)) {
       return _trackCache[key];
     }
 
-    var fetchedEntry = await _fetchTrack(key);
-    TrackCacheEntry entryToReturn = fetchedEntry;
-    if (entryToReturn != null) {
-      if (augmentCache != null) {
-        // create a new track combining the fetched and augmented...
-        // this is needed because for some tracks, track.getInfo
-        // does not return album art... but it does when fetching
-        // user.getRecentTracks
-
-        entryToReturn = new TrackCacheEntry(
-          tags: fetchedEntry.tags,
-          track: entryToReturn.track.copyWith(
-            images: augmentCache.images
-          ),
-        );
-      }
-
-      _trackCache[key] = entryToReturn;
-    }
-
-    return entryToReturn;
+    return await _fetchAndCacheTrack(key);
   }
 
-  Future<TrackCacheEntry> _fetchTrack(TrackCacheKey key) async {
+  Future<TrackCacheEntry> _fetchAndCacheTrack(TrackCacheKey key) async {
     String artist = key.artist;
     String name = key.name;
-    var res = await _api.track.getInfo(
+    String trackIdentifier = '"$name" by "$artist"';
+    log('Fetching info for track $trackIdentifier');
+
+    var trackInfoRes = await _api.track.getInfo(
       artist: artist,
       track: name,
       userName: _user.name,
     );
 
-    String trackIdentifier = '"$name" by "$artist"';
-    log('Fetching info for track $trackIdentifier');
-    if (res.hasError()) {
-      log('Error when fetching info for track $trackIdentifier: $res');
+    if (trackInfoRes.hasError()) {
+      log('Error when fetching info for track $trackIdentifier: $trackInfoRes');
       return null;
     }
 
-    Track track = res.data.track;
+    Track track = trackInfoRes.data.track;
+    String imageUrl = Utils.getImageUrl(null, track);
+    if (imageUrl == null) {
+      // sometimes tracks will not have an image url... fetch the info
+      // on the album to ensure we have it... but in some cases
+      // the track is not even associated with an album so we just have
+      // to search and hope for the best
+      if (track.album == null) {
+        var searchRes = await _api.track.search(
+          name,
+          artist: artist
+        );
 
-    res = await _api.track.getTags(
+        if (searchRes.hasError()) {
+          log('Error when searching for $trackIdentifier: $searchRes');
+          return null;
+        }
+
+        var trackMatches = searchRes.data.results.tracks.items;
+        for (var trackMatch in trackMatches) {
+          imageUrl = Utils.getImageUrl(null, trackMatch);
+          if (imageUrl != null) {
+            break;
+          }
+        }
+      }
+      else {
+        var albumInfoRes = await _api.album.getInfo(
+          artist: artist,
+          album: track.album.name,
+        );
+
+        if (albumInfoRes.hasError()) {
+          log('Error when fetching info for ${track.album.name} by $artist: $trackInfoRes');
+          return null;
+        }
+
+        imageUrl = albumInfoRes.data.album.image[Utils.IMAGE_QUALITY].text;
+      }
+
+      // if we're here and we STILL haven't set imageUrl to a valid url
+      // then we definitely could not find it
+      if (imageUrl == null) {
+        log('Could not find album art for $trackIdentifier');
+      }
+    }
+
+    log('Fetching tags for track $trackIdentifier');
+    var tagsRes = await _api.track.getTags(
       artist: artist,
       track: name,
       user: _user.name,
     );
 
-    log('Fetching tags for track $trackIdentifier');
-    if (res.hasError()) {
-      log('Error when fetching tags for track $trackIdentifier: $res');
+    if (tagsRes.hasError()) {
+      log('Error when fetching tags for track $trackIdentifier: $tagsRes');
       return null;
     }
 
     List<String> tags = [];
-    if (!(res.data.tags.items == null)) {
-      tags = res.data.tags.items.map((x) => x.name).toList();
+    if (!(tagsRes.data.tags.items == null)) {
+      tags = tagsRes.data.tags.items.map((x) => x.name).toList();
     }
 
-    return new TrackCacheEntry(
-      tags: tags,
-      track: track
-    );
-  }
-
-  void _updateStateAfterCacheChange(bool isAdd, TrackCacheEntry entry,
-      String tag)
-  {
-
-    // create new list of tags
-    List<String> newTags;
-    if (isAdd) {
-      newTags = [tag]..addAll(entry.tags);
-    }
-    else {
-      newTags = []..addAll(entry.tags)..remove(tag);
-    }
-
-
-    // create key for track
-    var key = TrackCacheKey.fromTrack(entry.track);
-
-
-    // cache objects are immutable... update entry
-    _trackCache[key] = new TrackCacheEntry(
-      tags: newTags,
-      track: entry.track,
+    var entry = new TrackCacheEntry(
+      key: key,
+      album: track.album == null ? null : track.album.name,
+      name: name,
+      artist: artist,
+      imageUrl: imageUrl,
+      playCount: track.userplaycount,
     );
 
+    // finally, update caches
+    _trackCache[key] = entry;
+    _favorites[key] = track.userloved;
+    tags.forEach((x) {
+      updateTrackToTags(true, key, x);
+      updateTagToTracks(true, x, key);
+    });
 
-    // update _recentTracks if the track was in it
-    int index = _recentTracks.indexWhere((x) => x == key);
-    if (index >= 0) {
-      _recentTracks.replaceRange(index, index+1, [key]);
-    }
-
-
-    // update tag count
-    index = _tags.indexWhere((x) => x.name == tag);
-    if (index >= 0) {
-      Tag oldTag = _tags[index];
-
-      int newCount = isAdd ? oldTag.count+1 : oldTag.count-1;
-
-      if (newCount == 0) {
-        _tags.removeAt(index);
-      }
-      else {
-        Tag newTag = oldTag.copyWith(count: newCount);
-        _tags.replaceRange(index, index+1, [newTag]);
-      }
-    }
-    else if (isAdd) {
-      // if we're adding and there was no entry in tags cache
-      // that means we're adding a new tag, need to update the cache
-      _tags.add(new Tag(
-        name: tag,
-        count: 1,
-      ));
-    }
-
-    // update tags cache
-    if (isAdd) {
-      if (_tagsCache.containsKey(tag)) {
-        _tagsCache[tag].tracks.add(key);
-      }
-      else {
-        _tagsCache[tag] = new TagResult(
-            tracks: [key],
-            albums: [],
-            artists: []
-        );
-      }
-    }
-    else {
-      _tagsCache[tag].tracks.removeWhere((x) => x == key);
-    }
+    return entry;
   }
 
-  Future<bool> addTagsToTrack(TrackCacheKey key, List<String> tags) async {
+  Future<bool> addTagsToTrack(TrackCacheKey key, Set<String> tags) async {
     TrackCacheEntry entry = _trackCache[key];
     String artist = entry.artist;
     String name = entry.name;
-    String tagsStr = _trackTags.join(',');
+    String tagsStr = _tagsToTagTracksWith.join(',');
     log('Tagging "$name" by "$artist" with "$tagsStr"');
     var res = await api.track.addTags(
       artist,
       name,
-      _trackTags,
+      _tagsToTagTracksWith.toList(),
     );
 
     if (res.hasError()) {
@@ -763,9 +741,10 @@ class LastFmStore  extends ChangeNotifier {
       return false;
     }
 
-    for (String tag in tags) {
-      _updateStateAfterCacheChange(true, entry, tag);
-    }
+    tags.forEach((x) {
+      updateTrackToTags(true, key, x);
+      updateTagToTracks(true, x, key);
+    });
 
     notifyListeners();
     return true;
@@ -788,7 +767,8 @@ class LastFmStore  extends ChangeNotifier {
       return false;
     }
 
-    _updateStateAfterCacheChange(false, entry, tag);
+    updateTrackToTags(false, key, tag);
+    updateTagToTracks(false, tag, key);
 
     log('Removed tag "$tag" from $entryId');
     notifyListeners();

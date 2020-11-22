@@ -17,7 +17,7 @@ class LogLine {
 class LogStore extends ChangeNotifier {
 
   List<LogLine> _lines = [];
-  List<LogLine> get lines => _lines;
+  List<LogLine> get lines => _lines.reversed.toList();
 
   log(dynamic object) {
     print(object.toString());

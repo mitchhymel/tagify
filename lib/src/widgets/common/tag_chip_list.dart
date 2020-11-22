@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class TagChipList extends StatelessWidget {
 
-  final List<String> tags;
+  final Set<String> tags;
   final Function(String) onRemoveTag;
   TagChipList({
     @required this.tags,

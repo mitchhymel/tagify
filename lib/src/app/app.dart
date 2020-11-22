@@ -1,12 +1,9 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/app/main_container.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
-
 
 class App extends StatelessWidget {
   final Color accentColor = Colors.redAccent;
@@ -29,12 +26,12 @@ class App extends StatelessWidget {
           labelColor: accentColor,
         ),
         navigationRailTheme: NavigationRailThemeData(
-          selectedIconTheme: IconThemeData(
-            color: accentColor,
-          ),
-          selectedLabelTextStyle: TextStyle(
-            color: accentColor
-          )
+            selectedIconTheme: IconThemeData(
+              color: accentColor,
+            ),
+            selectedLabelTextStyle: TextStyle(
+              color: accentColor
+            )
         ),
         toggleableActiveColor: accentColor
       ),

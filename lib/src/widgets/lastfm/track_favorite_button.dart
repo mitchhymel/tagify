@@ -12,9 +12,9 @@ class TrackFavoriteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
     builder: (_, store, __) => IconButton(
-      icon: store.trackCache[cacheKey].track.userloved ?
+      icon: store.favorites[cacheKey] ?
         Icon(Icons.favorite, color: Colors.redAccent) : Icon(Icons.favorite_outline),
-      onPressed: () => store.changeLikeOnTrack(cacheKey, !store.trackCache[cacheKey].track.userloved),
+      onPressed: () => store.changeLikeOnTrack(cacheKey, !store.favorites[cacheKey]),
     )
   );
 }

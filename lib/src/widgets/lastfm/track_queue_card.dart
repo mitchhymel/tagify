@@ -7,23 +7,16 @@ import 'package:tagify/src/widgets/common/custom_card.dart';
 
 class TrackQueueCard extends StatelessWidget {
 
-  final QueueEntry<TrackCacheKey> queueEntry;
-  TrackQueueCard(this.queueEntry);
+  final TrackCacheKey cacheKey;
+  TrackQueueCard(this.cacheKey);
 
-  Widget _getCard(BuildContext context, TrackCacheEntry entry) {
+  Widget _getCard({
+    @required BuildContext context,
+    @required TrackCacheEntry entry,
+    @required bool processed
+  }) {
 
-    bool hasDataImage = (entry.track.images != null &&
-        entry.track.images.isNotEmpty &&
-        entry.track.images[0].text != null);
-    bool hasAlbumImage = (entry.track.album != null &&
-        entry.track.album.image != null &&
-        entry.track.album.image.isNotEmpty &&
-        entry.track.album.image[0].text != null);
-    bool hasImage = hasDataImage || hasAlbumImage;
-    String imageUrl = hasDataImage ? entry.track.images[0].text
-        : entry.track.album.image[0].text;
-    String trackArtistName = entry.track.artist.name
-        ?? entry.track.artist.text;
+    bool hasImage = entry.imageUrl != null;
 
     return CustomCard(
       constraints: BoxConstraints(
@@ -34,31 +27,34 @@ class TrackQueueCard extends StatelessWidget {
       child: Row(
         children: [
           if (hasImage) Expanded(
-              child: Image.network(imageUrl,
+              child: Image.network(entry.imageUrl,
                 height: 50,
                 width: 50,
               )
           ),
           Expanded(child: Text(entry.name)),
-          Expanded(child: Text(trackArtistName)),
+          Expanded(child: Text(entry.artist)),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: queueEntry.processed ?
+              backgroundColor: processed ?
               MaterialStateProperty.all<Color>(Colors.green) :
               MaterialStateProperty.all<Color>(Colors.blueAccent),
             ),
-            child: queueEntry.processed ? Icon(Icons.check) : Icon(Icons.clear),
+            child: processed ? Icon(Icons.check) : Icon(Icons.clear),
             onPressed: () => Provider.of<LastFmStore>(context, listen: false)
-                .removeTrackFromQueue(entry.key),
+              .removeTrackFromQueue(entry.key),
           )
         ],
       ),
     );
   }
 
-
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
-    builder: (_, store, __) => _getCard(_, store.trackCache[queueEntry.data]),
+    builder: (_, store, __) => _getCard(
+      context: _,
+      entry: store.trackCache[cacheKey],
+      processed: store.trackQueue[cacheKey],
+    ),
   );
 }

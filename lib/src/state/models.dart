@@ -5,29 +5,38 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 
-class TagResult {
-  final List<Artist> artists;
-  final List<TrackCacheKey> tracks;
-  final List<Album> albums;
-
-  TagResult({
-    @required this.artists,
-    @required this.tracks,
-    @required this.albums,
-  });
-}
-
 class TrackCacheEntry{
-  List<String> tags;
-  Track track;
+  final TrackCacheKey key;
+  final String imageUrl;
+  final String name;
+  final String artist;
+  final String album;
+  final int playCount;
+
   TrackCacheEntry({
-    this.tags,
-    this.track
+    this.key,
+    this.imageUrl,
+    this.name,
+    this.artist,
+    this.album,
+    this.playCount,
   });
 
-  TrackCacheKey get key => TrackCacheKey.fromTrack(track);
-  String get name => track.name;
-  String get artist => track.artist.name??track.artist.text;
+  TrackCacheEntry copyWith({
+    TrackCacheKey key,
+    String imageUrl,
+    String name,
+    String artist,
+    String album,
+    int playCount,
+  }) => new TrackCacheEntry(
+    key: key ?? this.key,
+    imageUrl: imageUrl ?? this.imageUrl,
+    name: name ?? this.name,
+    artist: artist ?? this.artist,
+    album: album ?? this.album,
+    playCount: playCount ?? this.playCount,
+  );
 }
 
 class TrackCacheKey {
@@ -67,23 +76,6 @@ class TrackCacheKey {
 
   @override
   // TODO: implement hashCode
-  int get hashCode => super.hashCode;
+  int get hashCode => name.hashCode + artist.hashCode;
 
-}
-
-class QueueEntry<T> {
-
-  final T data;
-  bool processed;
-  QueueEntry({
-    this.data,
-    this.processed=false,
-  });
-
-  @override
-  String toString() => jsonEncode(toMap());
-  Map toMap() => {
-    'data': data,
-    'processed': processed,
-  };
 }

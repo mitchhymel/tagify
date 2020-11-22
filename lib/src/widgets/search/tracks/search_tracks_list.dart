@@ -12,10 +12,10 @@ class SearchTracksList extends StatelessWidget {
     builder: (_, store, __) => PaginatedDesktopListView(
       onRefresh: store.searchRefresh,
       fetchMore: (page, limit) => store.searchTrack(page, limit: limit),
-      itemCount: store.searchTracks.length,
+      itemCount: store.trackSearchResults.length,
       pageSize: 25,
-      itemBuilder: (___, index) => TrackCard(store.searchTracks[index]),
-      hasMore: store.searchHasMore,
+      itemBuilder: (___, index) => TrackCard(store.trackSearchResults[index]),
+      hasMore: store.trackSearchHasMore,
     )
   );
 }

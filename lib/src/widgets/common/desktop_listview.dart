@@ -11,11 +11,13 @@ class DesktopListView extends StatelessWidget {
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
   final double scrollPercent;
+  final bool reverse;
   DesktopListView({
     @required this.itemCount,
     @required this.itemBuilder,
     this.columns=1,
     this.scrollPercent=0,
+    this.reverse=false,
   });
 
   @override
@@ -30,6 +32,7 @@ class DesktopListView extends StatelessWidget {
       itemBuilder: itemBuilder,
       columns: columns,
       scrollPercent: scrollPercent,
+      reverse: reverse,
     );
   }
 }
@@ -40,11 +43,13 @@ class _DesktopListViewWrap extends StatefulWidget {
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
   final double scrollPercent;
+  final bool reverse;
   _DesktopListViewWrap({
     @required this.itemCount,
     @required this.itemBuilder,
     @required this.columns,
     @required this.scrollPercent,
+    @required this.reverse,
   });
 
   @override
@@ -120,6 +125,7 @@ class _DesktopListViewWrapState extends State<_DesktopListViewWrap> {
             controller: controller,
             itemBuilder: widget.itemBuilder,
             itemCount: widget.itemCount,
+            reverse: widget.reverse,
           ) : GridView.builder(
             itemCount: widget.itemCount,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
