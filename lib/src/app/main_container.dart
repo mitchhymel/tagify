@@ -10,6 +10,7 @@ import 'package:tagify/src/screens/settings_screen.dart';
 import 'package:tagify/src/screens/spotify_playlist_screen.dart';
 import 'package:tagify/src/screens/tag_side_bar.dart';
 import 'package:tagify/src/screens/tags_screen.dart';
+import 'package:tagify/src/utils/utils.dart';
 
 class MainContainer extends StatefulWidget {
   
@@ -58,7 +59,7 @@ class MainContainerState extends State<MainContainer> {
       label: 'Tags',
       builder: (ctx) => TagsScreen(),
     ),
-    if (!Platform.isWindows) NavigationRailItem(
+    if (!Utils.isBigScreen) NavigationRailItem(
       icon: Icons.queue_outlined,
       selectedIcon: Icons.queue,
       label: 'Queue',
@@ -77,7 +78,7 @@ class MainContainerState extends State<MainContainer> {
     body: SafeArea(
       child: Row(
         children: [
-          if (Platform.isWindows) NavigationRail(
+          if (Utils.isBigScreen) NavigationRail(
             selectedIndex: selectedIndex,
             onDestinationSelected: (int index) {
               setState((){
@@ -87,20 +88,20 @@ class MainContainerState extends State<MainContainer> {
             labelType: NavigationRailLabelType.selected,
             destinations: railItems.map((e) => e.toDestination()).toList(),
           ),
-          if (Platform.isWindows) VerticalDivider(thickness: 1, width: 1),
+          if (Utils.isBigScreen) VerticalDivider(thickness: 1, width: 1),
           Flexible(
               flex: 2,
               child: railItems[selectedIndex].builder(context)
           ),
-          if (Platform.isWindows) VerticalDivider(thickness: 2, width: 2),
-          if (Platform.isWindows) Flexible(
+          if (Utils.isBigScreen) VerticalDivider(thickness: 2, width: 2),
+          if (Utils.isBigScreen) Flexible(
             flex: 1,
             child: TagSideBar(),
           )
         ]
       )
     ),
-    bottomNavigationBar: Platform.isWindows ? null : BottomNavigationBar(
+    bottomNavigationBar: Utils.isBigScreen ? null : BottomNavigationBar(
       items: railItems.map((e) => e.toItem()).toList(),
       currentIndex: selectedIndex,
       selectedItemColor: Colors.redAccent,

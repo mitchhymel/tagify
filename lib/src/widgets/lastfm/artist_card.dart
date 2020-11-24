@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
+import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 
 class ArtistCard extends StatelessWidget {
@@ -31,7 +32,7 @@ class ArtistCard extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => (draggable && Platform.isWindows) ?
+  Widget build(BuildContext context) => (draggable && Utils.isBigScreen) ?
   Draggable(
     data: artist,
     feedback: _getCard(),

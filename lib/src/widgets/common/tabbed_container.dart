@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:tagify/src/utils/utils.dart';
 
 class TabItem {
   final IconData icon;
@@ -51,7 +52,7 @@ class _TabbedContainerState extends State<TabbedContainer>
       ),
       Expanded(
         child: TabBarView(
-          physics: Platform.isWindows ? NeverScrollableScrollPhysics() : null,
+          physics: Utils.isBigScreen ? NeverScrollableScrollPhysics() : null,
           controller: controller,
           children: widget.tabs.map((e) => e.child).toList()
         )

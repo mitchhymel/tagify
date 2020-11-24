@@ -1,10 +1,15 @@
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:tagify/src/state/models.dart';
 
 class Utils {
 
   static const int IMAGE_QUALITY = 2;
+
+  static const bool isBigScreen = kIsWeb || Platform.isWindows;
 
   static String getImageUrl(TrackCacheEntry entry, Track track,{
     int indexOfImagesToUse=IMAGE_QUALITY,
