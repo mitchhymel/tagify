@@ -16,11 +16,11 @@ class TagsScreen extends StatelessWidget {
         builder: (_, store, __) => CustomLoadingIndicator(store.tagsFetching),
       ),
       Consumer<LastFmStore>(
-        builder: (_, store, __) => store.trackToTags.length == 0 && !store.tagsFetching ?
-        ElevatedButton(
-          child: Text('No tags fetched or found, try refreshing by clicking me'),
-          onPressed: () => store.tagsRefresh(),
-        ) : Container()
+          builder: (_, store, __) => store.trackToTags.length == 0 && !store.tagsFetching ?
+          ElevatedButton(
+            child: Text('No tags fetched or found, try refreshing by clicking me'),
+            onPressed: () => store.tagsRefresh(),
+          ) : Container()
       ),
       Expanded(
         child: Row(

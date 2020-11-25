@@ -23,7 +23,7 @@ class SpotifyAccountWidget extends StatelessWidget {
                 }
               }
             ),
-            Container(width: 10),
+            Container(width: 10, height: 1),
             Expanded(
               child: TextField(
                 showCursor: true,

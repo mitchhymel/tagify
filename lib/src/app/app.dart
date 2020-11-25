@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tagify/src/app/login_screen.dart';
 import 'package:tagify/src/app/main_container.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/log_store.dart';
@@ -17,7 +18,10 @@ class App extends StatelessWidget {
     ],
     child: MaterialApp(
       title: 'Tagify',
-      home: MainContainer(),
+      home: Consumer<LastFmStore>(
+        builder: (_, store, __) => store.loggedIn
+          ? MainContainer() : LoginScreen()
+      ),
       theme: ThemeData.dark().copyWith(
         accentColor: accentColor,
         indicatorColor: accentColor,

@@ -4,7 +4,7 @@ import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/widgets/common/desktop_listview.dart';
 import 'package:tagify/src/widgets/common/drag_drop_wrappers.dart';
 import 'package:tagify/src/widgets/lastfm/track_queue_card.dart';
-import 'package:tagify/src/widgets/tag_side_bar/queue_tracks_controls.dart';
+import 'package:tagify/src/widgets/queue/queue_tracks_controls.dart';
 
 class QueueTracksContainer extends StatelessWidget {
 

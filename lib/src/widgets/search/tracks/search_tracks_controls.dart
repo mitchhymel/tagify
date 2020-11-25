@@ -15,33 +15,33 @@ class SearchTracksControls extends HookWidget {
     final artistController = useTextEditingController(text: store.artistQuery);
 
     return Consumer<LastFmStore>(
-        builder: (_, store, __) => CustomCard(
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: trackController,
-                  onChanged: (x) => store.trackQuery = x,
-                  onSubmitted: (x) => store.searchRefresh(),
-                  decoration: InputDecoration(
-                    hintText: 'Search by track name',
-                  )
-                )
-              ),
-              Container(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: artistController,
-                  onChanged: (x) => store.artistQuery = x,
-                  onSubmitted: (x) => store.searchRefresh(),
-                  decoration: InputDecoration(
-                    hintText: 'Optionally, include artist name for track',
-                  ),
+      builder: (_, store, __) => CustomCard(
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: trackController,
+                onChanged: (x) => store.trackQuery = x,
+                onSubmitted: (x) => store.searchRefresh(),
+                decoration: InputDecoration(
+                  hintText: 'Search by track name',
                 )
               )
-            ],
-          ),
-        )
+            ),
+            Container(width: 10),
+            Expanded(
+              child: TextField(
+                controller: artistController,
+                onChanged: (x) => store.artistQuery = x,
+                onSubmitted: (x) => store.searchRefresh(),
+                decoration: InputDecoration(
+                  hintText: 'Optionally, include artist name for track',
+                ),
+              )
+            )
+          ],
+        ),
+      )
     );
   }
 }

@@ -38,34 +38,73 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
     builder: (_, store, child) { 
 
       if (!store.loggedIn) {
+        final onSubmit = () async {
+          String userName = _userController.text;
+          String password = _passController.text;
+
+          if (userName.isEmpty) {
+            log('username is null');
+            return;
+          }
+
+          if (password.isEmpty) {
+            log('password is null');
+            return;
+          }
+
+          var res = await store.login(userName, password);
+
+          if (!res) {
+            Scaffold.of(context).showSnackBar(SnackBar(
+              backgroundColor: Colors.redAccent,
+              action: SnackBarAction(
+                label: 'dismiss',
+                textColor: Colors.white,
+                onPressed: () {},
+              ),
+              content: Text('Login failed, try reentering username and password',
+                style: TextStyle(
+                  color: Colors.white,
+                )
+              ),
+            ));
+          }
+        };
+
         return CustomCard(child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    showCursor: true,
-                    autofocus: false,
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                      hintText: 'Session Key',
-                    ),
-                    controller: _sessionKeyController,
-                  )
-                ),
-                Container(width: 10),
-                ElevatedButton(
-                  child: Text('Login'),
-                  onPressed: () async {
-                    if (_sessionKeyController.text.isEmpty) {
-                      log('session key is empty');
-                      return;
-                    }
-                    await store.loginFromSession(_sessionKeyController.text);
-                  }
-                )
-              ]
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       flex: 3,
+            //       child: TextField(
+            //         showCursor: true,
+            //         autofocus: false,
+            //         textAlign: TextAlign.center,
+            //         decoration: InputDecoration(
+            //           hintText: 'Session Key',
+            //         ),
+            //         controller: _sessionKeyController,
+            //       )
+            //     ),
+            //     Container(width: 10),
+            //     ElevatedButton(
+            //       child: Text('Login'),
+            //       onPressed: () async {
+            //         if (_sessionKeyController.text.isEmpty) {
+            //           log('session key is empty');
+            //           return;
+            //         }
+            //         await store.loginFromSession(_sessionKeyController.text);
+            //       }
+            //     )
+            //   ]
+            // ),
+            // Container(height: 5),
+            Text('Login with your lastfm account',
+              style: TextStyle(
+                fontSize: 20,
+              )
             ),
             Container(height: 5),
             Row(
@@ -89,31 +128,18 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
                     textAlign: TextAlign.center,
                     controller: _passController,
                     obscureText: true,
+                    onSubmitted: (x) => onSubmit(),
                     decoration: InputDecoration(
                       hintText: 'Password',
                     ),
                   ),
                 ),
-                Container(width: 10),
-                ElevatedButton(
-                  child: Text('Login'),
-                  onPressed: () async {
-                    String userName = _userController.text;
-                    String password = _passController.text;
-
-                    if (userName.isEmpty) {
-                      log('username is null');
-                      return;
-                    }
-
-                    if (password.isEmpty) {
-                      log('password is null');
-                      return;
-                    }
-                    await store.login(userName, password);
-                  },
-                )
               ],
+            ),
+            Container(height: 10),
+            ElevatedButton(
+              child: Text('Login'),
+              onPressed: onSubmit,
             )
           ],
         ));

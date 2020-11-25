@@ -11,7 +11,7 @@ class SearchTracksList extends StatelessWidget {
   Widget build(BuildContext context) => Consumer<LastFmStore>(
     builder: (_, store, __) => PaginatedDesktopListView(
       onRefresh: store.searchRefresh,
-      fetchMore: (page, limit) => store.searchTrack(page, limit: limit),
+      fetchMore: (page, limit) => store.searchTrack(page+1, limit: limit),
       itemCount: store.trackSearchResults.length,
       pageSize: 25,
       itemBuilder: (___, index) => TrackCard(store.trackSearchResults[index]),

@@ -224,6 +224,7 @@ class LastFmStore  extends ChangeNotifier {
 
     _api.logout();
     log('Successfully deleted LastFm credentials from cache');
+    _userSession = null;
     notifyListeners();
   }
 
@@ -435,24 +436,29 @@ class LastFmStore  extends ChangeNotifier {
   }
 
   Future<void> searchTrack(int page, {int limit=25, bool refreshCache=false}) async {
-    if (_trackQuery.isEmpty) {
+    if (_trackQuery.isEmpty && _artistQuery.isEmpty) {
       log('Search track query is empty, so will not make a request');
       return;
+    }
+
+    String trackToUse = _trackQuery;
+    if (trackToUse.isEmpty && _artistQuery.isNotEmpty) {
+      trackToUse = ' ';
     }
 
     _searching = true;
     notifyListeners();
 
-    log('Searching for track "$_trackQuery", artist "$_artistQuery", with results for page $page with limit $limit');
+    log('Searching for track "$trackToUse", artist "$_artistQuery", with results for page $page with limit $limit');
     LastFmResponse response;
     if (_artistQuery.isEmpty) {
-      response = await api.track.search(_trackQuery,
+      response = await api.track.search(trackToUse,
         page: page,
         limit: limit
       );
     }
     else {
-      response = await api.track.search(_trackQuery,
+      response = await api.track.search(trackToUse,
         artist: _artistQuery,
         page: page,
         limit: limit
