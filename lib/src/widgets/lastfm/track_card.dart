@@ -21,7 +21,7 @@ class TrackCard extends StatelessWidget {
   void _onTap(BuildContext context) {
     bool success = Provider.of<LastFmStore>(context, listen: false)
         .addTrackToQueue(cacheKey);
-    if (success && !Utils.isBigScreen) {
+    if (success && !Utils.isBigScreen(context)) {
       Scaffold.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.blueAccent,
         action: SnackBarAction(
@@ -110,7 +110,7 @@ class TrackCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
-    builder: (_, store, __) => (draggable && Utils.isBigScreen) ?
+    builder: (_, store, __) => (draggable && Utils.isBigScreen(context)) ?
     Draggable(
       data: cacheKey,
       feedback: _getCard(context, store.trackCache[cacheKey], feedback: true),

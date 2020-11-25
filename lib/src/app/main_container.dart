@@ -59,7 +59,7 @@ class MainContainerState extends State<MainContainer> {
       label: 'Tags',
       builder: (ctx) => TagsScreen(),
     ),
-    if (!Utils.isBigScreen) NavigationRailItem(
+    if (!Utils.isBigScreenWithoutContext()) NavigationRailItem(
       icon: Icons.queue_outlined,
       selectedIcon: Icons.queue,
       label: 'Queue',
@@ -78,7 +78,7 @@ class MainContainerState extends State<MainContainer> {
     body: SafeArea(
       child: Row(
         children: [
-          if (Utils.isBigScreen) NavigationRail(
+          if (Utils.isBigScreen(context) ) NavigationRail(
             selectedIndex: selectedIndex,
             onDestinationSelected: (int index) {
               setState((){
@@ -88,20 +88,20 @@ class MainContainerState extends State<MainContainer> {
             labelType: NavigationRailLabelType.selected,
             destinations: railItems.map((e) => e.toDestination()).toList(),
           ),
-          if (Utils.isBigScreen) VerticalDivider(thickness: 1, width: 1),
+          if (Utils.isBigScreen(context) ) VerticalDivider(thickness: 1, width: 1),
           Flexible(
               flex: 2,
               child: railItems[selectedIndex].builder(context)
           ),
-          if (Utils.isBigScreen) VerticalDivider(thickness: 2, width: 2),
-          if (Utils.isBigScreen) Flexible(
+          if (Utils.isBigScreen(context) ) VerticalDivider(thickness: 2, width: 2),
+          if (Utils.isBigScreen(context) ) Flexible(
             flex: 1,
             child: TagSideBar(),
           )
         ]
       )
     ),
-    bottomNavigationBar: Utils.isBigScreen ? null : BottomNavigationBar(
+    bottomNavigationBar: Utils.isBigScreen(context)  ? null : BottomNavigationBar(
       items: railItems.map((e) => e.toItem()).toList(),
       currentIndex: selectedIndex,
       selectedItemColor: Colors.redAccent,

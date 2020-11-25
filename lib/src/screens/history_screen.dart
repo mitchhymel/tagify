@@ -17,6 +17,13 @@ class HistoryScreen extends StatelessWidget {
           Consumer<LastFmStore>(
             builder: (_, store, __) => CustomLoadingIndicator(store.recentsFetching),
           ),
+          Consumer<LastFmStore>(
+            builder: (_, store, __) => store.recents.length == 0 && !store.recentsFetching ?
+            ElevatedButton(
+              child: Text('No recent tracks fetched or found, try refreshing by clicking me'),
+              onPressed: () => store.recentsRefresh(),
+            ) : Container()
+          ),
           Expanded(
             child: HistoryList(),
           )

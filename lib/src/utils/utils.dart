@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:tagify/src/state/models.dart';
 
@@ -9,7 +10,16 @@ class Utils {
 
   static const int IMAGE_QUALITY = 2;
 
-  static const bool isBigScreen = kIsWeb || Platform.isWindows;
+  static bool isBigScreenWithoutContext() {
+    return kIsWeb || Platform.isWindows;
+  }
+  static bool isBigScreen(BuildContext context) {
+    if (kIsWeb || Platform.isWindows) {
+      return MediaQuery.of(context).size.width > 768;
+    }
+
+    return false;
+  }
 
   static String getImageUrl(TrackCacheEntry entry, Track track,{
     int indexOfImagesToUse=IMAGE_QUALITY,

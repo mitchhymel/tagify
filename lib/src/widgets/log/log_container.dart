@@ -13,7 +13,7 @@ class LogContainer extends StatelessWidget {
         TextSpan(
           text: store.lines[index].time.toString(),
           style: TextStyle(
-            color: Colors.redAccent,
+            color: store.lines[index].isError ? Colors.redAccent : Colors.blueAccent,
           ),
           children: [
             TextSpan(

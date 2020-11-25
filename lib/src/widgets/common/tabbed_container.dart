@@ -52,7 +52,7 @@ class _TabbedContainerState extends State<TabbedContainer>
       ),
       Expanded(
         child: TabBarView(
-          physics: Utils.isBigScreen ? NeverScrollableScrollPhysics() : null,
+          physics: Utils.isBigScreen(context) ? NeverScrollableScrollPhysics() : null,
           controller: controller,
           children: widget.tabs.map((e) => e.child).toList()
         )

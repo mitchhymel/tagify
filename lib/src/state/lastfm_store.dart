@@ -208,8 +208,8 @@ class LastFmStore  extends ChangeNotifier {
   Future<void> _afterLogin() async {
 
     await userRefresh();
-    await recentsRefresh();
-    await tagsFetch(1); //dont want to lose tags to tracks from recents
+    // await recentsRefresh();
+    // await tagsFetch(1); //dont want to lose tags to tracks from recents
 
     notifyListeners();
   }
@@ -290,7 +290,7 @@ class LastFmStore  extends ChangeNotifier {
     );
 
     if (!res.isSuccess()) {
-      log('Error when fetching recents');
+      logError('Error when fetching recents: $res');
       _recentsFetching = false;
       notifyListeners();
       return;
@@ -353,7 +353,7 @@ class LastFmStore  extends ChangeNotifier {
     var response = await api.user.getTopTags(userSession.name);
 
     if (!response.isSuccess()) {
-      log('Error when fetching tags: $response');
+      logError('Error when fetching tags: $response');
       _tagsFetching = false;
       notifyListeners();
       return;
@@ -417,7 +417,7 @@ class LastFmStore  extends ChangeNotifier {
     var res = isLike ? await _api.track.love(key.artist, key.name)
       : await _api.track.unlove(key.artist, key.name);
     if (res.hasError()) {
-      log('Error while trying to $op track: $res');
+      logError('Error while trying to $op track: $res');
       return;
     }
 
@@ -460,7 +460,7 @@ class LastFmStore  extends ChangeNotifier {
     }
 
     if (response.error != null) {
-      log('Error when searching: $response');
+      logError('Error when searching: $response');
       _searching = false;
       notifyListeners();
       return;
@@ -640,7 +640,7 @@ class LastFmStore  extends ChangeNotifier {
     );
 
     if (trackInfoRes.hasError()) {
-      log('Error when fetching info for track $trackIdentifier: $trackInfoRes');
+      logError('Error when fetching info for track $trackIdentifier: $trackInfoRes');
       return null;
     }
 
@@ -658,7 +658,7 @@ class LastFmStore  extends ChangeNotifier {
         );
 
         if (searchRes.hasError()) {
-          log('Error when searching for $trackIdentifier: $searchRes');
+          logError('Error when searching for $trackIdentifier: $searchRes');
           return null;
         }
 
@@ -677,7 +677,7 @@ class LastFmStore  extends ChangeNotifier {
         );
 
         if (albumInfoRes.hasError()) {
-          log('Error when fetching info for ${track.album.name} by $artist: $trackInfoRes');
+          logError('Error when fetching info for ${track.album.name} by $artist: $trackInfoRes');
           return null;
         }
 
@@ -687,7 +687,7 @@ class LastFmStore  extends ChangeNotifier {
       // if we're here and we STILL haven't set imageUrl to a valid url
       // then we definitely could not find it
       if (imageUrl == null) {
-        log('Could not find album art for $trackIdentifier');
+        logError('Could not find album art for $trackIdentifier');
       }
     }
 
@@ -699,7 +699,7 @@ class LastFmStore  extends ChangeNotifier {
     );
 
     if (tagsRes.hasError()) {
-      log('Error when fetching tags for track $trackIdentifier: $tagsRes');
+      logError('Error when fetching tags for track $trackIdentifier: $tagsRes');
       return null;
     }
 
@@ -741,7 +741,7 @@ class LastFmStore  extends ChangeNotifier {
     );
 
     if (res.hasError()) {
-      log('Error while trying to tag tracks: $res');
+      logError('Error while trying to tag tracks: $res');
       return false;
     }
 
@@ -767,7 +767,7 @@ class LastFmStore  extends ChangeNotifier {
       tag,
     );
     if (res.hasError()) {
-      log('Error when trying to remove tag "$tag" from $entryId');
+      logError('Error when trying to remove tag "$tag" from $entryId');
       return false;
     }
 

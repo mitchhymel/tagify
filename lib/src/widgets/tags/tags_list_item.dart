@@ -18,7 +18,7 @@ class TagsListItem extends StatelessWidget {
     builder: (_, store, __) => CustomCard(
       onTap: () => store.selectedTag = tag,
       color: store.selectedTag == tag ? Colors.redAccent : Colors.black12,
-      child: Utils.isBigScreen ? Row(
+      child: Utils.isBigScreen(context) ? Row(
         children: [
           Text(tag),
           Flexible(child: Container()),

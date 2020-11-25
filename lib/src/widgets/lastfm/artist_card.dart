@@ -32,7 +32,7 @@ class ArtistCard extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => (draggable && Utils.isBigScreen) ?
+  Widget build(BuildContext context) => (draggable && Utils.isBigScreen(context)) ?
   Draggable(
     data: artist,
     feedback: _getCard(),
