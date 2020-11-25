@@ -492,7 +492,7 @@ class LastFmStore  extends ChangeNotifier {
     }
 
     notifyListeners();
-    return false;
+    return true;
   }
 
   void removeTrackFromQueue(TrackCacheKey key) {

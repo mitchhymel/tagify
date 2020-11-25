@@ -19,8 +19,18 @@ class TrackCard extends StatelessWidget {
   });
 
   void _onTap(BuildContext context) {
-    bool success = Provider.of<LastFmStore>(context, listen: false)
-        .addTrackToQueue(cacheKey);
+    var store = Provider.of<LastFmStore>(context, listen: false);
+    bool success = false;
+    String str = '';
+    if (store.trackQueue.containsKey(cacheKey)) {
+      store.removeTrackFromQueue(cacheKey);
+      success = true;
+      str = 'Removed ${cacheKey.toLogStr()} from track tag queue';
+    }
+    else {
+      success = store.addTrackToQueue(cacheKey);
+      str = 'Added ${cacheKey.toLogStr()} to track tag queue';
+    }
     if (success && !Utils.isBigScreen(context)) {
       Scaffold.of(context).showSnackBar(SnackBar(
         backgroundColor: Colors.blueAccent,
@@ -29,10 +39,10 @@ class TrackCard extends StatelessWidget {
           textColor: Colors.white,
           onPressed: () {},
         ),
-        content: Text('Added "${cacheKey.toLogStr()}" to track tag queue',
-            style: TextStyle(
-              color: Colors.white,
-            )
+        content: Text(str,
+          style: TextStyle(
+            color: Colors.white,
+          )
         ),
       ));
     }
