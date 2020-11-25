@@ -732,12 +732,12 @@ class LastFmStore  extends ChangeNotifier {
     TrackCacheEntry entry = _trackCache[key];
     String artist = entry.artist;
     String name = entry.name;
-    String tagsStr = _tagsToTagTracksWith.join(',');
+    String tagsStr = tags.join(',');
     log('Tagging "$name" by "$artist" with "$tagsStr"');
     var res = await api.track.addTags(
       artist,
       name,
-      _tagsToTagTracksWith.toList(),
+      tags.toList(),
     );
 
     if (res.hasError()) {

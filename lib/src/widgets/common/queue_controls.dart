@@ -59,23 +59,12 @@ class _QueueControlsState extends State<QueueControls> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        IntrinsicHeight(
-          child: TextFormField(
-            textAlign: TextAlign.center,
-            controller: controller,
-            focusNode: focusNode,
-            onFieldSubmitted: (x) {
-              widget.onAddTag(x);
-              controller.clearComposing();
-              setState((){});
-              focusNode.requestFocus();
-            },
-          )
-        ),
-        Container(height: 5),
-        TagChipList(
-          tags: widget.tags,
-          onRemoveTag: widget.onRemoveTag,
+        Expanded(
+          child: TagChipList(
+            tags: widget.tags,
+            onRemoveTag: widget.onRemoveTag,
+            onAddTag: widget.onAddTag,
+          ),
         ),
         Container(height: 10),
         IntrinsicHeight(
