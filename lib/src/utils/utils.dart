@@ -1,4 +1,5 @@
 
+import 'dart:html' as html;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,9 @@ import 'package:tagify/src/state/models.dart';
 class Utils {
 
   static const int IMAGE_QUALITY = 2;
+
+  static const String REDIRECT_URI = kDebugMode ? 'http://localhost:3000'
+      : 'https://mitchhymel.github.io/tagify';
 
   static bool isBigScreenWithoutContext() {
     return kIsWeb || Platform.isWindows;
@@ -63,4 +67,25 @@ class Utils {
   }
 
   static bool stringIsNotNullOrEmpty(String x) => !(x == null || x == '');
+
+  static String getTokenFromLastFmRedirectUri(String uri) {
+    // RegExp exp = new RegExp(r'token=(.*)');
+    // var match = exp.firstMatch(uri);
+    // print(match.toString());
+    // return match.toString();
+    var split = uri.split('token=');
+    return split[1];
+  }
+
+  static bool redirectUriForSpotify(html.MessageEvent event) {
+    bool originIsTrusted = (event.origin == Utils.REDIRECT_URI);
+    bool forSpotify = event.data.toString().contains('code');
+    return originIsTrusted && forSpotify;
+  }
+
+  static bool redirectUriForLastFm(html.MessageEvent event) {
+    bool originIsTrusted = (event.origin == Utils.REDIRECT_URI);
+    bool forLastfm = event.data.toString().contains('token');
+    return originIsTrusted && forLastfm;
+  }
 }

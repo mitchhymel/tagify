@@ -5,14 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotify/spotify.dart' as spot;
 import 'package:tagify/src/spotify/secrets.dart';
 import 'package:tagify/src/spotify/serializable_spotify_creds.dart';
+import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/utils/utils.dart';
 
 class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_CREDS';
   spot.SpotifyApiCredentials _credentials;
   AuthorizationCodeGrant _grant;
 
-  final String _redirectUri = kDebugMode ? 'http://localhost:3000'
-      : 'https://mitchhymel.github.io/tagify';
   final List<String> scopes = [
     'user-library-read',
     'user-read-recently-played',
@@ -48,7 +48,7 @@ class SpotifyStore extends ChangeNotifier {
         spot.SpotifyApiCredentials(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET);
     _grant = spot.SpotifyApi.authorizationCodeGrant(_credentials);
     _authUri =
-        _grant.getAuthorizationUrl(Uri.parse(_redirectUri), scopes: scopes);
+        _grant.getAuthorizationUrl(Uri.parse(Utils.REDIRECT_URI), scopes: scopes);
 
     tryLoginFromCachedCreds();
   }
@@ -56,7 +56,7 @@ class SpotifyStore extends ChangeNotifier {
   Future<void> tryLoginFromCachedCreds() async {
     var creds = await _retrieveCredsFromCache();
     if (creds == null) {
-      print('failed to retrieve cached creds');
+      log('Failed to retrieve cached Spotify creds');
       return;
     }
 
@@ -76,7 +76,7 @@ class SpotifyStore extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool res = await prefs.remove(_cachedCredsKey);
     if (!res) {
-      print('failed to delete creds from shared prefs');
+      log('Failed to delete Spotify creds from cache');
     }
 
     _playlists.clear();
@@ -98,7 +98,7 @@ class SpotifyStore extends ChangeNotifier {
         tryRefreshCreds = true;
       }
       else {
-        print('Exception when ensure valid creds: $ex');
+        logError('Exception when ensure valid creds: $ex');
         return false;
       }
     }
@@ -107,7 +107,7 @@ class SpotifyStore extends ChangeNotifier {
       try {
         await _spotify.client.refreshCredentials();
       } catch (ex) {
-        print('Exception when trying to refresh creds: $ex');
+        logError('Exception when trying to refresh creds: $ex');
         return false;
       }
 
@@ -115,7 +115,7 @@ class SpotifyStore extends ChangeNotifier {
         _user = await _spotify.me.get();
         return true;
       } catch (ex) {
-        print('Exception when trying to get me after refreshing creds: $ex');
+        logError('Exception when trying to get me after refreshing creds: $ex');
         return false;
       }
     }
@@ -132,7 +132,7 @@ class SpotifyStore extends ChangeNotifier {
     try {
       refreshPlaylists();
     } catch (ex) {
-      print('Exception when trying to fetch spotify user data: $ex');
+      logError('Exception when trying to fetch spotify user data: $ex');
     }
 
     notifyListeners();
@@ -143,7 +143,7 @@ class SpotifyStore extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool res = await prefs.setString(_cachedCredsKey, creds.toJson());
     if (!res) {
-      print('Failed to save creds');
+      log('Failed to save Spotify creds');
     }
   }
 
@@ -151,7 +151,7 @@ class SpotifyStore extends ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (!prefs.containsKey(_cachedCredsKey)) {
-      print('no cached creds found');
+      log('No Spotify cached creds found');
       return null;
     }
 

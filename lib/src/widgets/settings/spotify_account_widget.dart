@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/spotify_store.dart';
+import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,15 +17,13 @@ class SpotifyAccountWidget extends StatelessWidget {
       if (!store.loggedIn) {
         return CustomCard(child: Row(
           children: [
-            RaisedButton(
-              child: Text('Launch browser to login to Spotify'),
+            ElevatedButton(
+              child: Text('Launch window to login to Spotify'),
               onPressed: () async {
                 if (kIsWeb) {
                   StreamSubscription<MessageEvent> sub;
                   sub = window.onMessage.listen((event) {
-                    bool originIsTrusted = (event.origin == (kDebugMode ?
-                      'http://localhost:3000' : 'https://mitchhymel.github.io'));
-                    if (originIsTrusted) {
+                    if (Utils.redirectUriForSpotify(event)) {
                       // the event.data is the callback url we need
                       // pass it to the store
                       var uri = Uri.parse(event.data.toString());

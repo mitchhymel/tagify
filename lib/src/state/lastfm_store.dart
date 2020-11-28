@@ -2,6 +2,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -152,7 +153,6 @@ class LastFmStore  extends ChangeNotifier {
     notifyListeners();
   }
 
-
   LastFmStore() {
     _api = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET,
       //logger: LastFmConsoleLogger()
@@ -185,6 +185,19 @@ class LastFmStore  extends ChangeNotifier {
 
     _userSession = resp.data.session;
     _api.loginWithSessionKey(_userSession.key);
+    await _cacheCreds();
+    await _afterLogin();
+    return true;
+  }
+
+  Future<bool> loginFromToken(String token) async {
+    var resp = await _api.loginFromWebToken(token);
+    if (resp == null) {
+      log('Could not login from token: $resp');
+      return false;
+    }
+
+    _userSession = resp;
     await _cacheCreds();
     await _afterLogin();
     return true;

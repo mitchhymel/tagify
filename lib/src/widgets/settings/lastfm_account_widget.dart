@@ -1,8 +1,14 @@
+import 'dart:async';
+import 'dart:html';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LastFmAccountWidget extends StatefulWidget {
 
@@ -32,6 +38,37 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
     _sessionKeyController.dispose();
     super.dispose();
   }
+
+  Widget _getOAuthLoginButton(BuildContext context) => Consumer<LastFmStore>(
+    builder: (_, store, __) => ElevatedButton(
+        child: Text('Launch window to login to Lastfm'),
+        onPressed: () async {
+          if (kIsWeb) {
+            StreamSubscription<MessageEvent> sub;
+            sub = window.onMessage.listen((event) async {
+              if (Utils.redirectUriForLastFm(event)) {
+                // the event.data is the callback url we need, parse out token
+                String token = Utils.getTokenFromLastFmRedirectUri(event.data.toString());
+                if (await store.loginFromToken(token)) {
+                  sub.cancel();
+                }
+              }
+              else {
+                print(event.origin);
+              }
+            });
+
+            String url = store.api.getAuthUriWithCallbackUri(Utils.REDIRECT_URI);
+            if (await canLaunch(url)) {
+              await launch(url);
+            }
+            else {
+              print('Could not launch url');
+            }
+          }
+        }
+    )
+  );
 
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
@@ -73,74 +110,49 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
 
         return CustomCard(child: Column(
           children: [
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       flex: 3,
-            //       child: TextField(
-            //         showCursor: true,
-            //         autofocus: false,
-            //         textAlign: TextAlign.center,
-            //         decoration: InputDecoration(
-            //           hintText: 'Session Key',
-            //         ),
-            //         controller: _sessionKeyController,
-            //       )
-            //     ),
-            //     Container(width: 10),
-            //     ElevatedButton(
-            //       child: Text('Login'),
-            //       onPressed: () async {
-            //         if (_sessionKeyController.text.isEmpty) {
-            //           log('session key is empty');
-            //           return;
-            //         }
-            //         await store.loginFromSession(_sessionKeyController.text);
-            //       }
-            //     )
-            //   ]
-            // ),
-            // Container(height: 5),
-            Text('Login with your lastfm account',
-              style: TextStyle(
-                fontSize: 20,
+            if (kIsWeb) _getOAuthLoginButton(context),
+            if (!kIsWeb) ...[
+              Text('Login with your lastfm account',
+                  style: TextStyle(
+                    fontSize: 20,
+                  )
+              ),
+              Container(height: 5),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      showCursor: true,
+                      autofocus: false,
+                      textAlign: TextAlign.center,
+                      controller: _userController,
+                      decoration: InputDecoration(
+                        hintText: 'Username',
+                      ),
+                    ),
+                  ),
+                  Container(width: 10),
+                  Expanded(
+                    child: TextField(
+                      showCursor: true,
+                      autofocus: false,
+                      textAlign: TextAlign.center,
+                      controller: _passController,
+                      obscureText: true,
+                      onSubmitted: (x) => onSubmit(),
+                      decoration: InputDecoration(
+                        hintText: 'Password',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Container(height: 10),
+              ElevatedButton(
+                child: Text('Login'),
+                onPressed: onSubmit,
               )
-            ),
-            Container(height: 5),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    showCursor: true,
-                    autofocus: false,
-                    textAlign: TextAlign.center,
-                    controller: _userController,
-                    decoration: InputDecoration(
-                      hintText: 'Username',
-                    ),
-                  ),
-                ),
-                Container(width: 10),
-                Expanded(
-                  child: TextField(
-                    showCursor: true,
-                    autofocus: false,
-                    textAlign: TextAlign.center,
-                    controller: _passController,
-                    obscureText: true,
-                    onSubmitted: (x) => onSubmit(),
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Container(height: 10),
-            ElevatedButton(
-              child: Text('Login'),
-              onPressed: onSubmit,
-            )
+            ]
           ],
         ));
       }
@@ -161,8 +173,8 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
             ),
           ),
           RaisedButton(
-              child: Text('Logout from Lastfm'),
-              onPressed: () => store.logout()
+            child: Text('Logout from Lastfm'),
+            onPressed: () => store.logout()
           ),
         ]
       ));

@@ -18,6 +18,7 @@ dependencies:
   url_launcher:
   draggable_scrollbar:
   flutter_hooks:
+  flutter_icons:
   lastfm:
     path: ../lastfm/
 
