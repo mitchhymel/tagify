@@ -24,10 +24,27 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('flutter-first-frame', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=2417937055');
+        navigator.serviceWorker.register('flutter_service_worker.js?v=463421785');
       });
     }
   </script>
-  <script src="main.dart.js" type="application/javascript"></script>
+  <script>
+    var str = window.location.href;
+    if (str.includes('code')) {
+      window.opener.postMessage(str , '*')
+      window.close();
+    }
+    else if (str.includes('token')) {
+      window.opener.postMessage(str, '*')
+      window.close();
+    }
+    else {
+      var script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'main.dart.js';
+      document.getElementsByTagName('head')[0].appendChild(script);
+    }
+  </script>
+<!--  <script src="main.dart.js" type="application/javascript"></script>-->
 </body>
 </html>
