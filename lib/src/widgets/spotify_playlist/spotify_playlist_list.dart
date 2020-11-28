@@ -11,7 +11,7 @@ class SpotifyPlaylistList extends StatelessWidget {
   Widget build(BuildContext context) => Consumer<SpotifyStore>(
     builder: (context, store, child) => DesktopListView(
       itemCount: store.playlists.length,
-      columns: 2,
+      columns: 1,
       itemBuilder: (ctx, index) => SpotifyPlaylistListItem(
         playlist: store.playlists[index],
       ),

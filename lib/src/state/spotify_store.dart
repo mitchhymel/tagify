@@ -6,6 +6,7 @@ import 'package:spotify/spotify.dart' as spot;
 import 'package:tagify/src/spotify/secrets.dart';
 import 'package:tagify/src/spotify/serializable_spotify_creds.dart';
 import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/utils/utils.dart';
 
 class SpotifyStore extends ChangeNotifier {
@@ -39,7 +40,23 @@ class SpotifyStore extends ChangeNotifier {
   spot.User get user => _user;
 
   List<spot.PlaylistSimple> _playlists = [];
-  List<spot.PlaylistSimple> get playlists => _playlists;
+  List<spot.PlaylistSimple> get playlists => _playlists.where(
+      (p) => p.name.toLowerCase().contains(_filter.toLowerCase())).toList();
+  spot.PlaylistSimple _selectedPlaylist;
+  spot.PlaylistSimple get selectedPlaylist => _selectedPlaylist;
+
+  bool _fetchingPlaylist = false;
+  bool get fetchingPlaylist => _fetchingPlaylist;
+
+  String _filter = '';
+  String get filter => _filter;
+  set filter(String other) {
+    _filter = other;
+    notifyListeners();
+  }
+
+  Map<String, List<TrackCacheKey>> _playlistIdToTracks = {};
+  Map<String, List<TrackCacheKey>> get playlistIdToTracks => _playlistIdToTracks;
 
   bool get loggedIn => _spotify != null && _user != null;
 
@@ -163,6 +180,38 @@ class SpotifyStore extends ChangeNotifier {
   Future<void> refreshPlaylists() async {
     var results = await _spotify.playlists.me.all();
     _playlists = results.toList();
+    notifyListeners();
+  }
+
+  Future<void> setSelectedAndEnsureCached(spot.PlaylistSimple other,
+      Function(TrackCacheKey) ensureCached
+  ) async {
+    _selectedPlaylist = other;
+    _fetchingPlaylist = true;
+    notifyListeners();
+
+    if (_playlistIdToTracks.containsKey(_selectedPlaylist.id)) {
+      log('Spotify playlist already fetched, using cached version');
+      _fetchingPlaylist = false;
+      return;
+    }
+
+    _playlistIdToTracks[_selectedPlaylist.id] = [];
+    log('Fetching tracks for spotify playlist "${other.name}"');
+    var tracks = await _spotify.playlists.getTracksByPlaylistId(_selectedPlaylist.id).all();
+    for (var track in tracks) {
+      var key = new TrackCacheKey(
+        name: track.name,
+        artist: track.artists.first.name
+      );
+      await ensureCached(key);
+
+      _playlistIdToTracks[_selectedPlaylist.id].add(key);
+      notifyListeners();
+    }
+
+    log('Finished fetching tracks for spotify playlist "${_selectedPlaylist.name}"');
+    _fetchingPlaylist = false;
     notifyListeners();
   }
 }

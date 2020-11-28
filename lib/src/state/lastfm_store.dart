@@ -318,7 +318,7 @@ class LastFmStore  extends ChangeNotifier {
     // the currently playing track will always be the first
     if (newRecents.isNotEmpty && newRecents.first.nowPlaying) {
       var newKey = TrackCacheKey.fromTrack(newRecents.first);
-      var cached = await _ensureCached(newKey,
+      var cached = await ensureCached(newKey,
         refreshCache: refreshCache,
       );
       if (cached != null) {
@@ -333,7 +333,7 @@ class LastFmStore  extends ChangeNotifier {
     List<TrackCacheKey> keys = [];
     for (Track track in newRecents) {
       var key = new TrackCacheKey.fromTrack(track);
-      var cached = await _ensureCached(key,
+      var cached = await ensureCached(key,
         refreshCache: refreshCache,
       );
       if (cached != null) {
@@ -514,6 +514,14 @@ class LastFmStore  extends ChangeNotifier {
     return true;
   }
 
+  bool addTracksToQueue(List<TrackCacheKey> keys) {
+    for (var key in keys) {
+      addTrackToQueue(key);
+    }
+
+    return true;
+  }
+
   void removeTrackFromQueue(TrackCacheKey key) {
     _trackQueue.remove(key);
     resetProgress();
@@ -627,7 +635,7 @@ class LastFmStore  extends ChangeNotifier {
     List<TrackCacheKey> keys = [];
     for (var track in tracks) {
       var newKey = new TrackCacheKey.fromTrack(track);
-      var entry = await _ensureCached(newKey, refreshCache: refreshCache);
+      var entry = await ensureCached(newKey, refreshCache: refreshCache);
       if (entry != null) {
         keys.add(newKey);
       }
@@ -636,7 +644,7 @@ class LastFmStore  extends ChangeNotifier {
     return keys;
   }
 
-  Future<TrackCacheEntry> _ensureCached(TrackCacheKey key, {
+  Future<TrackCacheEntry> ensureCached(TrackCacheKey key, {
     bool refreshCache=false
   }) async {
     if (!refreshCache && _trackCache.containsKey(key)) {

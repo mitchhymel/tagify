@@ -35,10 +35,13 @@ class WrapDropTargetTrack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Consumer<LastFmStore>(
-    builder: (_, store, c) => WrapDropTarget<TrackCacheKey>(
-      child: child,
-      onAcceptWithDetails: (details) => store.addTrackToQueue(details.data),
-    )
+    builder: (_, store, c) => WrapDropTarget<List<TrackCacheKey>>(
+      child: WrapDropTarget<TrackCacheKey>(
+        child: child,
+        onAcceptWithDetails: (details) => store.addTrackToQueue(details.data),
+      ),
+      onAcceptWithDetails: (details) => store.addTracksToQueue(details.data),
+    ),
   );
 }
 

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:html';
+import 'package:universal_html/html.dart' as html;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,8 +44,8 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
         child: Text('Launch window to login to Lastfm'),
         onPressed: () async {
           if (kIsWeb) {
-            StreamSubscription<MessageEvent> sub;
-            sub = window.onMessage.listen((event) async {
+            StreamSubscription<html.MessageEvent> sub;
+            sub = html.window.onMessage.listen((event) async {
               if (Utils.redirectUriForLastFm(event)) {
                 // the event.data is the callback url we need, parse out token
                 String token = Utils.getTokenFromLastFmRedirectUri(event.data.toString());

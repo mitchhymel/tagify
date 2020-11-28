@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' as spot;
+import 'package:tagify/src/state/lastfm_store.dart';
+import 'package:tagify/src/state/spotify_store.dart';
+import 'package:tagify/src/utils/utils.dart';
+import 'package:tagify/src/widgets/common/custom_card.dart';
 
 class SpotifyPlaylistListItem extends StatelessWidget {
 
@@ -23,12 +28,16 @@ class SpotifyPlaylistListItem extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: () => print('ta'),
+  Widget _getCard({
+    @required bool selected,
+    @required VoidCallback onTap
+  }) => CustomCard(
+    color: selected ? Colors.redAccent : Colors.black12,
+    onTap: onTap,
+    // todo: onlongpress for mobile
     child: Container(
-      height: 190,
-      width: 190,
+      height: 150,
+      width: 150,
       decoration: _getDecoration(),
       child: Center(
         child: Container(
@@ -37,5 +46,32 @@ class SpotifyPlaylistListItem extends StatelessWidget {
         )
       )
     ),
+  );
+
+  @override
+  Widget build(BuildContext context) => Consumer<SpotifyStore>(
+    builder: (_, store, __) => Utils.isBigScreen(context)
+        && store.playlistIdToTracks.containsKey(playlist.id) ?
+        Draggable(
+          feedback: _getCard(
+            selected: store.selectedPlaylist == playlist,
+            onTap: () => store.setSelectedAndEnsureCached(playlist,
+                Provider.of<LastFmStore>(context, listen: false).ensureCached
+            )
+          ),
+          data: store.playlistIdToTracks[playlist.id],
+          child: _getCard(
+            selected: store.selectedPlaylist == playlist,
+            onTap: () => store.setSelectedAndEnsureCached(playlist,
+                Provider.of<LastFmStore>(context, listen: false).ensureCached
+            )
+          )
+        ) :
+        _getCard(
+          selected: store.selectedPlaylist == playlist,
+          onTap: () => store.setSelectedAndEnsureCached(playlist,
+            Provider.of<LastFmStore>(context, listen: false).ensureCached
+          )
+        )
   );
 }

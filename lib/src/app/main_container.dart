@@ -10,6 +10,7 @@ import 'package:tagify/src/screens/spotify_playlist_screen.dart';
 import 'package:tagify/src/screens/queue_screen.dart';
 import 'package:tagify/src/screens/tags_screen.dart';
 import 'package:tagify/src/utils/utils.dart';
+import 'package:tagify/src/widgets/settings/info_widget.dart';
 
 class MainContainer extends StatefulWidget {
   

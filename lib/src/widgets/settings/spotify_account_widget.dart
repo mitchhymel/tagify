@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:html';
+import 'package:universal_html/html.dart' as html;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,8 +21,8 @@ class SpotifyAccountWidget extends StatelessWidget {
               child: Text('Launch window to login to Spotify'),
               onPressed: () async {
                 if (kIsWeb) {
-                  StreamSubscription<MessageEvent> sub;
-                  sub = window.onMessage.listen((event) {
+                  StreamSubscription<html.MessageEvent> sub;
+                  sub = html.window.onMessage.listen((event) {
                     if (Utils.redirectUriForSpotify(event)) {
                       // the event.data is the callback url we need
                       // pass it to the store

@@ -19,6 +19,7 @@ dependencies:
   draggable_scrollbar:
   flutter_hooks:
   flutter_icons:
+  universal_html:
   lastfm:
     path: ../lastfm/
 
