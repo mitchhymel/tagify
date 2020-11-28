@@ -54,7 +54,7 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
                 }
               }
               else {
-                print(event.origin);
+                log('Error when trying to login from redirect');
               }
             });
 

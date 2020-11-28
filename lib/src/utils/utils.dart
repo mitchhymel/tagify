@@ -12,7 +12,9 @@ class Utils {
   static const int IMAGE_QUALITY = 2;
 
   static const String REDIRECT_URI = kDebugMode ? 'http://localhost:3000'
-      : 'https://mitchhymel.github.io/tagify';
+    : 'https://mitchhymel.github.io/tagify';
+  static const String _expectedOrigin = kDebugMode ? 'http://localhost:3000'
+    : 'https://mitchhymel.github.io';
 
   static bool isBigScreenWithoutContext() {
     return kIsWeb || Platform.isWindows;
@@ -78,13 +80,13 @@ class Utils {
   }
 
   static bool redirectUriForSpotify(html.MessageEvent event) {
-    bool originIsTrusted = (event.origin == Utils.REDIRECT_URI);
+    bool originIsTrusted = (event.origin == Utils._expectedOrigin);
     bool forSpotify = event.data.toString().contains('code');
     return originIsTrusted && forSpotify;
   }
 
   static bool redirectUriForLastFm(html.MessageEvent event) {
-    bool originIsTrusted = (event.origin == Utils.REDIRECT_URI);
+    bool originIsTrusted = (event.origin == Utils._expectedOrigin);
     bool forLastfm = event.data.toString().contains('token');
     return originIsTrusted && forLastfm;
   }
