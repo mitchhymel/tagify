@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:html';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/spotify_store.dart';
@@ -15,16 +19,42 @@ class SpotifyAccountWidget extends StatelessWidget {
             RaisedButton(
               child: Text('Launch browser to login to Spotify'),
               onPressed: () async {
-                if (await canLaunch(store.authUri.toString())) {
-                  await launch(store.authUri.toString());
+                if (kIsWeb) {
+                  StreamSubscription<MessageEvent> sub;
+                  sub = window.onMessage.listen((event) {
+                    bool originIsTrusted = (event.origin == (kDebugMode ?
+                      'http://localhost:3000' : 'https://mitchhymel.github.io'));
+                    if (originIsTrusted) {
+                      // the event.data is the callback url we need
+                      // pass it to the store
+                      var uri = Uri.parse(event.data.toString());
+                      store.loginFromRedirectUri(uri);
+                      sub.cancel();
+                    }
+                    else {
+                      print(event.origin);
+                    }
+                  });
+
+                  if (await canLaunch(store.authUri.toString())) {
+                    await launch(store.authUri.toString());
+                  }
+                  else {
+                    print('Could not launch url');
+                  }
                 }
                 else {
-                  print('Could not launch url');
+                  if (await canLaunch(store.authUri.toString())) {
+                    await launch(store.authUri.toString());
+                  }
+                  else {
+                    print('Could not launch url');
+                  }
                 }
               }
             ),
-            Container(width: 10, height: 1),
-            Expanded(
+            if (!kIsWeb) Container(width: 10, height: 1),
+            if (!kIsWeb) Expanded(
               child: TextField(
                 showCursor: true,
                 autofocus: false,

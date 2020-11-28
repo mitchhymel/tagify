@@ -154,7 +154,7 @@ class LastFmStore  extends ChangeNotifier {
 
 
   LastFmStore() {
-    _api = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET, 'tagify',
+    _api = new LastFmApi(LASTFM_API_KEY, LASTFM_SHARED_SECRET,
       //logger: LastFmConsoleLogger()
     );
 

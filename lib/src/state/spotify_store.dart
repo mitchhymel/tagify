@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:oauth2/oauth2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,7 +10,9 @@ class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_CREDS';
   spot.SpotifyApiCredentials _credentials;
   AuthorizationCodeGrant _grant;
-  final String _redirectUri = 'https://localhost/callback'; //'tagify://spotifycallback';
+
+  final String _redirectUri = kDebugMode ? 'http://localhost:3000'
+      : 'https://mitchhymel.github.io/tagify';
   final List<String> scopes = [
     'user-library-read',
     'user-read-recently-played',
@@ -47,7 +50,7 @@ class SpotifyStore extends ChangeNotifier {
     _authUri =
         _grant.getAuthorizationUrl(Uri.parse(_redirectUri), scopes: scopes);
 
-    // tryLoginFromCachedCreds();
+    tryLoginFromCachedCreds();
   }
 
   Future<void> tryLoginFromCachedCreds() async {
