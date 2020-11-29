@@ -9,38 +9,58 @@ import 'package:tagify/src/widgets/tags/tracks/tags_tracks_container.dart';
 class TagsScreen extends StatelessWidget {
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context) => Stack(
     children: [
-      TagsControls(),
-      Consumer<LastFmStore>(
-        builder: (_, store, __) => CustomLoadingIndicator(store.tagsFetching),
-      ),
-      Consumer<LastFmStore>(
-          builder: (_, store, __) => store.trackToTags.length == 0 && !store.tagsFetching ?
-          ElevatedButton(
-            child: Text('No tags fetched or found, try refreshing by clicking me'),
-            onPressed: () => store.tagsRefresh(),
-          ) : Container()
-      ),
-      Expanded(
-        child: Row(
-          children: [
-            Flexible(
+      Row(
+        children: [
+          Flexible(
               flex: 1,
               child: Column(
                 children: [
+                  TagsControls(),
                   Icon(Icons.tag),
                   Expanded(
-                    child: TagsList()
+                      child: TagsList()
                   )
                 ],
               )
-            ),
-            Flexible(
+          ),
+          Flexible(
               flex: 3,
               child: TagsTracksContainer()
-            )
-          ],
+          )
+        ],
+      ),
+      // Row(
+      //   children: [
+      //     // Expanded(
+      //     //   child: Column(
+      //     //     children: [
+      //     //       TagsControls(),
+      //     //       Consumer<LastFmStore>(
+      //     //         builder: (_, store, __) => CustomLoadingIndicator(store.tagsFetching),
+      //     //       ),
+      //     //       Consumer<LastFmStore>(
+      //     //           builder: (_, store, __) => store.trackToTags.length == 0 && !store.tagsFetching ?
+      //     //           ElevatedButton(
+      //     //             child: Text('No tags fetched or found, try refreshing by clicking me'),
+      //     //             onPressed: () => store.tagsRefresh(),
+      //     //           ) : Container()
+      //     //       ),
+      //     //     ],
+      //     //   ),
+      //     // ),
+      //
+      //   ],
+      // ),
+      Positioned(
+        right: 10,
+        bottom: 10,
+        child: Consumer<LastFmStore>(
+          builder: (_, store, __) => FloatingActionButton(
+            onPressed: store.tagsRefresh,
+            child: Icon(Icons.refresh),
+          )
         )
       ),
     ],

@@ -1,49 +1,44 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class CustomTextField extends StatefulWidget {
+class CustomTextField extends HookWidget {
 
   final Function(String) onSubmitted;
   final Function(String) onChanged;
+  final Function onClear;
   final String initialText;
   final String hint;
   CustomTextField({
     @required this.initialText,
     @required this.hint,
-    @required this.onSubmitted,
     @required this.onChanged,
+    this.onClear,
+    this.onSubmitted,
   });
 
   @override
-  State createState() => _CustomTextFieldState();
-}
-
-class _CustomTextFieldState extends State<CustomTextField> {
-
-  TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = new TextEditingController();
-    Future.delayed(Duration.zero, () {
-      _controller.text = widget.initialText;
-    });
+  Widget build(BuildContext context) {
+    var controller = useTextEditingController(text: initialText);
+    return TextField(
+      controller: controller,
+      textAlign: TextAlign.left,
+      decoration: InputDecoration(
+        hintText: hint,
+        suffixIcon: IconButton(
+          iconSize: 20,
+          icon: Icon(Icons.clear),
+          color: Colors.white,
+          onPressed: () {
+            controller.clear();
+            if (onClear != null) {
+              onClear();
+            }
+          },
+        )
+      ),
+      onSubmitted: onSubmitted,
+      onChanged: onChanged
+    );
   }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => TextField(
-    textAlign: TextAlign.left,
-    decoration: InputDecoration(
-      hintText: widget.hint
-    ),
-    onSubmitted: widget.onSubmitted,
-    onChanged: widget.onChanged
-  );
 }

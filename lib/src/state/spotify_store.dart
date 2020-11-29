@@ -77,7 +77,9 @@ class SpotifyStore extends ChangeNotifier {
       return;
     }
 
-    _spotify = spot.SpotifyApi(creds);
+    _spotify = spot.SpotifyApi.withRefreshCallback(creds, (c) async {
+      await _cacheCreds(creds: c);
+    });
     await _afterLogin();
   }
 
@@ -155,8 +157,10 @@ class SpotifyStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _cacheCreds() async {
-    spot.SpotifyApiCredentials creds = await _spotify.getCredentials();
+  Future<void> _cacheCreds({spot.SpotifyApiCredentials creds}) async {
+    if (creds == null) {
+      creds = await _spotify.getCredentials();
+    }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool res = await prefs.setString(_cachedCredsKey, creds.toJson());
     if (!res) {

@@ -4,7 +4,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
-import 'package:tagify/src/widgets/common/custom_text_field.dart';
 
 class SearchTracksControls extends HookWidget {
 

@@ -15,9 +15,6 @@ class TrackQueueCard extends StatelessWidget {
     @required TrackCacheEntry entry,
     @required bool processed
   }) {
-
-    bool hasImage = entry.imageUrl != null && entry.imageUrl != '';
-
     return CustomCard(
       constraints: BoxConstraints(
         maxWidth: 800,

@@ -2,15 +2,16 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:tagify/src/screens/history_screen.dart';
 import 'package:tagify/src/screens/log_screen.dart';
 import 'package:tagify/src/screens/search_screen.dart';
 import 'package:tagify/src/screens/settings_screen.dart';
-import 'package:tagify/src/screens/spotify_playlist_screen.dart';
+import 'package:tagify/src/screens/spotify_playlist_create_screen.dart';
+import 'package:tagify/src/screens/spotify_playlists_screen.dart';
 import 'package:tagify/src/screens/queue_screen.dart';
 import 'package:tagify/src/screens/tags_screen.dart';
 import 'package:tagify/src/utils/utils.dart';
-import 'package:tagify/src/widgets/settings/info_widget.dart';
 
 class MainContainer extends StatefulWidget {
   
@@ -66,12 +67,20 @@ class MainContainerState extends State<MainContainer> {
       builder: (ctx) => QueueScreen(),
     ),
     NavigationRailItem(
-      icon: Icons.headset_outlined,
-      selectedIcon: Icons.headset_sharp,
-      label: 'Spotify',
-      builder: (ctx) => SpotifyPlaylistScreen()
+      icon: SimpleLineIcons.social_spotify,
+      selectedIcon: FontAwesome.spotify,
+      label: 'Playlists',
+      builder: (ctx) => SpotifyPlaylistsScreen()
     ),
+    NavigationRailItem(
+      icon: Icons.playlist_add_outlined,
+      selectedIcon: Icons.playlist_add,
+      label: 'Add',
+      builder: (ctx) => SpotifyPlaylistCreateScreen(),
+    )
   ];
+
+  bool get showSidebar => (selectedIndex >= 2 && selectedIndex <=5);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -93,8 +102,8 @@ class MainContainerState extends State<MainContainer> {
             flex: 2,
             child: railItems[selectedIndex].builder(context)
           ),
-          if (Utils.isBigScreen(context)) VerticalDivider(thickness: 2, width: 2),
-          if (Utils.isBigScreen(context)) Flexible(
+          if (Utils.isBigScreen(context) && showSidebar) VerticalDivider(thickness: 2, width: 2),
+          if (Utils.isBigScreen(context) && showSidebar) Flexible(
             flex: 1,
             child: QueueScreen(),
           )

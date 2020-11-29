@@ -1,0 +1,96 @@
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tagify/src/state/lastfm_store.dart';
+import 'package:tagify/src/state/playlist_create_store.dart';
+import 'package:tagify/src/state/spotify_store.dart';
+import 'package:tagify/src/widgets/common/custom_card.dart';
+import 'package:tagify/src/widgets/common/custom_text_field.dart';
+import 'package:tagify/src/widgets/common/tag_chip_list.dart';
+
+class PlaylistCreateControls extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) => CustomCard(
+    child: Column(
+      children: [
+        Row(
+          children: [
+            Consumer<PlaylistCreateStore>(
+              builder: (_, store, __) => IntrinsicWidth(
+                child: CheckboxListTile(
+                  title: Text('Must have ALL tags'),
+                  value: store.mustHaveAllWithTags,
+                  onChanged: (v) => store.mustHaveAllWithTags = v,
+                ),
+              )
+            ),
+            Container(width: 10),
+            Text('With tags:'),
+            Container(width: 10),
+            Consumer<PlaylistCreateStore>(
+              builder: (_, store, __) => TagChipList(
+                tags: store.withTags,
+                onAddTag: store.addWithTag,
+                onRemoveTag: store.removeWithTag,
+              )
+            )
+          ],
+        ),
+        Container(height: 10),
+        Row(
+          children: [
+            Text('Without tags:'),
+            Container(width: 10),
+            Consumer<PlaylistCreateStore>(
+              builder: (_, store, __) => TagChipList(
+                tags: store.withoutTags,
+                onAddTag: store.addWithoutTag,
+                onRemoveTag: store.removeWithoutTag,
+              )
+            )
+          ],
+        ),
+        Container(height: 10),
+        Row(
+          children: [
+            Text('Playlist name: '),
+            Container(width: 10),
+            Consumer<PlaylistCreateStore>(
+              builder: (_, store, __) => Expanded(
+                child: CustomTextField(
+                  hint: 'Enter playlist name',
+                  onChanged: (x) => store.playlistName = x,
+                  onClear: () => store.playlistName = '',
+                  initialText: store.playlistName,
+                )
+              )
+            )
+          ],
+        ),
+        Container(height: 10),
+        Row(
+          children: [
+            Consumer3<PlaylistCreateStore, SpotifyStore, LastFmStore>(
+              builder: (_, create, spotify, lastfm, __) => ElevatedButton(
+                child: Text('Fetch songs that match criteria'),
+                onPressed: () => create.fetchTracksMatchingCriteria(
+                  lastfmUserName: lastfm.user.name,
+                  lastfm: lastfm.api,
+                  spotify: spotify.spotify
+                ),
+              ),
+            ),
+            Container(width: 10),
+            Consumer2<PlaylistCreateStore, SpotifyStore>(
+              builder: (_, create, spotify, __) => ElevatedButton(
+                child: Text('Start creating playlist'),
+                onPressed: () => create.createPlaylist(spotify.user.id, spotify.spotify),
+              )
+            )
+          ],
+        )
+      ],
+    )
+  );
+}

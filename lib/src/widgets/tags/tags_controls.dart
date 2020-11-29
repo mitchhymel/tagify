@@ -25,10 +25,10 @@ class TagsControls extends HookWidget {
                     ),
                   )
                 ),
-                ElevatedButton(
-                  child: Icon(Icons.refresh),
-                  onPressed: store.tagsRefresh,
-                )
+                // ElevatedButton(
+                //   child: Icon(Icons.refresh),
+                //   onPressed: store.tagsRefresh,
+                // )
               ],
             )
         )
