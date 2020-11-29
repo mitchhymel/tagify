@@ -7,9 +7,13 @@ import 'package:tagify/src/widgets/spotify_playlist/spotify_playlist_list_item.d
 
 class SpotifyPlaylistList extends StatelessWidget {
 
+  final Axis scrollDirection;
+  SpotifyPlaylistList({this.scrollDirection=Axis.vertical});
+
   @override
   Widget build(BuildContext context) => Consumer<SpotifyStore>(
     builder: (context, store, child) => DesktopListView(
+      scrollDirection: scrollDirection,
       itemCount: store.playlists.length,
       columns: 1,
       itemBuilder: (ctx, index) => SpotifyPlaylistListItem(

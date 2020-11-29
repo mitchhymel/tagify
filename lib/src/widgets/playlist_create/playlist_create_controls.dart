@@ -13,19 +13,20 @@ class PlaylistCreateControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CustomCard(
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Consumer<LastFmStore>(
-              builder: (_, store, __) => IntrinsicWidth(
-                child: CheckboxListTile(
-                  title: Text('Must have ALL tags'),
-                  value: store.mustHaveAllWithTags,
-                  onChanged: (v) => store.mustHaveAllWithTags = v,
-                ),
-              )
+        Consumer<LastFmStore>(
+          builder: (_, store, __) => IntrinsicWidth(
+            child: CheckboxListTile(
+              title: Text('Must have ALL tags'),
+              value: store.mustHaveAllWithTags,
+              onChanged: (v) => store.mustHaveAllWithTags = v,
             ),
-            Container(width: 10),
+          )
+        ),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
             Text('With tags:'),
             Container(width: 10),
             Consumer<LastFmStore>(
@@ -38,7 +39,8 @@ class PlaylistCreateControls extends StatelessWidget {
           ],
         ),
         Container(height: 10),
-        Row(
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text('Without tags:'),
             Container(width: 10),
@@ -72,13 +74,13 @@ class PlaylistCreateControls extends StatelessWidget {
         Consumer2<LastFmStore, SpotifyStore>(
           builder: (_, lastfm, spotify, __) => ElevatedButton(
             child: Text('Start creating playlist of ${lastfm.playlistTracks.length} tracks'),
-            onPressed: () async {
+            onPressed: lastfm.playlistTracks.length > 0 && lastfm.playlistName.isNotEmpty ? () async {
               bool success = await lastfm.createPlaylist(
                   spotify.user.id, spotify.spotify);
               if (success) {
                 Utils.showSnackBar(context, 'Successfully created playlist');
               }
-            },
+            } : null,
           )
         )
       ],

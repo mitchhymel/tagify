@@ -12,12 +12,14 @@ class DesktopListView extends StatelessWidget {
   final IndexedWidgetBuilder itemBuilder;
   final double scrollPercent;
   final bool reverse;
+  final Axis scrollDirection;
   DesktopListView({
     @required this.itemCount,
     @required this.itemBuilder,
     this.columns=1,
     this.scrollPercent=0,
     this.reverse=false,
+    this.scrollDirection=Axis.vertical,
   });
 
   @override
@@ -33,6 +35,7 @@ class DesktopListView extends StatelessWidget {
       columns: columns,
       scrollPercent: scrollPercent,
       reverse: reverse,
+      scrollDirection: scrollDirection,
     );
   }
 }
@@ -44,12 +47,14 @@ class _DesktopListViewWrap extends StatefulWidget {
   final IndexedWidgetBuilder itemBuilder;
   final double scrollPercent;
   final bool reverse;
+  final Axis scrollDirection;
   _DesktopListViewWrap({
     @required this.itemCount,
     @required this.itemBuilder,
     @required this.columns,
     @required this.scrollPercent,
     @required this.reverse,
+    @required this.scrollDirection,
   });
 
   @override
@@ -116,27 +121,31 @@ class _DesktopListViewWrapState extends State<_DesktopListViewWrap> {
       });
     }
 
+    var child = widget.columns == 1 ? ListView.builder(
+      controller: controller,
+      itemBuilder: widget.itemBuilder,
+      itemCount: widget.itemCount,
+      reverse: widget.reverse,
+      scrollDirection: widget.scrollDirection,
+    ) : GridView.builder(
+      itemCount: widget.itemCount,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: widget.columns,
+          childAspectRatio: MediaQuery.of(context).size.width /
+              (MediaQuery.of(context).size.height / 3)
+      ),
+      itemBuilder: widget.itemBuilder,
+      controller: controller,
+      scrollDirection: widget.scrollDirection,
+    );
+
     return Listener(
       onPointerSignal: _handlePointerSignal,
       child: _IgnorePointerSignal(
-        child: DraggableScrollbar.semicircle(
+        child: widget.scrollDirection == Axis.vertical ? DraggableScrollbar.semicircle(
           controller: controller,
-          child: widget.columns == 1 ? ListView.builder(
-            controller: controller,
-            itemBuilder: widget.itemBuilder,
-            itemCount: widget.itemCount,
-            reverse: widget.reverse,
-          ) : GridView.builder(
-            itemCount: widget.itemCount,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: widget.columns,
-              childAspectRatio: MediaQuery.of(context).size.width /
-                  (MediaQuery.of(context).size.height / 3)
-            ),
-            itemBuilder: widget.itemBuilder,
-            controller: controller,
-          ),
-        )
+          child: child
+        ) : child
       )
     );
   }
