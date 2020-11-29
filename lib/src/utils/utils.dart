@@ -90,4 +90,22 @@ class Utils {
     bool forLastfm = event.data.toString().contains('token');
     return originIsTrusted && forLastfm;
   }
+
+  static void showSnackBar(BuildContext context, String text,{
+    bool isError=false,
+  }) {
+    Scaffold.of(context).showSnackBar(SnackBar(
+      backgroundColor: isError ? Colors.redAccent : Colors.blueAccent,
+      action: SnackBarAction(
+        label: 'dismiss',
+        textColor: Colors.white,
+        onPressed: () {},
+      ),
+      content: Text(text,
+          style: TextStyle(
+            color: Colors.white,
+          )
+      ),
+    ));
+  }
 }

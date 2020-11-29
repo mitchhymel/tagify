@@ -1,6 +1,7 @@
 
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ import 'package:tagify/src/lastfm/secrets.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/utils/utils.dart';
-
+import 'package:spotify/spotify.dart' as spot;
 
 class LastFmStore  extends ChangeNotifier {
   String _cachedCredsKey = 'LASTFM_CACHED_CREDS';
@@ -33,7 +34,8 @@ class LastFmStore  extends ChangeNotifier {
   Map<TrackCacheKey, bool> get favorites => _favorites;
   Map<TrackCacheKey, Set<String>> _trackToTags = {};
   Map<TrackCacheKey, Set<String>> get trackToTags => _trackToTags;
-  void updateTrackToTags(bool isAdd, TrackCacheKey key, String tag) {
+  void updateTrackToTags(bool isAdd, TrackCacheKey key, String inTag) {
+    String tag = inTag.toLowerCase();
     Set<String> set;
     if (!_trackToTags.containsKey(key)) {
       set = new Set<String>();
@@ -87,7 +89,8 @@ class LastFmStore  extends ChangeNotifier {
   // Tag screen state
   Map<String, Set<TrackCacheKey>> _tagToTracks = {};
   Map<String, Set<TrackCacheKey>> get tagToTracks => _tagToTracks;
-  void updateTagToTracks(bool isAdd, String tag, TrackCacheKey key) {
+  void updateTagToTracks(bool isAdd, String inTag, TrackCacheKey key) {
+    String tag = inTag.toLowerCase();
     Set<TrackCacheKey> set;
     if (!_tagToTracks.containsKey(tag)) {
       set = new Set<TrackCacheKey>();
@@ -121,6 +124,8 @@ class LastFmStore  extends ChangeNotifier {
   bool get tagsHasMore => _tagsHasMore;
   bool _tagsFetching = false;
   bool get tagsFetching => _tagsFetching;
+  Map<String, bool> _tagToHasMore = {};
+  Map<String, bool> get tagToHasMore => _tagToHasMore;
   String _selectedTag;
   String get selectedTag => _selectedTag;
   set selectedTag(String other) {
@@ -131,11 +136,6 @@ class LastFmStore  extends ChangeNotifier {
       refreshForTag(_selectedTag);
     }
   }
-  Map<String, Set<Artist>> _tagToArtists = {};
-  Map<String, Set<Artist>> get tagToArtists => _tagToArtists;
-  Map<String, Set<Album>> _tagToAlbums = {};
-  Map<String, Set<Album>> get tagToAlbums => _tagToAlbums;
-
 
   // Queue screen state
   int _totalToTag = 1;
@@ -150,6 +150,90 @@ class LastFmStore  extends ChangeNotifier {
   }
   void removeTagFromTagList(String tag) {
     _tagsToTagTracksWith.remove(tag);
+    notifyListeners();
+  }
+
+
+  // playlist create screen state
+  bool _mustHaveAllWithTags = true;
+  bool get mustHaveAllWithTags => _mustHaveAllWithTags;
+  set mustHaveAllWithTags(bool other) {
+    _mustHaveAllWithTags = other;
+    notifyListeners();
+  }
+  Set<String> _withTags = new Set<String>();
+  Set<String> get withTags => _withTags;
+  Set<String> _withoutTags = new Set<String>();
+  Set<String> get withoutTags => _withoutTags;
+
+  String _playlistName = '';
+  String get playlistName => _playlistName;
+  set playlistName(String other) {
+    _playlistName = other;
+    notifyListeners();
+  }
+
+  bool _fetchingCreatePlaylist = false;
+  bool get fetchingCreatePlaylist => _fetchingCreatePlaylist;
+  set fetchingCreatePlaylist(bool other) {
+    _fetchingCreatePlaylist = other;
+    notifyListeners();
+  }
+
+  Set<TrackCacheKey> get playlistTracks {
+    Set<TrackCacheKey> set = new Set<TrackCacheKey>();
+    for (var tag in _withTags) {
+      if (_tagToTracks.containsKey(tag)) {
+        set.addAll(_tagToTracks[tag]);
+      }
+    }
+
+    Set<TrackCacheKey> copied = new Set<TrackCacheKey>()..addAll(set);
+    if (_mustHaveAllWithTags) {
+      for (var tag in _withTags) {
+        for (var key in copied) {
+          if (!_trackToTags[key].contains(tag)) {
+            set.remove(key);
+          }
+        }
+      }
+    }
+
+    copied = new Set<TrackCacheKey>()..addAll(set);
+    for (var tag in _withoutTags) {
+      for (var key in copied) {
+        if (_trackToTags[key].contains(tag)) {
+          set.remove(key);
+        }
+      }
+    }
+
+    return set;
+  }
+
+  void addWithTag(String tag) {
+    _withTags.add(tag);
+    notifyListeners();
+
+    // ensure tag is fetched and cached
+    fetchAndCacheAllTracksForTag(tag);
+  }
+
+  void removeWithTag(String tag) {
+    _withTags.remove(tag);
+    notifyListeners();
+  }
+
+  void addWithoutTag(String tag) {
+    _withoutTags.add(tag);
+    notifyListeners();
+
+    // ensure tag is fetched and cached
+    fetchAndCacheAllTracksForTag(tag);
+  }
+
+  void removeWithoutTag(String tag) {
+    _withoutTags.remove(tag);
     notifyListeners();
   }
 
@@ -358,11 +442,11 @@ class LastFmStore  extends ChangeNotifier {
     await tagsFetch(1);
   }
 
-  Future<void> tagsFetch(int page, {int limit=25}) async {
+  Future<void> tagsFetch(int page) async {
     _tagsFetching = true;
     notifyListeners();
 
-    log('GetTopTags with results for page $page with limit $limit');
+    log('GetTopTags with results for page $page');
 
     var response = await api.user.getTopTags(userSession.name);
 
@@ -374,7 +458,6 @@ class LastFmStore  extends ChangeNotifier {
     }
 
     List<Tag> tags = response.data.toptags.items;
-    _tagsHasMore = tags.length == limit;
     for (Tag tag in tags) {
       await refreshForTag(tag.name);
     }
@@ -393,32 +476,22 @@ class LastFmStore  extends ChangeNotifier {
       page: page,
       limit: limit
     );
+
+    if (trackResp.hasError()) {
+      logError('Error while refreshing tag $tag: $trackResp');
+      _tagsFetching = false;
+      notifyListeners();
+    }
+
+    bool hasMore = page < trackResp.data.taggings.attr.totalPages;
+    _tagToHasMore[tag] = hasMore;
+
     var trackTags = trackResp.data.taggings.tracks.items;
     var trackCacheKeys = await _ensureTracksCached(trackTags);
     for (var key in trackCacheKeys) {
       updateTrackToTags(true, key, tag);
       updateTagToTracks(true, tag, key);
     }
-
-    // var artistResp = await api.user.getPersonalTags(
-    //     userSession.name, tag, 'artist');
-    // var artistIds = artistResp.data.taggings.artists.items
-    //     .map((e) => e.name).toSet();
-    // var artistTags = artistResp.data.taggings.artists.items;
-    // artistTags.retainWhere((x) => artistIds.remove(x.name));
-    //
-    // var albumResp = await api.user.getPersonalTags(
-    //     userSession.name, tag, 'album');
-    // var albumIds = albumResp.data.taggings.albums.items
-    //     .map((e) => e.name).toSet();
-    // var albumTags = albumResp.data.taggings.albums.items;
-    // albumTags.retainWhere((x) => albumIds.remove(x.name));
-
-    // var tagResult = new TagResult(
-    //   artists: artistTags,
-    //   albums: albumTags,
-    //   tracks: trackCacheKeys,
-    // );
 
     _tagsFetching = false;
     notifyListeners();
@@ -806,6 +879,121 @@ class LastFmStore  extends ChangeNotifier {
     return true;
   }
 
+
+  //#endregion
+
+  //#region create playlist
+  Future<void> fetchAndCacheAllTracksForTag(String tag) async {
+    _fetchingCreatePlaylist = true;
+    notifyListeners();
+
+    // fetch a single element to see how many tracks have this tag
+    // and if the number is different than what we have cached
+    // update our cache
+    var resp = await api.user.getPersonalTags(
+      user.name, tag, 'track',
+      page: 1,
+      limit: 25
+    );
+
+    if (resp.hasError()) {
+      logError('Error when fetching $tag: $resp');
+      _fetchingCreatePlaylist = false;
+      notifyListeners();
+      return;
+    }
+
+    int total = resp.data.taggings.attr.total;
+    int totalPages = resp.data.taggings.attr.totalPages;
+    print(resp.data.taggings.attr.toJson());
+
+    if (_tagToTracks.containsKey(tag) && _tagToTracks[tag].length == total) {
+      log('Already have fetched all tracks for $tag');
+      _fetchingCreatePlaylist = false;
+      notifyListeners();
+      return;
+    }
+
+    log('For tag $tag, found $total total tracks, will fetch $totalPages pages');
+    int limit = 25;
+    int page = 1;
+    while (page <= totalPages) {
+      String id = 'tag $tag for page $page with limit $limit';
+      log('Fetching tracks for $id');
+      var resp = await api.user.getPersonalTags(
+        user.name, tag, 'track',
+        page: page,
+        limit: limit
+      );
+
+      if (resp.hasError()) {
+        logError('Error when fetching $id: $resp');
+        _fetchingCreatePlaylist = false;
+        notifyListeners();
+        return null;
+      }
+
+      page++;
+
+      var trackTags = resp.data.taggings.tracks.items;
+      var trackCacheKeys = await _ensureTracksCached(trackTags);
+      for (var key in trackCacheKeys) {
+        updateTrackToTags(true, key, tag);
+        updateTagToTracks(true, tag, key);
+      }
+    }
+
+    _tagToHasMore[tag] = false;
+    _fetchingCreatePlaylist = false;
+    notifyListeners();
+  }
+
+  Future<bool> createPlaylist(String userId, spot.SpotifyApi spotify) async {
+    _fetchingCreatePlaylist = true;
+    notifyListeners();
+
+    // cache the playlist tracks list incase user changes it
+    var tracks = new Set<TrackCacheKey>()..addAll(playlistTracks);
+
+    List<spot.Track> spotifyTracks = [];
+    for (var key in tracks) {
+      String query = '${key.name} ${key.artist}';
+      log('Searching spotify for a track matching "$query"');
+      var resp = await spotify.search
+          .get(query, types: [spot.SearchType.track])
+          .first();
+
+      // assume the first hit is the best one
+      if (resp.first.items.isNotEmpty) {
+        var asTrack = resp.first.items.first as spot.Track;
+        log('Assuming best match is "${asTrack.name}" by "${asTrack.artists.first.name}"');
+        spotifyTracks.add(asTrack);
+      }
+      else {
+        log('Could not find track matching "$query"');
+      }
+    }
+
+    log('Creating playlist with name "$_playlistName"');
+    var playlist = await spotify.playlists.createPlaylist(userId, _playlistName);
+
+    List<String> uris = spotifyTracks.map((x) => x.uri).toList();
+
+    // spotify only allows adding 100 tracks to a playlist per request
+    int increment = 100;
+    for (int i = 0; i < uris.length; i+=increment) {
+      int maxTracksToAdd = min(increment, uris.length - i);
+      List<String> subset = uris.sublist(i, maxTracksToAdd);
+      log('Adding ${subset.length} tracks to "$_playlistName"');
+      await spotify.playlists.addTracks(subset, playlist.id);
+    }
+
+    log('Finished creating playlist "$_playlistName"');
+    _fetchingCreatePlaylist = false;
+    notifyListeners();
+
+    return true;
+  }
 
   //#endregion
 }

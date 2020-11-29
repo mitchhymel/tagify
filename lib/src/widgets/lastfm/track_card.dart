@@ -30,19 +30,7 @@ class TrackCard extends StatelessWidget {
       str = 'Added ${cacheKey.toLogStr()} to track tag queue';
     }
     if (success && !Utils.isBigScreen(context)) {
-      Scaffold.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.blueAccent,
-        action: SnackBarAction(
-          label: 'dismiss',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-        content: Text(str,
-          style: TextStyle(
-            color: Colors.white,
-          )
-        ),
-      ));
+      Utils.showSnackBar(context, str);
     }
   }
 

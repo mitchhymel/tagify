@@ -37,7 +37,7 @@ class AddTagChip extends HookWidget {
                     return;
                   }
 
-                  onSubmit(x);
+                  onSubmit(x.toLowerCase());
                   controller.clear();
                 },
                 decoration: InputDecoration(

@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
-import 'package:tagify/src/state/playlist_create_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
+import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 import 'package:tagify/src/widgets/common/custom_text_field.dart';
 import 'package:tagify/src/widgets/common/tag_chip_list.dart';
@@ -16,7 +16,7 @@ class PlaylistCreateControls extends StatelessWidget {
       children: [
         Row(
           children: [
-            Consumer<PlaylistCreateStore>(
+            Consumer<LastFmStore>(
               builder: (_, store, __) => IntrinsicWidth(
                 child: CheckboxListTile(
                   title: Text('Must have ALL tags'),
@@ -28,7 +28,7 @@ class PlaylistCreateControls extends StatelessWidget {
             Container(width: 10),
             Text('With tags:'),
             Container(width: 10),
-            Consumer<PlaylistCreateStore>(
+            Consumer<LastFmStore>(
               builder: (_, store, __) => TagChipList(
                 tags: store.withTags,
                 onAddTag: store.addWithTag,
@@ -42,7 +42,7 @@ class PlaylistCreateControls extends StatelessWidget {
           children: [
             Text('Without tags:'),
             Container(width: 10),
-            Consumer<PlaylistCreateStore>(
+            Consumer<LastFmStore>(
               builder: (_, store, __) => TagChipList(
                 tags: store.withoutTags,
                 onAddTag: store.addWithoutTag,
@@ -56,7 +56,7 @@ class PlaylistCreateControls extends StatelessWidget {
           children: [
             Text('Playlist name: '),
             Container(width: 10),
-            Consumer<PlaylistCreateStore>(
+            Consumer<LastFmStore>(
               builder: (_, store, __) => Expanded(
                 child: CustomTextField(
                   hint: 'Enter playlist name',
@@ -69,26 +69,17 @@ class PlaylistCreateControls extends StatelessWidget {
           ],
         ),
         Container(height: 10),
-        Row(
-          children: [
-            Consumer3<PlaylistCreateStore, SpotifyStore, LastFmStore>(
-              builder: (_, create, spotify, lastfm, __) => ElevatedButton(
-                child: Text('Fetch songs that match criteria'),
-                onPressed: () => create.fetchTracksMatchingCriteria(
-                  lastfmUserName: lastfm.user.name,
-                  lastfm: lastfm.api,
-                  spotify: spotify.spotify
-                ),
-              ),
-            ),
-            Container(width: 10),
-            Consumer2<PlaylistCreateStore, SpotifyStore>(
-              builder: (_, create, spotify, __) => ElevatedButton(
-                child: Text('Start creating playlist'),
-                onPressed: () => create.createPlaylist(spotify.user.id, spotify.spotify),
-              )
-            )
-          ],
+        Consumer2<LastFmStore, SpotifyStore>(
+          builder: (_, lastfm, spotify, __) => ElevatedButton(
+            child: Text('Start creating playlist of ${lastfm.playlistTracks.length} tracks'),
+            onPressed: () async {
+              bool success = await lastfm.createPlaylist(
+                  spotify.user.id, spotify.spotify);
+              if (success) {
+                Utils.showSnackBar(context, 'Successfully created playlist');
+              }
+            },
+          )
         )
       ],
     )

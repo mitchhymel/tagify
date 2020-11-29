@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 
 class LogControls extends HookWidget {
@@ -38,19 +39,7 @@ class LogControls extends HookWidget {
               child: Icon(Icons.copy),
               onPressed: () async {
                 await Provider.of<LogStore>(context, listen: false).copyToClipboard();
-                Scaffold.of(context).showSnackBar(SnackBar(
-                  backgroundColor: Colors.blueAccent,
-                  action: SnackBarAction(
-                    label: 'dismiss',
-                    textColor: Colors.white,
-                    onPressed: () {},
-                  ),
-                  content: Text('Log content copied to clipboard',
-                    style: TextStyle(
-                      color: Colors.white,
-                    )
-                  ),
-                ));
+                Utils.showSnackBar(context, 'Log content copied to clipboard');
               },
             ),
             Container(width: 5),

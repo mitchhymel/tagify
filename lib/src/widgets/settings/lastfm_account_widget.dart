@@ -92,19 +92,10 @@ class LastFmAccountWidgetState extends State<LastFmAccountWidget> {
           var res = await store.login(userName, password);
 
           if (!res) {
-            Scaffold.of(context).showSnackBar(SnackBar(
-              backgroundColor: Colors.redAccent,
-              action: SnackBarAction(
-                label: 'dismiss',
-                textColor: Colors.white,
-                onPressed: () {},
-              ),
-              content: Text('Login failed, try reentering username and password',
-                style: TextStyle(
-                  color: Colors.white,
-                )
-              ),
-            ));
+            Utils.showSnackBar(context,
+              'Login failed, try reentering username and password',
+              isError: true
+            );
           }
         };
 

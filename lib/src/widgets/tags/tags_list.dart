@@ -11,13 +11,12 @@ class TagsList extends StatelessWidget {
     builder: (_, store, __) => PaginatedDesktopListView(
       pageSize: 25,
       itemCount: store.tagToTracks.length,
-      fetchMore: (page, limit) => store.tagsFetch(page, limit: limit),
+      fetchMore: null,
       onRefresh: () => store.tagsRefresh(),
       itemBuilder: (___, index) => TagsListItem(
         store.tagToTracks.keys.toList()[index],
         store.tagToTracks.values.toList()[index].length,
       ),
-      hasMore: store.tagsHasMore,
     )
   );
 }

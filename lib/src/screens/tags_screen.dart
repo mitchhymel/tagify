@@ -14,45 +14,32 @@ class TagsScreen extends StatelessWidget {
       Row(
         children: [
           Flexible(
-              flex: 1,
-              child: Column(
-                children: [
-                  TagsControls(),
-                  Icon(Icons.tag),
-                  Expanded(
-                      child: TagsList()
-                  )
-                ],
-              )
+            flex: 1,
+            child: Column(
+              children: [
+                TagsControls(),
+                Icon(Icons.tag),
+                Expanded(
+                  child: TagsList()
+                )
+              ],
+            )
           ),
           Flexible(
-              flex: 3,
-              child: TagsTracksContainer()
+            flex: 3,
+            child: Column(
+              children: [
+                Consumer<LastFmStore>(
+                  builder: (_, store, __) => CustomLoadingIndicator(store.tagsFetching),
+                ),
+                Expanded(
+                  child: TagsTracksContainer()
+                )
+              ]
+            )
           )
         ],
       ),
-      // Row(
-      //   children: [
-      //     // Expanded(
-      //     //   child: Column(
-      //     //     children: [
-      //     //       TagsControls(),
-      //     //       Consumer<LastFmStore>(
-      //     //         builder: (_, store, __) => CustomLoadingIndicator(store.tagsFetching),
-      //     //       ),
-      //     //       Consumer<LastFmStore>(
-      //     //           builder: (_, store, __) => store.trackToTags.length == 0 && !store.tagsFetching ?
-      //     //           ElevatedButton(
-      //     //             child: Text('No tags fetched or found, try refreshing by clicking me'),
-      //     //             onPressed: () => store.tagsRefresh(),
-      //     //           ) : Container()
-      //     //       ),
-      //     //     ],
-      //     //   ),
-      //     // ),
-      //
-      //   ],
-      // ),
       Positioned(
         right: 10,
         bottom: 10,

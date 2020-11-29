@@ -4,7 +4,6 @@ import 'package:tagify/src/app/login_screen.dart';
 import 'package:tagify/src/app/main_container.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/log_store.dart';
-import 'package:tagify/src/state/playlist_create_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 
 class App extends StatelessWidget {
@@ -16,7 +15,6 @@ class App extends StatelessWidget {
       ChangeNotifierProvider<LogStore>(create: (_) => logStore),
       ChangeNotifierProvider<SpotifyStore>(create: (_) => SpotifyStore()),
       ChangeNotifierProvider<LastFmStore>(create: (_) => LastFmStore()),
-      ChangeNotifierProvider<PlaylistCreateStore>(create: (_) => PlaylistCreateStore()),
     ],
     child: MaterialApp(
       title: 'Tagify',

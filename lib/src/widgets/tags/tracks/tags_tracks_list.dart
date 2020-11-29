@@ -17,7 +17,8 @@ class TagsTracksList extends StatelessWidget {
         pageSize: 25,
         itemBuilder: (___, index) => TrackCard(
             store.tagToTracks[store.selectedTag].toList()[index]),
-        hasMore: store.tagsHasMore,
+        hasMore: store.tagToHasMore.containsKey(store.selectedTag) &&
+          store.tagToHasMore[store.selectedTag],
       )
   );
 }
