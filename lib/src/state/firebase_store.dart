@@ -142,8 +142,11 @@ class FirebaseStore extends ChangeNotifier {
         });
 
         _trackToTags.keys.forEach((e) async {
-          var track = await spotify.tracks.get(e);
-          _trackCache[e] = TrackCacheItem.fromSpotifyTrack(track);
+          if (!_trackCache.containsKey(e)) {
+            var track = await spotify.tracks.get(e);
+            _trackCache[e] = TrackCacheItem.fromSpotifyTrack(track);
+          }
+
         });
       });
     } catch (ex) {

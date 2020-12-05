@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tagify/src/app/login_screen.dart';
 import 'package:tagify/src/app/main_container.dart';
 import 'package:tagify/src/state/firebase_store.dart';
+import 'package:tagify/src/state/history_store.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/search_store.dart';
@@ -19,6 +20,7 @@ class App extends StatelessWidget {
       ChangeNotifierProvider<LastFmStore>(create: (_) => LastFmStore()),
       ChangeNotifierProvider<FirebaseStore>(create: (_) => FirebaseStore()),
       ChangeNotifierProvider<SearchStore>(create: (_) => SearchStore()),
+      ChangeNotifierProvider<HistoryStore>(create: (_) => HistoryStore()),
     ],
     child: MaterialApp(
       title: 'Tagify',

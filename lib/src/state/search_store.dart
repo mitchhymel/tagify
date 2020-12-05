@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
 
-typedef SearchFunction = Future<List<TrackCacheItem>> Function(String, int);
+typedef FetchSearch = Future<List<TrackCacheItem>> Function(String, int);
 typedef EnsureCached = void Function(List<TrackCacheItem>);
 
 class SearchStore extends ChangeNotifier {
@@ -22,9 +22,11 @@ class SearchStore extends ChangeNotifier {
   List<String> _searchResults = [];
   List<String> get searchResults => _searchResults;
 
-  Future<void> search(int page, SearchFunction searchFunc, EnsureCached cacheFunc) async {
+  Future<void> search(int page, FetchSearch searchFunc, EnsureCached cacheFunc) async {
+    if (page == 0) {
+      _searchResults = [];
+    }
     _searching = true;
-    _searchResults = [];
     notifyListeners();
 
    try {

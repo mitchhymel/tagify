@@ -27,7 +27,7 @@ class TrackCacheItem {
     name=track.name,
     artist=track.artists.first.name,
     album=track.album.name,
-    imageUrl=track.album.images[2].url,
+    imageUrl=track.album.images[0].url,
     externalUrl=track.uri;
 
   TrackCacheItem copyWith({
@@ -45,6 +45,18 @@ class TrackCacheItem {
     imageUrl: imageUrl ?? this.imageUrl,
     externalUrl: externalUrl ?? this.externalUrl
   );
+
+
+  @override
+  String toString() => jsonEncode(toMap());
+  Map toMap() => {
+    'id': id,
+    'name': name,
+    'artist': artist,
+    'album': album,
+    'imageUrl': imageUrl,
+    'externalUrl': externalUrl,
+  };
 }
 
 class TrackCacheEntry{

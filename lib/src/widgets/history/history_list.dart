@@ -1,22 +1,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/lastfm_store.dart';
-import 'package:tagify/src/widgets/common/paginated_desktop_listview.dart';
-import 'package:tagify/src/widgets/lastfm/track_card.dart';
+import 'package:tagify/src/state/history_store.dart';
+import 'package:tagify/src/widgets/common/desktop_listview.dart';
+import 'package:tagify/src/widgets/spotify/track_card.dart';
 
 class HistoryList extends StatelessWidget {
 
   @override
-  Widget build(BuildContext context) => Consumer<LastFmStore>(
-    builder: (_, store, __) => PaginatedDesktopListView(
-      pageSize: 25,
-      itemCount: store.recents.length,
-      fetchMore: (page, pageLimit) => store.recentsFetch(page, pageLimit),
-      onRefresh: () => store.recentsRefresh(),
-      additionalPageCheck: 1, // recents returns the nowplaying track
-      itemBuilder: (___, index) => TrackCard(store.recents[index]),
-      hasMore: store.recentsHasMore,
+  Widget build(BuildContext context) => Consumer<HistoryStore>(
+    builder: (_, history, __) => DesktopListView(
+      itemCount: history.recents.length,
+      itemBuilder: (___, index) => TrackCard(
+        history.recents[index]
+      ),
     )
   );
 }
