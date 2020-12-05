@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:tagify/src/widgets/settings/firebase_account_widget.dart';
 import 'package:tagify/src/widgets/settings/info_widget.dart';
 import 'package:tagify/src/widgets/settings/lastfm_account_widget.dart';
 
@@ -25,7 +26,8 @@ class LoginScreen extends StatelessWidget {
                 )
               ),
               Container(height: 10),
-              LastFmAccountWidget(),
+              //LastFmAccountWidget(),
+              FirebaseAccountWidget(),
             ],
           ),
           Positioned(

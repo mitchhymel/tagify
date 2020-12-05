@@ -16,6 +16,10 @@ class InfoWidget extends StatelessWidget {
     onPressed: _onPressed,
     icon: Icon(AntDesign.github),
     label: Text('Checkout the source on github!'),
+    style: ButtonStyle(
+      padding: MaterialStateProperty.all(EdgeInsets.all(20)),
+      backgroundColor: MaterialStateProperty.all(Colors.green),
+    ),
   ) : IconButton(
     onPressed: _onPressed,
     icon: Icon(AntDesign.github),

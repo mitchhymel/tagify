@@ -23,6 +23,10 @@ dependencies:
   flutter_hooks:
   flutter_icons:
   universal_html:
+  firebase_core:
+  firebase_auth:
+  cloud_functions:
+  google_sign_in:
   lastfm:
     path: ../lastfm/
 

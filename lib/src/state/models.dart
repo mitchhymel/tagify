@@ -1,9 +1,42 @@
 
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
+
+class TrackCacheItem {
+  final String id;
+  final String name;
+  final String artist;
+  final String album;
+  final String imageUrl;
+  final String externalUrl;
+
+  TrackCacheItem({
+    this.id,
+    this.name,
+    this.artist,
+    this.album,
+    this.imageUrl,
+    this.externalUrl,
+  });
+
+  TrackCacheItem copyWith({
+    String id,
+    String name,
+    String artist,
+    String album,
+    String imageUrl,
+    String externalUrl
+  }) => new TrackCacheItem(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    artist: artist ?? this.artist,
+    album: album ?? this.album,
+    imageUrl: imageUrl ?? this.imageUrl,
+    externalUrl: externalUrl ?? this.externalUrl
+  );
+}
 
 class TrackCacheEntry{
   final TrackCacheKey key;
@@ -75,7 +108,6 @@ class TrackCacheKey {
   }
 
   @override
-  // TODO: implement hashCode
   int get hashCode => name.hashCode + artist.hashCode;
 
 }

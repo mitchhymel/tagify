@@ -218,4 +218,9 @@ class SpotifyStore extends ChangeNotifier {
     _fetchingPlaylist = false;
     notifyListeners();
   }
+
+  Future<List<TrackCacheItem>> search(String query) async {
+    return [];
+  }
+
 }
