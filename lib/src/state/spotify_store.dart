@@ -219,8 +219,28 @@ class SpotifyStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<TrackCacheItem>> search(String query) async {
-    return [];
+  Future<List<TrackCacheItem>> search(String query, int page) async {
+
+    List<TrackCacheItem> results = [];
+    var res = await _spotify.search
+      .get(query, types: [spot.SearchType.track])
+      .getPage(25, page);
+    res.forEach((p) {
+      p.items.forEach((t) {
+        if (t is spot.Track) {
+          var track = new TrackCacheItem(
+            id: t.id,
+            name: t.name,
+            artist: t.artists.first.name,
+            album: t.album.name,
+            externalUrl: t.uri,
+            imageUrl: t.album.images[2].url,
+          );
+          results.add(track);
+        }
+      });
+    });
+    return results;
   }
 
 }

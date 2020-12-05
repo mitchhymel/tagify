@@ -86,35 +86,7 @@ class FirebaseStore extends ChangeNotifier {
     await getTags();
   }
 
-  Future<bool> addTags(List<String> tracks, List<String> tags) async {
-    _fetching = true;
-    notifyListeners();
 
-    bool success = true;
-    var callable = _functions.httpsCallable(_ADD_TAGS);
-
-    try {
-      final results = await callable.call(<String, dynamic>{
-        _TRACKS: tracks,
-        _TAGS: tags,
-      });
-      if (results.data == true) {
-        tracks.forEach((x) => _trackToTags[x].addAll(tags));
-        tags.forEach((x) => _tagToTracks[x].addAll(tracks));
-      }
-      else {
-        log('Error when adding tags: ${results.data}');
-        success = false;
-      }
-    } catch (ex) {
-      log('Error when adding tags: $ex');
-      success = false;
-    }
-
-    _fetching = false;
-    notifyListeners();
-    return success;
-  }
 
   Future<bool> getTags() async {
     _fetching = true;
@@ -152,29 +124,70 @@ class FirebaseStore extends ChangeNotifier {
     return success;
   }
 
-  Future<bool> removeTags(List<String> tracks, List<String> tags) async {
+  Future<bool> addTags(Set<String> tracks, Set<String> tags) async {
+    return _updateTags(true, tracks, tags);
+  }
+
+  Future<bool> removeTags(Set<String> tracks, Set<String> tags) async {
+    return _updateTags(false, tracks, tags);
+  }
+
+  Future<bool> _updateTags(bool add, Set<String> tracks, Set<String> tags) async {
     _fetching = true;
     notifyListeners();
 
     bool success = true;
-    var callable = _functions.httpsCallable(_REMOVE_TAGS);
+    String endpoint = add ? _ADD_TAGS : _REMOVE_TAGS;
+    var callable = _functions.httpsCallable(endpoint);
+    String op = add ? 'add' : 'remove';
 
     try {
+      // Update state before making call
+      var beforeTrack = {}..addAll(_trackToTags);
+      var beforeTags = {}..addAll(_tagToTracks);
+      tracks.forEach((x) {
+        if (add) {
+          if (!_trackToTags.containsKey(x)) {
+            _trackToTags[x] = new Set<String>();
+          }
+
+          _trackToTags[x].addAll(tags);
+        }
+        else {
+          _trackToTags[x].removeAll(tags);
+        }
+      });
+      tags.forEach((x) {
+        if (add) {
+          if (!_tagToTracks.containsKey(x)) {
+            _tagToTracks[x] = new Set<String>();
+          }
+
+          _tagToTracks[x].addAll(tracks);
+        }
+        else {
+          _tagToTracks[x].removeAll(tracks);
+        }
+      });
+
+      notifyListeners();
+
       final results = await callable.call(<String, dynamic>{
-        _TRACKS: tracks,
-        _TAGS: tags,
+        _TRACKS: tracks.toList(),
+        _TAGS: tags.toList(),
       });
       if (results.data == true) {
-        // success
-        tracks.forEach((x) => _trackToTags[x].removeAll(tags));
-        tags.forEach((x) => _tagToTracks[x].removeAll(tracks));
+        log('Successfully $op tags $tags from $tracks');
       }
       else {
-        log('Error when removing tags: ${results.data}');
+        log('Error when $op tags: ${results.data}');
+        //revert state
+        _trackToTags = beforeTrack;
+        _tagToTracks = beforeTags;
         success = false;
       }
     } catch (ex) {
-      log('Error when removing tags: $ex');
+      log('Error when $op tags: $ex');
       success = false;
     }
 

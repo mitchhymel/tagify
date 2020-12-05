@@ -22,7 +22,7 @@ class SearchTracksControls extends HookWidget {
               child: TextField(
                 controller: trackController,
                 onChanged: (x) => search.query = x,
-                onSubmitted: (x) => search.search(spotify.search, cache.addAllToCache),
+                onSubmitted: (x) => search.search(0, spotify.search, cache.addAllToCache),
                 decoration: InputDecoration(
                   hintText: 'Search by track name',
                 )

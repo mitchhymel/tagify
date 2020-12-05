@@ -1,9 +1,10 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
 
-typedef SearchFunction = Future<List<TrackCacheItem>> Function(String);
+typedef SearchFunction = Future<List<TrackCacheItem>> Function(String, int);
 typedef EnsureCached = void Function(List<TrackCacheItem>);
 
 class SearchStore extends ChangeNotifier {
@@ -21,13 +22,18 @@ class SearchStore extends ChangeNotifier {
   List<String> _searchResults = [];
   List<String> get searchResults => _searchResults;
 
-  Future<void> search(SearchFunction searchFunc, EnsureCached cacheFunc) async {
+  Future<void> search(int page, SearchFunction searchFunc, EnsureCached cacheFunc) async {
     _searching = true;
+    _searchResults = [];
     notifyListeners();
 
-    var res = await searchFunc(_query);
-    cacheFunc(res);
-    _searchResults.addAll(res.map((x) => x.id).toList());
+   try {
+     var res = await searchFunc(_query, page);
+     cacheFunc(res);
+     _searchResults.addAll(res.map((x) => x.id).toList());
+   } catch (ex) {
+     log('Error while searching: $ex');
+   }
 
     _searching = false;
     notifyListeners();
