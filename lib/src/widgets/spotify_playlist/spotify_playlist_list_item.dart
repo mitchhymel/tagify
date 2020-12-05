@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' as spot;
+import 'package:tagify/src/state/firebase_store.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 import 'package:tagify/src/utils/utils.dart';
@@ -56,21 +57,21 @@ class SpotifyPlaylistListItem extends StatelessWidget {
           feedback: _getCard(
             selected: store.selectedPlaylist == playlist,
             onTap: () => store.setSelectedAndEnsureCached(playlist,
-                Provider.of<LastFmStore>(context, listen: false).ensureCached
+              Provider.of<FirebaseStore>(context, listen: false).addAllToCache
             )
           ),
           data: store.playlistIdToTracks[playlist.id],
           child: _getCard(
             selected: store.selectedPlaylist == playlist,
             onTap: () => store.setSelectedAndEnsureCached(playlist,
-                Provider.of<LastFmStore>(context, listen: false).ensureCached
+              Provider.of<FirebaseStore>(context, listen: false).addAllToCache
             )
           )
         ) :
         _getCard(
           selected: store.selectedPlaylist == playlist,
           onTap: () => store.setSelectedAndEnsureCached(playlist,
-            Provider.of<LastFmStore>(context, listen: false).ensureCached
+            Provider.of<FirebaseStore>(context, listen: false).addAllToCache
           )
         )
   );

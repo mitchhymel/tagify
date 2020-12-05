@@ -5,8 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotify/spotify.dart' as spot;
 import 'package:tagify/src/spotify/secrets.dart';
 import 'package:tagify/src/spotify/serializable_spotify_creds.dart';
+import 'package:tagify/src/state/firebase_store.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
+import 'package:tagify/src/state/search_store.dart';
 import 'package:tagify/src/utils/utils.dart';
 
 spot.SpotifyApi spotify;
@@ -54,8 +56,8 @@ class SpotifyStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Map<String, List<TrackCacheKey>> _playlistIdToTracks = {};
-  Map<String, List<TrackCacheKey>> get playlistIdToTracks => _playlistIdToTracks;
+  Map<String, List<String>> _playlistIdToTracks = {};
+  Map<String, List<String>> get playlistIdToTracks => _playlistIdToTracks;
 
   bool get loggedIn => spotify != null && _user != null;
 
@@ -187,7 +189,7 @@ class SpotifyStore extends ChangeNotifier {
   }
 
   Future<void> setSelectedAndEnsureCached(spot.PlaylistSimple other,
-      Function(TrackCacheKey) ensureCached
+      EnsureCached cache
   ) async {
     _selectedPlaylist = other;
     _fetchingPlaylist = true;
@@ -196,6 +198,7 @@ class SpotifyStore extends ChangeNotifier {
     if (_playlistIdToTracks.containsKey(_selectedPlaylist.id)) {
       log('Spotify playlist already fetched, using cached version');
       _fetchingPlaylist = false;
+      notifyListeners();
       return;
     }
 
@@ -203,13 +206,9 @@ class SpotifyStore extends ChangeNotifier {
     log('Fetching tracks for spotify playlist "${other.name}"');
     var tracks = await spotify.playlists.getTracksByPlaylistId(_selectedPlaylist.id).all();
     for (var track in tracks) {
-      var key = new TrackCacheKey(
-        name: track.name,
-        artist: track.artists.first.name
-      );
-      await ensureCached(key);
-
-      _playlistIdToTracks[_selectedPlaylist.id].add(key);
+      var item = TrackCacheItem.fromSpotifyTrack(track);
+      cache([item]);
+      _playlistIdToTracks[_selectedPlaylist.id].add(item.id);
       notifyListeners();
     }
 

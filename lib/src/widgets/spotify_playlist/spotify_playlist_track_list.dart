@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 import 'package:tagify/src/widgets/common/desktop_listview.dart';
-import 'package:tagify/src/widgets/lastfm/track_card.dart';
+import 'package:tagify/src/widgets/spotify/track_card.dart';
 
 class SpotifyPlaylistTrackList extends StatelessWidget {
   @override

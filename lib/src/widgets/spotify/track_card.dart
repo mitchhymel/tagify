@@ -83,21 +83,22 @@ class _TrackCardWidget extends StatelessWidget {
           ),
           Container(width: 10),
           Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: Text(item.name,
-                      style: TextStyle(
-                        fontSize: 20,
-                      )
-                  )),
-                  Container(height: 10),
-                  Expanded(child: Text(item.artist)),
-                ],
-              )
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: Text(item.name,
+                    style: TextStyle(
+                      fontSize: 20,
+                    )
+                )),
+                Container(height: 10),
+                Expanded(child: Text(item.artist)),
+              ],
+            )
           ),
           Expanded(
             child:  Wrap(
+              alignment: WrapAlignment.end,
               children: [
                 TrackTagsList(item.id),
               ],

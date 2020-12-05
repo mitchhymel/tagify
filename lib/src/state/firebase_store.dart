@@ -11,6 +11,8 @@ import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 
+typedef IsInCacheCallback = bool Function(String);
+
 class FirebaseStore extends ChangeNotifier {
 
   static const _GET_TAGS = 'getTags';
