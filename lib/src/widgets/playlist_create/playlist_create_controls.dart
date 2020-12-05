@@ -72,12 +72,12 @@ class PlaylistCreateControls extends StatelessWidget {
         ),
         Container(height: 10),
         Consumer2<LastFmStore, SpotifyStore>(
-          builder: (_, lastfm, spotify, __) => ElevatedButton(
+          builder: (_, lastfm, spot, __) => ElevatedButton(
             child: Text('Start creating playlist of ${lastfm.playlistTracks.length} tracks'),
             onPressed: lastfm.playlistTracks.length > 0
                 && lastfm.playlistName.isNotEmpty ? () async {
 
-              var playlist = spotify.playlists.where((p)
+              var playlist = spot.playlists.where((p)
                 => p.name == lastfm.playlistName);
               if (playlist != null && playlist.isNotEmpty) {
                 showDialog(
@@ -96,7 +96,7 @@ class PlaylistCreateControls extends StatelessWidget {
                           Navigator.pop(context, false);
 
                           bool success = await lastfm.createPlaylist(
-                              spotify.user.id, spotify.spotify);
+                              spot.user.id, spotify);
                           if (success) {
                             Utils.showSnackBar(context, 'Successfully created playlist');
                           }
@@ -114,7 +114,7 @@ class PlaylistCreateControls extends StatelessWidget {
               }
               else {
                 bool success = await lastfm.createPlaylist(
-                    spotify.user.id, spotify.spotify);
+                    spot.user.id, spotify);
                 if (success) {
                   Utils.showSnackBar(context, 'Successfully created playlist');
                 }

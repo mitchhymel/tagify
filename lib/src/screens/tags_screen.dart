@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/lastfm_store.dart';
+import 'package:tagify/src/state/firebase_store.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';
 import 'package:tagify/src/widgets/tags/tags_controls.dart';
@@ -15,8 +15,8 @@ class TagsScreen extends StatelessWidget {
       if (!Utils.isBigScreen(context)) Column(
         children: [
           TagsControls(),
-          Consumer<LastFmStore>(
-            builder: (_, store, __) => CustomLoadingIndicator(store.tagsFetching),
+          Consumer<FirebaseStore>(
+            builder: (_, store, __) => CustomLoadingIndicator(store.fetching),
           ),
           Container(
             constraints: BoxConstraints(
@@ -47,8 +47,8 @@ class TagsScreen extends StatelessWidget {
             flex: 3,
             child: Column(
               children: [
-                Consumer<LastFmStore>(
-                  builder: (_, store, __) => CustomLoadingIndicator(store.tagsFetching),
+                Consumer<FirebaseStore>(
+                  builder: (_, store, __) => CustomLoadingIndicator(store.fetching),
                 ),
                 Expanded(
                   child: TagsTracksContainer()
@@ -61,9 +61,9 @@ class TagsScreen extends StatelessWidget {
       Positioned(
         right: 10,
         bottom: 10,
-        child: Consumer<LastFmStore>(
+        child: Consumer<FirebaseStore>(
           builder: (_, store, __) => FloatingActionButton(
-            onPressed: store.tagsRefresh,
+            onPressed: store.getTags,
             child: Icon(Icons.refresh),
           )
         )

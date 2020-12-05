@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:lastfm/lastfm_api.dart';
+import 'package:spotify/spotify.dart' as spot;
 
 class TrackCacheItem {
   final String id;
@@ -20,6 +21,14 @@ class TrackCacheItem {
     this.imageUrl,
     this.externalUrl,
   });
+
+  TrackCacheItem.fromSpotifyTrack(spot.Track track):
+    id=track.id,
+    name=track.name,
+    artist=track.artists.first.name,
+    album=track.album.name,
+    imageUrl=track.album.images[2].url,
+    externalUrl=track.uri;
 
   TrackCacheItem copyWith({
     String id,

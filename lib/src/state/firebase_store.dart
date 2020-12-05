@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/state/models.dart';
+import 'package:tagify/src/state/spotify_store.dart';
 
 class FirebaseStore extends ChangeNotifier {
 
@@ -28,11 +30,39 @@ class FirebaseStore extends ChangeNotifier {
 
   Map<String, Set<String>> _tagToTracks = {};
   Map<String, Set<String>> get tagToTracks => _tagToTracks;
+  List<String> get filteredTags => _tagToTracks.keys.where((x) =>
+      x.toLowerCase().contains(_tagsFilter.toLowerCase())).toList();
   Map<String, Set<String>> _trackToTags = {};
   Map<String, Set<String>> get trackToTags => _trackToTags;
 
   bool _fetching = false;
   bool get fetching => _fetching;
+
+  String _tagsFilter = '';
+  String get tagsFilter => _tagsFilter;
+  set tagsFilter(String other) {
+    _tagsFilter = other;
+    notifyListeners();
+  }
+
+  String _selectedTag;
+  String get selectedTag => _selectedTag;
+  set selectedTag(String other) {
+    _selectedTag = other;
+    notifyListeners();
+  }
+
+  Map<String, TrackCacheItem> _trackCache = {};
+  Map<String, TrackCacheItem> get trackCache => _trackCache;
+
+  void addToCache(TrackCacheItem item) {
+    _trackCache[item.id] = item;
+    notifyListeners();
+  }
+
+  void addAllToCache(List<TrackCacheItem> items) {
+    items.forEach((x) => addToCache(x));
+  }
 
   FirebaseStore() {
     init();
@@ -86,10 +116,10 @@ class FirebaseStore extends ChangeNotifier {
     await getTags();
   }
 
-
-
   Future<bool> getTags() async {
     _fetching = true;
+    _tagToTracks = {};
+    _trackToTags = {};
     notifyListeners();
 
     bool success = true;
@@ -109,6 +139,11 @@ class FirebaseStore extends ChangeNotifier {
           }
 
           _trackToTags[t].add(e.key);
+        });
+
+        _trackToTags.keys.forEach((e) async {
+          var track = await spotify.tracks.get(e);
+          _trackCache[e] = TrackCacheItem.fromSpotifyTrack(track);
         });
       });
     } catch (ex) {

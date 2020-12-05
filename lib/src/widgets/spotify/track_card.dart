@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/cache_store.dart';
+import 'package:tagify/src/state/firebase_store.dart';
 import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
@@ -18,7 +18,7 @@ class TrackCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Consumer<CacheStore>(
+  Widget build(BuildContext context) => Consumer<FirebaseStore>(
     builder: (_, store, __) => draggable && Utils.isBigScreen(context) ?
       Draggable(
         data: id,

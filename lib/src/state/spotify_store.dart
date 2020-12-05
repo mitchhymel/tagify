@@ -9,6 +9,8 @@ import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/utils/utils.dart';
 
+spot.SpotifyApi spotify;
+
 class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_CREDS';
   spot.SpotifyApiCredentials _credentials;
@@ -33,9 +35,6 @@ class SpotifyStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  spot.SpotifyApi _spotify;
-  spot.SpotifyApi get spotify => _spotify;
-
   spot.User _user;
   spot.User get user => _user;
 
@@ -58,7 +57,7 @@ class SpotifyStore extends ChangeNotifier {
   Map<String, List<TrackCacheKey>> _playlistIdToTracks = {};
   Map<String, List<TrackCacheKey>> get playlistIdToTracks => _playlistIdToTracks;
 
-  bool get loggedIn => _spotify != null && _user != null;
+  bool get loggedIn => spotify != null && _user != null;
 
   SpotifyStore() {
     _credentials =
@@ -77,7 +76,7 @@ class SpotifyStore extends ChangeNotifier {
       return;
     }
 
-    _spotify = spot.SpotifyApi.withRefreshCallback(creds, (c) async {
+    spotify = spot.SpotifyApi.withRefreshCallback(creds, (c) async {
       await _cacheCreds(creds: c);
     });
     await _afterLogin();
@@ -85,7 +84,7 @@ class SpotifyStore extends ChangeNotifier {
 
   Future<void> loginFromRedirectUri(Uri responseUri) async {
     _responseUri = responseUri;
-    _spotify = spot.SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
+    spotify = spot.SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
 
     await _cacheCreds();
     await _afterLogin();
@@ -100,7 +99,7 @@ class SpotifyStore extends ChangeNotifier {
 
     _playlists.clear();
     _user = null;
-    _spotify = null;
+    spotify = null;
     notifyListeners();
   }
 
@@ -110,7 +109,7 @@ class SpotifyStore extends ChangeNotifier {
   Future<bool> _ensureValidCreds() async {
     bool tryRefreshCreds = false;
     try {
-      _user = await _spotify.me.get();
+      _user = await spotify.me.get();
       return true;
     } catch (ex) {
       if (ex is AuthorizationException) {
@@ -124,14 +123,14 @@ class SpotifyStore extends ChangeNotifier {
 
     if (tryRefreshCreds) {
       try {
-        await _spotify.client.refreshCredentials();
+        await spotify.client.refreshCredentials();
       } catch (ex) {
         logError('Exception when trying to refresh creds: $ex');
         return false;
       }
 
       try {
-        _user = await _spotify.me.get();
+        _user = await spotify.me.get();
         return true;
       } catch (ex) {
         logError('Exception when trying to get me after refreshing creds: $ex');
@@ -159,7 +158,7 @@ class SpotifyStore extends ChangeNotifier {
 
   Future<void> _cacheCreds({spot.SpotifyApiCredentials creds}) async {
     if (creds == null) {
-      creds = await _spotify.getCredentials();
+      creds = await spotify.getCredentials();
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool res = await prefs.setString(_cachedCredsKey, creds.toJson());
@@ -182,7 +181,7 @@ class SpotifyStore extends ChangeNotifier {
   }
 
   Future<void> refreshPlaylists() async {
-    var results = await _spotify.playlists.me.all();
+    var results = await spotify.playlists.me.all();
     _playlists = results.toList();
     notifyListeners();
   }
@@ -202,7 +201,7 @@ class SpotifyStore extends ChangeNotifier {
 
     _playlistIdToTracks[_selectedPlaylist.id] = [];
     log('Fetching tracks for spotify playlist "${other.name}"');
-    var tracks = await _spotify.playlists.getTracksByPlaylistId(_selectedPlaylist.id).all();
+    var tracks = await spotify.playlists.getTracksByPlaylistId(_selectedPlaylist.id).all();
     for (var track in tracks) {
       var key = new TrackCacheKey(
         name: track.name,
@@ -222,7 +221,7 @@ class SpotifyStore extends ChangeNotifier {
   Future<List<TrackCacheItem>> search(String query, int page) async {
 
     List<TrackCacheItem> results = [];
-    var res = await _spotify.search
+    var res = await spotify.search
       .get(query, types: [spot.SearchType.track])
       .getPage(25, page);
     res.forEach((p) {
