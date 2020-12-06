@@ -6,7 +6,7 @@ const RESOURCES = {
   "assets/AssetManifest.json": "e761bc6879ac01d01e872702a5c067ca",
 "assets/FontManifest.json": "f67cebcedcf99eaf92fab8686f965661",
 "assets/fonts/MaterialIcons-Regular.otf": "132a5e63b5e510933ab4845577716106",
-"assets/NOTICES": "8471ebfe56c62f15588e5adf8064793f",
+"assets/NOTICES": "be99894cd92ded965da79d699362d955",
 "assets/packages/flutter_icons/fonts/AntDesign.ttf": "3a2ba31570920eeb9b1d217cabe58315",
 "assets/packages/flutter_icons/fonts/Entypo.ttf": "744ce60078c17d86006dd0edabcd59a7",
 "assets/packages/flutter_icons/fonts/EvilIcons.ttf": "140c53a7643ea949007aa9a282153849",
@@ -26,9 +26,9 @@ const RESOURCES = {
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
-"index.html": "ccbe8e8ceead97de7fa8b0094e9b2a82",
-"/": "ccbe8e8ceead97de7fa8b0094e9b2a82",
-"main.dart.js": "66cb53a9cc16fa5f77372b1092c1aac4",
+"index.html": "a23bffd9c7d3e3e8a7772107bd5db52c",
+"/": "a23bffd9c7d3e3e8a7772107bd5db52c",
+"main.dart.js": "c11ef738ebec9685cc6e565acb64376c",
 "manifest.json": "f0a4265451538c94c6d7ae97d5b56db2",
 "version.json": "3c992be0ec708c6c2de99296fd6f1891"
 };

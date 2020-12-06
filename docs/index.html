@@ -17,10 +17,10 @@
   <title>tagify</title>
   <link rel="manifest" href="manifest.json">
   <!-- The core Firebase JS SDK (always required for using any firebase service) -->
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-functions.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.1.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.1.2/firebase-functions.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.1.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.1.2/firebase-analytics.js"></script>
   <meta name="google-signin-client_id" content="630090769025-jskt0ftrojfvh11kao6j3th08qltl23j.apps.googleusercontent.com" />
 
 </head>
@@ -32,7 +32,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('flutter-first-frame', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=27549980');
+        navigator.serviceWorker.register('flutter_service_worker.js?v=2929589017');
       });
     }
   </script>
@@ -47,9 +47,9 @@
       appId: "1:630090769025:web:cae0f5cda90ee7a9972380",
       measurementId: "G-LK7RZRB7BJ"
     };
-
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-    // firebase.analytics();
+    firebase.analytics();
   </script>
   <script>
     var str = window.location.href;
