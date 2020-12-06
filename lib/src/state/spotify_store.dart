@@ -11,7 +11,9 @@ import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/state/search_store.dart';
 import 'package:tagify/src/utils/utils.dart';
 
-spot.SpotifyApi spotify;
+// have global spotify api for non user uses
+spot.SpotifyApi spotify = new spot.SpotifyApi(
+    spot.SpotifyApiCredentials(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET));
 
 class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_CREDS';
@@ -59,7 +61,8 @@ class SpotifyStore extends ChangeNotifier {
   Map<String, List<String>> _playlistIdToTracks = {};
   Map<String, List<String>> get playlistIdToTracks => _playlistIdToTracks;
 
-  bool get loggedIn => spotify != null && _user != null;
+  spot.SpotifyApi _spotify;
+  bool get loggedIn => _spotify != null && _user != null;
 
   SpotifyStore() {
     _credentials =
@@ -78,15 +81,13 @@ class SpotifyStore extends ChangeNotifier {
       return;
     }
 
-    spotify = spot.SpotifyApi.withRefreshCallback(creds, (c) async {
-      await _cacheCreds(creds: c);
-    });
+    _spotify = spot.SpotifyApi(creds);
     await _afterLogin();
   }
 
   Future<void> loginFromRedirectUri(Uri responseUri) async {
     _responseUri = responseUri;
-    spotify = spot.SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
+    _spotify = spot.SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
 
     await _cacheCreds();
     await _afterLogin();
@@ -101,7 +102,7 @@ class SpotifyStore extends ChangeNotifier {
 
     _playlists.clear();
     _user = null;
-    spotify = null;
+    _spotify = null;
     notifyListeners();
   }
 
@@ -111,7 +112,7 @@ class SpotifyStore extends ChangeNotifier {
   Future<bool> _ensureValidCreds() async {
     bool tryRefreshCreds = false;
     try {
-      _user = await spotify.me.get();
+      _user = await _spotify.me.get();
       return true;
     } catch (ex) {
       if (ex is AuthorizationException) {
@@ -125,14 +126,14 @@ class SpotifyStore extends ChangeNotifier {
 
     if (tryRefreshCreds) {
       try {
-        await spotify.client.refreshCredentials();
+        await _spotify.client.refreshCredentials();
       } catch (ex) {
         logError('Exception when trying to refresh creds: $ex');
         return false;
       }
 
       try {
-        _user = await spotify.me.get();
+        _user = await _spotify.me.get();
         return true;
       } catch (ex) {
         logError('Exception when trying to get me after refreshing creds: $ex');
@@ -160,7 +161,7 @@ class SpotifyStore extends ChangeNotifier {
 
   Future<void> _cacheCreds({spot.SpotifyApiCredentials creds}) async {
     if (creds == null) {
-      creds = await spotify.getCredentials();
+      creds = await _spotify.getCredentials();
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool res = await prefs.setString(_cachedCredsKey, creds.toJson());
@@ -183,7 +184,7 @@ class SpotifyStore extends ChangeNotifier {
   }
 
   Future<void> refreshPlaylists() async {
-    var results = await spotify.playlists.me.all();
+    var results = await _spotify.playlists.me.all();
     _playlists = results.toList();
     notifyListeners();
   }
@@ -204,7 +205,7 @@ class SpotifyStore extends ChangeNotifier {
 
     _playlistIdToTracks[_selectedPlaylist.id] = [];
     log('Fetching tracks for spotify playlist "${other.name}"');
-    var tracks = await spotify.playlists.getTracksByPlaylistId(_selectedPlaylist.id).all();
+    var tracks = await _spotify.playlists.getTracksByPlaylistId(_selectedPlaylist.id).all();
     for (var track in tracks) {
       var item = TrackCacheItem.fromSpotifyTrack(track);
       cache([item]);
@@ -236,7 +237,7 @@ class SpotifyStore extends ChangeNotifier {
 
   Future<List<TrackCacheItem>> getHistory(int page) async {
     List<TrackCacheItem> results = [];
-    var res = await spotify.me.recentlyPlayed();
+    var res = await _spotify.me.recentlyPlayed();
     for (var p in res) {
       var track = await spotify.tracks.get(p.track.id);
       var item = TrackCacheItem.fromSpotifyTrack(track);

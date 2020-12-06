@@ -5,7 +5,6 @@ import 'package:tagify/src/state/firebase_store.dart';
 import 'package:tagify/src/state/playlist_create_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 import 'package:tagify/src/utils/utils.dart';
-import 'package:tagify/src/widgets/settings/spotify_account_widget.dart';
 
 class PlaylistCreateButton extends StatelessWidget {
 

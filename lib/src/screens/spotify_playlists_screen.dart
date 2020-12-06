@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';
-import 'package:tagify/src/widgets/settings/spotify_account_widget.dart';
+import 'package:tagify/src/widgets/spotify/spotify_account_required.dart';
 import 'package:tagify/src/widgets/spotify_playlist/spotify_filter_playlists_controls.dart';
 import 'package:tagify/src/widgets/spotify_playlist/spotify_playlist_list.dart';
 import 'package:tagify/src/widgets/spotify_playlist/spotify_playlist_track_list.dart';
@@ -11,14 +11,13 @@ import 'package:tagify/src/widgets/spotify_playlist/spotify_playlist_track_list.
 class SpotifyPlaylistsScreen extends StatelessWidget {
 
   @override
-  Widget build(BuildContext context) => Consumer<SpotifyStore>(
-    builder: (_, store, __) => !store.loggedIn ? SpotifyAccountWidget() :
-    Stack(
+  Widget build(BuildContext context) => SpotifyAccountRequired(
+    child: Stack(
       children: [
         if(!Utils.isBigScreen(context)) Column(
           children: [
             SpotifyFilterPlaylistsControls(),
-            CustomLoadingIndicator(store.fetchingPlaylist),
+            PlaylistFetchLoadingIndicator(),
             Container(
               constraints: BoxConstraints(
                 maxHeight: 100,
@@ -48,7 +47,7 @@ class SpotifyPlaylistsScreen extends StatelessWidget {
               flex: 3,
               child: Column(
                   children: [
-                    CustomLoadingIndicator(store.fetchingPlaylist),
+                    PlaylistFetchLoadingIndicator(),
                     Expanded(
                       child: SpotifyPlaylistTrackList(),
                     )
@@ -60,9 +59,11 @@ class SpotifyPlaylistsScreen extends StatelessWidget {
         Positioned(
           right: 10,
           bottom: 10,
-          child: FloatingActionButton(
-            onPressed: store.refreshPlaylists,
-            child: Icon(Icons.refresh),
+          child: Consumer<SpotifyStore>(
+            builder: (_, store, __) => FloatingActionButton(
+              onPressed: store.refreshPlaylists,
+              child: Icon(Icons.refresh),
+            )
           )
         )
       ],

@@ -12,9 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
   spotify:
-    git:
-      url: https://github.com/stefanoromanello/spotify-dart.git
-      ref: c514a9816f70f14d767a597d201222e9f567e649
   provider:
   oauth2:
   shared_preferences:

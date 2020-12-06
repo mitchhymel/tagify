@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/firebase_store.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
@@ -10,9 +11,14 @@ class FirebaseAccountWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Consumer<FirebaseStore>(
     builder: (_, store, __) => !store.loggedIn ?
-      ElevatedButton(
-        child: Text('Login with Google'),
+      ElevatedButton.icon(
+        icon: Icon(FontAwesome.google),
+        label: Text('Login with Google'),
         onPressed: () => store.signInWithGoogle(),
+        style: ButtonStyle(
+          padding: MaterialStateProperty.all(EdgeInsets.all(20)),
+          backgroundColor: MaterialStateProperty.all(Colors.redAccent),
+        ),
       ) :
       CustomCard(
         child: Column(

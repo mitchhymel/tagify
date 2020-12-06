@@ -6,11 +6,12 @@ import 'package:tagify/src/state/history_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';
 import 'package:tagify/src/widgets/history/history_list.dart';
+import 'package:tagify/src/widgets/spotify/spotify_account_required.dart';
 
 class HistoryScreen extends StatelessWidget {
 
   @override
-  Widget build(BuildContext context) => Stack(
+  Widget build(BuildContext context) => SpotifyAccountRequired(child: Stack(
     children: [
       Column(
         children: [
@@ -41,5 +42,5 @@ class HistoryScreen extends StatelessWidget {
         )
       )
     ],
-  );
+  ));
 }

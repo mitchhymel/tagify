@@ -134,31 +134,41 @@ class FirebaseStore extends ChangeNotifier {
         _tagToTracks[e.key] = e.value.map((x) => x.toString()).toSet();
       });
 
-      _tagToTracks.entries.forEach((e) {
-        e.value.forEach((t) {
-          if (!_trackToTags.containsKey(t)) {
-            _trackToTags[t] = new Set<String>();
+      for (var e in _tagToTracks.entries) {
+        for (var track in e.value) {
+          if (!_trackToTags.containsKey(track)) {
+            _trackToTags[track] = new Set<String>();
           }
 
-          _trackToTags[t].add(e.key);
-        });
+          _trackToTags[track].add(e.key);
+        }
 
-        _trackToTags.keys.forEach((e) async {
-          if (!_trackCache.containsKey(e)) {
-            var track = await spotify.tracks.get(e);
-            _trackCache[e] = TrackCacheItem.fromSpotifyTrack(track);
+        for (var track in _trackToTags.keys) {
+          if (!_trackCache.containsKey(track)) {
+            try {
+              var t = await spotify.tracks.get(track);
+              _trackCache[track] = TrackCacheItem.fromSpotifyTrack(t);
+            }
+            catch (ex) {
+              logError('Error when fetching tags $ex');
+              success = false;
+              break;
+            }
           }
+        }
+      }
 
-        });
-      });
     } catch (ex) {
-      log('Error when fetching tags: $ex');
+      logError('Error when fetching tags: $ex');
       success = false;
     }
 
     // log(_tagToTracks);
     // log(_trackToTags);
 
+    if (_tagToTracks.isNotEmpty) {
+      _selectedTag = _tagToTracks.keys.first;
+    }
     _fetching = false;
     notifyListeners();
     return success;
@@ -220,14 +230,14 @@ class FirebaseStore extends ChangeNotifier {
         log('Successfully $op tags $tags from $tracks');
       }
       else {
-        log('Error when $op tags: ${results.data}');
+        logError('Error when $op tags: ${results.data}');
         //revert state
         _trackToTags = beforeTrack;
         _tagToTracks = beforeTags;
         success = false;
       }
     } catch (ex) {
-      log('Error when $op tags: $ex');
+      logError('Error when $op tags: $ex');
       success = false;
     }
 

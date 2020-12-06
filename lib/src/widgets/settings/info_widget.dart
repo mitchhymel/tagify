@@ -18,7 +18,7 @@ class InfoWidget extends StatelessWidget {
     label: Text('Checkout the source on github!'),
     style: ButtonStyle(
       padding: MaterialStateProperty.all(EdgeInsets.all(20)),
-      backgroundColor: MaterialStateProperty.all(Colors.green),
+      backgroundColor: MaterialStateProperty.all(Colors.blueAccent),
     ),
   ) : IconButton(
     onPressed: _onPressed,

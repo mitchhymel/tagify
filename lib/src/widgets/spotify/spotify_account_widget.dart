@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:flutter/foundation.dart';
@@ -15,43 +16,54 @@ class SpotifyAccountWidget extends StatelessWidget {
     builder: (_, store, child) {
 
       if (!store.loggedIn) {
-        return CustomCard(child: Row(
-          children: [
-            ElevatedButton(
-              child: Text('Launch window to login to Spotify'),
-              onPressed: () async {
-                if (kIsWeb) {
-                  StreamSubscription<html.MessageEvent> sub;
-                  sub = html.window.onMessage.listen((event) {
-                    if (Utils.redirectUriForSpotify(event)) {
-                      // the event.data is the callback url we need
-                      // pass it to the store
-                      var uri = Uri.parse(event.data.toString());
-                      store.loginFromRedirectUri(uri);
-                      sub.cancel();
-                    }
-                    else {
-                      print(event.origin);
-                    }
-                  });
-
-                  if (await canLaunch(store.authUri.toString())) {
-                    await launch(store.authUri.toString());
-                  }
-                  else {
-                    print('Could not launch url');
-                  }
+        var button = ElevatedButton.icon(
+          icon: Icon(FontAwesome.spotify),
+          label: Text('Login to Spotify'),
+          style: ButtonStyle(
+            padding: MaterialStateProperty.all(EdgeInsets.all(20)),
+            backgroundColor: MaterialStateProperty.all(Colors.green),
+          ),
+          onPressed: () async {
+            if (kIsWeb) {
+              StreamSubscription<html.MessageEvent> sub;
+              sub = html.window.onMessage.listen((event) {
+                if (Utils.redirectUriForSpotify(event)) {
+                  // the event.data is the callback url we need
+                  // pass it to the store
+                  var uri = Uri.parse(event.data.toString());
+                  store.loginFromRedirectUri(uri);
+                  sub.cancel();
                 }
                 else {
-                  if (await canLaunch(store.authUri.toString())) {
-                    await launch(store.authUri.toString());
-                  }
-                  else {
-                    print('Could not launch url');
-                  }
+                  print(event.origin);
                 }
+              });
+
+              if (await canLaunch(store.authUri.toString())) {
+                await launch(store.authUri.toString());
               }
-            ),
+              else {
+                print('Could not launch url');
+              }
+            }
+            else {
+              if (await canLaunch(store.authUri.toString())) {
+                await launch(store.authUri.toString());
+              }
+              else {
+                print('Could not launch url');
+              }
+            }
+          }
+        );
+
+        if (kIsWeb) {
+          return button;
+        }
+
+        return CustomCard(child: Row(
+          children: [
+            button,
             if (!kIsWeb) Container(width: 10, height: 1),
             if (!kIsWeb) Expanded(
               child: TextField(
@@ -84,8 +96,8 @@ class SpotifyAccountWidget extends StatelessWidget {
             ),
           ),
           RaisedButton(
-              child: Text('Logout from Spotify'),
-              onPressed: () => store.logout()
+            child: Text('Logout from Spotify'),
+            onPressed: () => store.logout()
           ),
         ],
       ));

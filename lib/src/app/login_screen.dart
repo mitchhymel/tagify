@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:tagify/src/widgets/settings/firebase_account_widget.dart';
+import 'package:tagify/src/widgets/firebase/firebase_account_widget.dart';
 import 'package:tagify/src/widgets/settings/info_widget.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -19,7 +19,7 @@ class LoginScreen extends StatelessWidget {
                 )
               ),
               Container(height: 5),
-              Text('An app made with flutter to add tags to songs and create playlists on spotify from the tags.',
+              Text('An app to add tags to songs and create playlists on spotify from the tags.',
                 style: TextStyle(
                   color: Colors.grey,
                 )

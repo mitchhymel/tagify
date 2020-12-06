@@ -24,7 +24,7 @@ class SearchTracksControls extends HookWidget {
                 onChanged: (x) => search.query = x,
                 onSubmitted: (x) => search.search(0, spotify.search, firebase.addAllToCache),
                 decoration: InputDecoration(
-                  hintText: 'Search by track name',
+                  hintText: 'Search for tracks to tag by name, artist, or album',
                 )
               )
             ),
