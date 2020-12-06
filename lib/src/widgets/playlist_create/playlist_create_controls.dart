@@ -1,12 +1,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/lastfm_store.dart';
-import 'package:tagify/src/state/spotify_store.dart';
-import 'package:tagify/src/utils/utils.dart';
+import 'package:tagify/src/state/playlist_create_store.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 import 'package:tagify/src/widgets/common/custom_text_field.dart';
 import 'package:tagify/src/widgets/common/tag_chip_list.dart';
+import 'package:tagify/src/widgets/playlist_create/playlist_create_button.dart';
 
 class PlaylistCreateControls extends StatelessWidget {
 
@@ -15,12 +14,12 @@ class PlaylistCreateControls extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Consumer<LastFmStore>(
+        Consumer<PlaylistCreateStore>(
           builder: (_, store, __) => IntrinsicWidth(
             child: CheckboxListTile(
               title: Text('Must have ALL tags'),
-              value: store.mustHaveAllWithTags,
-              onChanged: (v) => store.mustHaveAllWithTags = v,
+              value: store.mustHaveAllIncludeTags,
+              onChanged: (v) => store.mustHaveAllIncludeTags = v,
             ),
           )
         ),
@@ -29,11 +28,11 @@ class PlaylistCreateControls extends StatelessWidget {
           children: [
             Text('Include tracks with tags:'),
             Container(width: 10),
-            Consumer<LastFmStore>(
+            Consumer<PlaylistCreateStore>(
               builder: (_, store, __) => TagChipList(
-                tags: store.withTags,
-                onAddTag: store.addWithTag,
-                onRemoveTag: store.removeWithTag,
+                tags: store.includeTags,
+                onAddTag: store.addIncludeTag,
+                onRemoveTag: store.removeIncludeTag,
               )
             )
           ],
@@ -44,11 +43,11 @@ class PlaylistCreateControls extends StatelessWidget {
           children: [
             Text('Exclude tracks with tags:'),
             Container(width: 10),
-            Consumer<LastFmStore>(
+            Consumer<PlaylistCreateStore>(
               builder: (_, store, __) => TagChipList(
-                tags: store.withoutTags,
-                onAddTag: store.addWithoutTag,
-                onRemoveTag: store.removeWithoutTag,
+                tags: store.excludeTags,
+                onAddTag: store.addExcludeTag,
+                onRemoveTag: store.removeExcludeTag,
               )
             )
           ],
@@ -58,7 +57,7 @@ class PlaylistCreateControls extends StatelessWidget {
           children: [
             Text('Playlist name: '),
             Container(width: 10),
-            Consumer<LastFmStore>(
+            Consumer<PlaylistCreateStore>(
               builder: (_, store, __) => Expanded(
                 child: CustomTextField(
                   hint: 'Enter playlist name',
@@ -71,57 +70,7 @@ class PlaylistCreateControls extends StatelessWidget {
           ],
         ),
         Container(height: 10),
-        Consumer2<LastFmStore, SpotifyStore>(
-          builder: (_, lastfm, spot, __) => ElevatedButton(
-            child: Text('Start creating playlist of ${lastfm.playlistTracks.length} tracks'),
-            onPressed: lastfm.playlistTracks.length > 0
-                && lastfm.playlistName.isNotEmpty ? () async {
-
-              var playlist = spot.playlists.where((p)
-                => p.name == lastfm.playlistName);
-              if (playlist != null && playlist.isNotEmpty) {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    content: Text('A playlist named "${playlist.first.name}" with tracks already exists'),
-                    actions: [
-                      FlatButton(
-                        child: Text('Cancel'),
-                        onPressed: () => Navigator.pop(context, false),
-                      ),
-                      Container(width: 10),
-                      FlatButton(
-                        child: Text('Create new playlist with the same name'),
-                        onPressed: () async {
-                          Navigator.pop(context, false);
-
-                          bool success = await lastfm.createPlaylist(
-                              spot.user.id, spotify);
-                          if (success) {
-                            Utils.showSnackBar(context, 'Successfully created playlist');
-                          }
-                        }
-                      ),
-                      FlatButton(
-                        child: Text('Update existing playlist'),
-                        onPressed: () async {
-
-                        }
-                      )
-                    ]
-                  )
-                );
-              }
-              else {
-                bool success = await lastfm.createPlaylist(
-                    spot.user.id, spotify);
-                if (success) {
-                  Utils.showSnackBar(context, 'Successfully created playlist');
-                }
-              }
-            } : null,
-          )
-        )
+        PlaylistCreateButton(),
       ],
     )
   );

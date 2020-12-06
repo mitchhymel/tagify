@@ -6,6 +6,7 @@ import 'package:tagify/src/state/firebase_store.dart';
 import 'package:tagify/src/state/history_store.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/state/playlist_create_store.dart';
 import 'package:tagify/src/state/queue_store.dart';
 import 'package:tagify/src/state/search_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
@@ -23,6 +24,7 @@ class App extends StatelessWidget {
       ChangeNotifierProvider<SearchStore>(create: (_) => SearchStore()),
       ChangeNotifierProvider<HistoryStore>(create: (_) => HistoryStore()),
       ChangeNotifierProvider<QueueStore>(create: (_) => QueueStore()),
+      ChangeNotifierProvider<PlaylistCreateStore>(create: (_) => PlaylistCreateStore()),
     ],
     child: MaterialApp(
       title: 'Tagify',

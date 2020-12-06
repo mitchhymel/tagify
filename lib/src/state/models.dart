@@ -27,7 +27,7 @@ class TrackCacheItem {
     name=track.name,
     artist=track.artists.first.name,
     album=track.album.name,
-    imageUrl=track.album.images[0].url,
+    imageUrl=track.album.images[1].url,
     externalUrl=track.uri;
 
   TrackCacheItem copyWith({
