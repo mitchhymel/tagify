@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:tagify/src/widgets/settings/firebase_account_widget.dart';
 import 'package:tagify/src/widgets/settings/info_widget.dart';
-import 'package:tagify/src/widgets/settings/lastfm_account_widget.dart';
 
 class LoginScreen extends StatelessWidget {
 
@@ -20,13 +19,12 @@ class LoginScreen extends StatelessWidget {
                 )
               ),
               Container(height: 5),
-              Text('An app made with flutter to bulk tag songs on lastfm and make playlists on spotify based on tags. You have to login with LastFm to use this app.',
+              Text('An app made with flutter to add tags to songs and create playlists on spotify from the tags.',
                 style: TextStyle(
                   color: Colors.grey,
                 )
               ),
               Container(height: 10),
-              //LastFmAccountWidget(),
               FirebaseAccountWidget(),
             ],
           ),

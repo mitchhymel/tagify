@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/firebase_store.dart';
-import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/queue_store.dart';
 import 'package:tagify/src/widgets/common/queue_controls.dart';
 

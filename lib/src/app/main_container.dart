@@ -109,30 +109,30 @@ class MainContainerState extends State<MainContainer> {
     _checkAndUpdateRailItemsBasedOnWidth(context);
     return Scaffold(
       body: SafeArea(
-          child: Row(
-              children: [
-                if (Utils.isBigScreen(context)) NavigationRail(
-                  selectedIndex: selectedIndex,
-                  onDestinationSelected: (int index) {
-                    setState((){
-                      selectedIndex = index;
-                    });
-                  },
-                  labelType: NavigationRailLabelType.selected,
-                  destinations: railItems.map((e) => e.toDestination()).toList(),
-                ),
-                if (Utils.isBigScreen(context)) VerticalDivider(thickness: 1, width: 1),
-                Flexible(
-                    flex: 2,
-                    child: railItems[selectedIndex].builder(context)
-                ),
-                if (Utils.isBigScreen(context) && showSidebar) VerticalDivider(thickness: 2, width: 2),
-                if (Utils.isBigScreen(context) && showSidebar) Flexible(
-                  flex: 1,
-                  child: QueueScreen(),
-                )
-              ]
-          )
+        child: Row(
+          children: [
+            if (Utils.isBigScreen(context)) NavigationRail(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (int index) {
+                setState((){
+                  selectedIndex = index;
+                });
+              },
+              labelType: NavigationRailLabelType.selected,
+              destinations: railItems.map((e) => e.toDestination()).toList(),
+            ),
+            if (Utils.isBigScreen(context)) VerticalDivider(thickness: 1, width: 1),
+            Flexible(
+              flex: 2,
+              child: railItems[selectedIndex].builder(context)
+            ),
+            if (Utils.isBigScreen(context) && showSidebar) VerticalDivider(thickness: 2, width: 2),
+            if (Utils.isBigScreen(context) && showSidebar) Flexible(
+              flex: 1,
+              child: QueueScreen(),
+            )
+          ]
+        )
       ),
       bottomNavigationBar: Utils.isBigScreen(context)  ? null : BottomNavigationBar(
         items: railItems.map((e) => e.toItem()).toList(),

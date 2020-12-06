@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotify/spotify.dart' as spot;
 import 'package:tagify/src/state/firebase_store.dart';
-import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';

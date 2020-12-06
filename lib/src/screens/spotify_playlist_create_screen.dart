@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/playlist_create_store.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';

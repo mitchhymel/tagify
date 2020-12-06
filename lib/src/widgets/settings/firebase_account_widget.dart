@@ -31,7 +31,7 @@ class FirebaseAccountWidget extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              child: Text('Logout'),
+              child: Text('Logout from Tagify'),
               onPressed: () => store.signOutWithGoogle(),
             )
           ],

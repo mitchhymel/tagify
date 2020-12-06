@@ -1,9 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:lastfm/lastfm_api.dart';
 import 'package:provider/provider.dart';
-import 'package:tagify/src/state/lastfm_store.dart';
-import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/state/queue_store.dart';
 
 typedef DropTargetCallback<T> = void Function(DragTargetDetails<T>);
@@ -43,31 +40,5 @@ class WrapDropTargetTrack extends StatelessWidget {
       ),
       onAcceptWithDetails: (details) => store.addTracksToQueue(details.data),
     ),
-  );
-}
-
-class WrapDropTargetArtist extends StatelessWidget {
-  final Widget child;
-  WrapDropTargetArtist({@required this.child});
-
-  @override
-  Widget build(BuildContext context) => Consumer<LastFmStore>(
-      builder: (_, store, c) => WrapDropTarget<Artist>(
-        child: child,
-        onAcceptWithDetails: (details) => store.addArtistToQueue(details.data),
-      )
-  );
-}
-
-class WrapDropTargetAlbum extends StatelessWidget {
-  final Widget child;
-  WrapDropTargetAlbum({@required this.child});
-
-  @override
-  Widget build(BuildContext context) => Consumer<LastFmStore>(
-      builder: (_, store, c) => WrapDropTarget<Album>(
-        child: child,
-        onAcceptWithDetails: (details) => store.addAlbumToQueue(details.data),
-      )
   );
 }
