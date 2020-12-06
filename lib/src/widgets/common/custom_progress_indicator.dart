@@ -7,11 +7,13 @@ class CustomProgressIndicator extends StatelessWidget {
   final bool showText;
   final int progressSoFar;
   final int totalProgress;
+  final bool spin;
 
   CustomProgressIndicator({
     this.showText=true,
     @required this.progressSoFar,
     @required this.totalProgress,
+    this.spin=true,
   });
 
   @override
@@ -22,7 +24,7 @@ class CustomProgressIndicator extends StatelessWidget {
       IntrinsicHeight(
         child: LinearProgressIndicator(
           minHeight: 8,
-          value: totalProgress == 0 ? 0 : progressSoFar / totalProgress,
+          value: spin ? null : totalProgress == 0 ? 0 : progressSoFar / totalProgress,
           valueColor: AlwaysStoppedAnimation<Color>(Colors.green)
         ),
       ),

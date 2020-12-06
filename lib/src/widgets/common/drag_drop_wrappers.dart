@@ -4,6 +4,7 @@ import 'package:lastfm/lastfm_api.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/lastfm_store.dart';
 import 'package:tagify/src/state/models.dart';
+import 'package:tagify/src/state/queue_store.dart';
 
 typedef DropTargetCallback<T> = void Function(DragTargetDetails<T>);
 class WrapDropTarget<T> extends StatelessWidget {
@@ -34,9 +35,9 @@ class WrapDropTargetTrack extends StatelessWidget {
   WrapDropTargetTrack({@required this.child});
 
   @override
-  Widget build(BuildContext context) => Consumer<LastFmStore>(
-    builder: (_, store, c) => WrapDropTarget<List<TrackCacheKey>>(
-      child: WrapDropTarget<TrackCacheKey>(
+  Widget build(BuildContext context) => Consumer<QueueStore>(
+    builder: (_, store, c) => WrapDropTarget<List<String>>(
+      child: WrapDropTarget<String>(
         child: child,
         onAcceptWithDetails: (details) => store.addTrackToQueue(details.data),
       ),

@@ -5,11 +5,10 @@ import 'package:tagify/src/widgets/common/tag_chip_list.dart';
 
 import 'custom_card.dart';
 
-class QueueControls extends StatefulWidget {
+
+class QueueControls extends StatelessWidget {
   final Function start;
-  final Function stop;
   final Function startRemove;
-  final Function stopRemove;
   final Function clearQueue;
   final int totalProgress;
   final int progressSoFar;
@@ -24,35 +23,10 @@ class QueueControls extends StatefulWidget {
     @required this.showProgress,
     @required this.clearQueue,
     @required this.start,
-    @required this.stop,
     @required this.startRemove,
-    @required this.stopRemove,
     this.totalProgress=1,
     this.progressSoFar=0,
   });
-
-  @override
-  State createState() => _QueueControlsState();
-}
-
-class _QueueControlsState extends State<QueueControls> {
-
-  TextEditingController controller;
-  FocusNode focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = new TextEditingController();
-    focusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    focusNode?.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) => CustomCard(
@@ -61,9 +35,9 @@ class _QueueControlsState extends State<QueueControls> {
       children: [
         Expanded(
           child: TagChipList(
-            tags: widget.tags,
-            onRemoveTag: widget.onRemoveTag,
-            onAddTag: widget.onAddTag,
+            tags: tags,
+            onRemoveTag: onRemoveTag,
+            onAddTag: onAddTag,
           ),
         ),
         Container(height: 10),
@@ -72,34 +46,31 @@ class _QueueControlsState extends State<QueueControls> {
             children: [
               ElevatedButton(
                 child: Icon(Icons.clear_all),
-                onPressed: widget.showProgress ? null : widget.clearQueue,
+                onPressed: showProgress ? null : clearQueue,
               ),
               Flexible(child: Container()),
               ElevatedButton.icon(
                 label: Text('Remove Tags'),
-                icon: Icon(widget.showProgress ? Icons.pause : Icons.delete),
-                onPressed: widget.tags.isEmpty ? null :
-                  widget.showProgress ? widget.stopRemove : widget.startRemove,
+                icon: Icon(showProgress ? Icons.pause : Icons.delete),
+                onPressed: tags.isEmpty ? null :
+                  showProgress ? null : startRemove,
               ),
-              // ElevatedButton(
-              //   child: Icon(widget.showProgress ? Icons.pause : Icons.delete),
-              //   onPressed: widget.showProgress ? widget.stop : widget.start,
-              // ),
               Flexible(child: Container()),
               ElevatedButton.icon(
                 label: Text('Add Tags'),
-                icon: Icon(widget.showProgress ? Icons.pause : Icons.add),
-                onPressed: widget.tags.isEmpty ? null :
-                  widget.showProgress ? widget.stop : widget.start,
+                icon: Icon(showProgress ? Icons.pause : Icons.add),
+                onPressed: tags.isEmpty ? null :
+                  showProgress ? null : start,
               )
             ],
           ),
         ),
         Container(height: 4),
         CustomProgressIndicator(
-          totalProgress: widget.totalProgress,
-          progressSoFar: widget.progressSoFar,
-        )
+          spin: showProgress,
+          totalProgress: totalProgress,
+          progressSoFar: progressSoFar,
+        ),
       ],
     )
   );

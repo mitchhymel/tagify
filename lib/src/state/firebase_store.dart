@@ -165,14 +165,14 @@ class FirebaseStore extends ChangeNotifier {
   }
 
   Future<bool> addTags(Set<String> tracks, Set<String> tags) async {
-    return _updateTags(true, tracks, tags);
+    return updateTags(true, tracks, tags);
   }
 
   Future<bool> removeTags(Set<String> tracks, Set<String> tags) async {
-    return _updateTags(false, tracks, tags);
+    return updateTags(false, tracks, tags);
   }
 
-  Future<bool> _updateTags(bool add, Set<String> tracks, Set<String> tags) async {
+  Future<bool> updateTags(bool add, Set<String> tracks, Set<String> tags) async {
     _fetching = true;
     notifyListeners();
 
