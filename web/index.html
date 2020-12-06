@@ -37,6 +37,12 @@
     }
   </script>
   <script>
+    // workaround in case user has ad block or blocking tracking
+    if (!firebase.analytics || !navigator.cookieEnabled) {
+      firebase.analytics = function() {};
+    }
+  </script>
+  <script>
     var firebaseConfig = {
       apiKey: "AIzaSyBQW9JysBPoi4-I5X5hq0f1e8aRU1ijcf8",
       authDomain: "tagify-4882e.firebaseapp.com",
