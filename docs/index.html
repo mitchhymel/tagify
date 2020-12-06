@@ -32,14 +32,8 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('flutter-first-frame', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=567256887');
+        navigator.serviceWorker.register('flutter_service_worker.js?v=27549980');
       });
-    }
-  </script>
-  <script>
-    // workaround in case user has ad block or blocking tracking
-    if (!firebase.analytics || !navigator.cookieEnabled) {
-      firebase.analytics = function() {};
     }
   </script>
   <script>
@@ -55,7 +49,7 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
+    // firebase.analytics();
   </script>
   <script>
     var str = window.location.href;
