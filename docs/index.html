@@ -16,17 +16,39 @@
 
   <title>tagify</title>
   <link rel="manifest" href="manifest.json">
+  <!-- The core Firebase JS SDK (always required for using any firebase service) -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-functions.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-auth.js"></script>
+  <meta name="google-signin-client_id" content="630090769025-jskt0ftrojfvh11kao6j3th08qltl23j.apps.googleusercontent.com" />
+
 </head>
 <body>
+
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('flutter-first-frame', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=2799489428');
+        navigator.serviceWorker.register('flutter_service_worker.js?v=1066259116');
       });
     }
+  </script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyBQW9JysBPoi4-I5X5hq0f1e8aRU1ijcf8",
+      authDomain: "tagify-4882e.firebaseapp.com",
+      databaseURL: "https://tagify-4882e.firebaseio.com",
+      projectId: "tagify-4882e",
+      storageBucket: "tagify-4882e.appspot.com",
+      messagingSenderId: "630090769025",
+      appId: "1:630090769025:web:cae0f5cda90ee7a9972380",
+      measurementId: "G-LK7RZRB7BJ"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
   </script>
   <script>
     var str = window.location.href;
