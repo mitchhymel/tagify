@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tagify/src/state/firebase_store.dart';
+import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/state/queue_store.dart';
 import 'package:tagify/src/utils/utils.dart';
@@ -16,7 +17,7 @@ class TrackCard extends StatelessWidget {
 
   _onTap(BuildContext context) {
     var store = Provider.of<QueueStore>(context, listen: false);
-    if (store.trackQueue.containsKey(id)) {
+    if (!store.trackQueue.containsKey(id)) {
       store.addTrackToQueue(id);
     }
     else {
@@ -25,20 +26,20 @@ class TrackCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Consumer<FirebaseStore>(
-    builder: (_, store, __) => draggable && Utils.isBigScreen(context) ?
+  Widget build(BuildContext context) => Consumer2<FirebaseStore, QueueStore>(
+    builder: (_, store, queue,__) => draggable && Utils.isBigScreen(context) ?
       Draggable(
         data: id,
         child: _TrackCardWidget(
           item: store.trackCache[id],
           nowPlaying: false,
-          inQueue: false,
+          inQueue: queue.trackQueue.containsKey(id),
           onTap: () => _onTap(context),
         ),
         feedback: _TrackCardWidget(
           item: store.trackCache[id],
           nowPlaying: false,
-          inQueue: false,
+          inQueue: queue.trackQueue.containsKey(id),
           feedback: true,
           onTap: () => _onTap(context),
         ),
@@ -46,7 +47,7 @@ class TrackCard extends StatelessWidget {
       _TrackCardWidget(
         item: store.trackCache[id],
         nowPlaying: false,
-        inQueue: false,
+        inQueue: queue.trackQueue.containsKey(id),
         onTap: () => _onTap(context),
       ),
   );
