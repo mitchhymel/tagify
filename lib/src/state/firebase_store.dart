@@ -80,6 +80,48 @@ class FirebaseStore extends ChangeNotifier {
     }
   }
 
+  Future<String> signUpWithEmailPassword(String email, String password) async {
+    try {
+      final UserCredential userCred = await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password
+      );
+      _user = userCred.user;
+      await _afterLogin();
+      notifyListeners();
+    } catch (ex) {
+      return 'Error when signing up with email and password: $ex';
+    }
+
+    return null;
+  }
+
+  Future<String> signInWithEmailPassword(String email, String password) async {
+    try {
+      final UserCredential userCred = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password
+      );
+      _user = userCred.user;
+      await _afterLogin();
+      notifyListeners();
+    } catch (ex) {
+      return 'Error when signing in with email and password: $ex';
+    }
+
+    return null;
+  }
+
+  Future<String> sendResetPasswordEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (ex) {
+      return 'Error when trying to send password reset email: $ex';
+    }
+
+    return null;
+  }
+
   Future<bool> signInWithGoogle() async {
 
     final GoogleSignInAccount gsa = await _googleSignIn.signIn();
@@ -102,7 +144,7 @@ class FirebaseStore extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> signOutWithGoogle() async {
+  Future<bool> signOut() async {
     await _googleSignIn.signOut();
     await _auth.signOut();
 

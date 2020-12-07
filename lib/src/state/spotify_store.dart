@@ -119,7 +119,7 @@ class SpotifyStore extends ChangeNotifier {
         tryRefreshCreds = true;
       }
       else {
-        logError('Exception when ensure valid creds: $ex');
+        logError('Spotify - Exception when ensure valid creds: $ex');
         return false;
       }
     }
@@ -128,7 +128,7 @@ class SpotifyStore extends ChangeNotifier {
       try {
         await _spotify.client.refreshCredentials();
       } catch (ex) {
-        logError('Exception when trying to refresh creds: $ex');
+        logError('Spotify - Exception when trying to refresh creds: $ex');
         return false;
       }
 
@@ -136,7 +136,7 @@ class SpotifyStore extends ChangeNotifier {
         _user = await _spotify.me.get();
         return true;
       } catch (ex) {
-        logError('Exception when trying to get me after refreshing creds: $ex');
+        logError('Spotify - Exception when trying to get me after refreshing creds: $ex');
         return false;
       }
     }
