@@ -56,6 +56,9 @@ class LoginWithEmailWidget extends HookWidget {
             TextField(
               controller: passController,
               obscureText: true,
+              onSubmitted: (x) => _onSubmit(context, emailController.text,
+                passController.text, store.signInWithEmailPassword
+              ),
               decoration: InputDecoration(
                 hintText: 'Password'
               ),

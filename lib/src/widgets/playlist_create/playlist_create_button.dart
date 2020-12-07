@@ -23,7 +23,7 @@ class PlaylistCreateButton extends StatelessWidget {
             && store.playlistName.isNotEmpty ? () async {
 
           bool success = await store.createPlaylist(
-              spot.user.id, uris);
+              spot.user.id, uris, spot.authedSpotify);
           if (success) {
             Utils.showSnackBar(context, 'Successfully created playlist');
           }

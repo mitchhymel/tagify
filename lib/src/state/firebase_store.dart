@@ -148,13 +148,14 @@ class FirebaseStore extends ChangeNotifier {
 
   Future<bool> signOut() async {
 
-    try {
-      if (await _googleSignIn.isSignedIn()) {
-        await _googleSignIn.signOut();
-      }
-    } catch (ex) {
-      log('Error when signing out of google: $ex');
-    }
+    // TODO: once googlesignin is fixed, sign out of google
+    // try {
+    //   if (await _googleSignIn.isSignedIn()) {
+    //     await _googleSignIn.signOut();
+    //   }
+    // } catch (ex) {
+    //   log('Error when signing out of google: $ex');
+    // }
 
     await _auth.signOut();
 

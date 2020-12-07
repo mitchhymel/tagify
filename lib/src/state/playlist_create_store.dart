@@ -85,7 +85,7 @@ class PlaylistCreateStore extends ChangeNotifier {
   }
 
 
-  Future<bool> createPlaylist(String userId, List<String> uris) async {
+  Future<bool> createPlaylist(String userId, List<String> uris, SpotifyApi authedSpotify) async {
     _creatingPlaylist = true;
     notifyListeners();
 
@@ -93,10 +93,10 @@ class PlaylistCreateStore extends ChangeNotifier {
 
     Playlist playlist;
     try {
-      playlist = await spotify.playlists.createPlaylist(userId, _playlistName);
+      playlist = await authedSpotify.playlists.createPlaylist(userId, _playlistName);
     }
     catch (ex) {
-      log('Error when creating playlist: $ex');
+      logError('Error when creating playlist: $ex');
       _creatingPlaylist = false;
       notifyListeners();
       return false;
@@ -110,10 +110,10 @@ class PlaylistCreateStore extends ChangeNotifier {
       log('Adding ${subset.length} tracks to "$_playlistName"');
 
       try {
-        await spotify.playlists.addTracks(subset, playlist.id);
+        await authedSpotify.playlists.addTracks(subset, playlist.id);
       }
       catch (ex) {
-        log('Error when adding tracks to playlist: $ex');
+        logError('Error when adding tracks to playlist: $ex');
         _creatingPlaylist = false;
         notifyListeners();
         return false;

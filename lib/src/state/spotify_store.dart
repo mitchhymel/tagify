@@ -63,6 +63,7 @@ class SpotifyStore extends ChangeNotifier {
 
   spot.SpotifyApi _spotify;
   bool get loggedIn => _spotify != null && _user != null;
+  spot.SpotifyApi get authedSpotify => loggedIn ? _spotify : null;
 
   SpotifyStore() {
     _credentials =
@@ -81,7 +82,9 @@ class SpotifyStore extends ChangeNotifier {
       return;
     }
 
-    _spotify = spot.SpotifyApi(creds);
+    _spotify = spot.SpotifyApi.withRefreshCallback(creds, (c) async {
+      await _cacheCreds(creds: c);
+    });
     await _afterLogin();
   }
 
