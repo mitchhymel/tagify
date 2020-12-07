@@ -10,9 +10,9 @@ class Utils {
   static const int IMAGE_QUALITY = 2;
 
   static const String REDIRECT_URI = kDebugMode ? 'http://localhost:3000'
-    : 'https://mitchhymel.github.io/tagify';
+    : 'https://tagify-4882e.web.app';
   static const String _expectedOrigin = kDebugMode ? 'http://localhost:3000'
-    : 'https://mitchhymel.github.io';
+    : 'https://tagify-4882e.web.app';
 
   static bool isBigScreenWithoutContext() {
     return kIsWeb || Platform.isWindows;

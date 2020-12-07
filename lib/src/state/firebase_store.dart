@@ -1,6 +1,4 @@
 
-import 'dart:convert';
-
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,8 +20,7 @@ class FirebaseStore extends ChangeNotifier {
   static const _TRACKS = 'tracks';
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFunctions _functions = kReleaseMode ? FirebaseFunctions.instance
-      : FirebaseFunctions.instance..useFunctionsEmulator(origin: 'http://localhost:5001');
+  final FirebaseFunctions _functions = FirebaseFunctions.instance;
 
   User _user;
   User get user => _user;
@@ -72,6 +69,11 @@ class FirebaseStore extends ChangeNotifier {
 
   Future<void> init() async {
     await Firebase.initializeApp();
+
+    if (kDebugMode) {
+      _functions.useFunctionsEmulator(origin: 'http://localhost:5001');
+    }
+
     if (_auth.currentUser != null) {
       _user = _auth.currentUser;
       notifyListeners();
@@ -145,11 +147,19 @@ class FirebaseStore extends ChangeNotifier {
   }
 
   Future<bool> signOut() async {
-    await _googleSignIn.signOut();
+
+    try {
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.signOut();
+      }
+    } catch (ex) {
+      log('Error when signing out of google: $ex');
+    }
+
     await _auth.signOut();
 
     // clear sharedpreferences
-
+    logStore.clear();
     _user = null;
     notifyListeners();
 
