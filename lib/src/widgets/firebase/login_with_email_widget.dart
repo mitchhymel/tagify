@@ -65,6 +65,7 @@ class LoginWithEmailWidget extends HookWidget {
             ),
             Container(height: 10),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(width: 10),
                 ElevatedButton(
@@ -72,7 +73,7 @@ class LoginWithEmailWidget extends HookWidget {
                   onPressed: () => _onSubmit(context, emailController.text,
                       passController.text, store.signInWithEmailPassword),
                   style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all(Size(175, 40)),
+                    minimumSize: MaterialStateProperty.all(Size(150, 40)),
                   )
                 ),
                 Container(width: 30),
@@ -81,7 +82,7 @@ class LoginWithEmailWidget extends HookWidget {
                   onPressed: () => _onSubmit(context, emailController.text,
                       passController.text, store.signUpWithEmailPassword),
                   style: ButtonStyle(
-                    minimumSize: MaterialStateProperty.all(Size(175, 40)),
+                    minimumSize: MaterialStateProperty.all(Size(150, 40)),
                   )
                 ),
                 Container(width: 10),

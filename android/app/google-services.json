@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "630090769025",
+    "firebase_url": "https://tagify-4882e.firebaseio.com",
+    "project_id": "tagify-4882e",
+    "storage_bucket": "tagify-4882e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:630090769025:android:299e8211b57f01c4972380",
+        "android_client_info": {
+          "package_name": "com.mitchhymel.tagify.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "630090769025-ndr5t937u0jmpus348bkgrjegjpgv2rv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mitchhymel.tagify.app",
+            "certificate_hash": "5e809b36285e227ed7344cc881cdddf04f39093e"
+          }
+        },
+        {
+          "client_id": "630090769025-47fai3i297hc50r6tflgs8l0t6ava4ed.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy86qETTx4U68Db8BsF3ububvbYmakQ-0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "630090769025-47fai3i297hc50r6tflgs8l0t6ava4ed.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,4 @@
-package com.example.tagify
+package com.mitchhymel.tagify.app
 
 import io.flutter.embedding.android.FlutterActivity
 

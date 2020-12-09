@@ -70,7 +70,7 @@ class FirebaseStore extends ChangeNotifier {
   Future<void> init() async {
     await Firebase.initializeApp();
 
-    if (kDebugMode) {
+    if (kDebugMode && kIsWeb) {
       _functions.useFunctionsEmulator(origin: 'http://localhost:5001');
     }
 
