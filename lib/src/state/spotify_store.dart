@@ -5,20 +5,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotify/spotify.dart' as spot;
 import 'package:tagify/src/spotify/secrets.dart';
 import 'package:tagify/src/spotify/serializable_spotify_creds.dart';
-import 'package:tagify/src/state/firebase_store.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/state/search_store.dart';
 import 'package:tagify/src/utils/utils.dart';
 
-// have global spotify api for non user uses
-spot.SpotifyApi spotify = new spot.SpotifyApi(
-    spot.SpotifyApiCredentials(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET));
+spot.SpotifyApi spotify = spot.SpotifyApi(spot.SpotifyApiCredentials(SPOTIFY_CLIENT_ID, ''));
 
 class SpotifyStore extends ChangeNotifier {
-  String _cachedCredsKey = 'CACHED_CREDS';
+  String _cachedCredsKey = 'CACHED_SPOTIFY_CREDS';
   spot.SpotifyApiCredentials _credentials;
   AuthorizationCodeGrant _grant;
+
+  String get codeVerifier => 'ABCDEFGH';
 
   final List<String> scopes = [
     'user-library-read',
@@ -31,6 +30,11 @@ class SpotifyStore extends ChangeNotifier {
   ];
   Uri _authUri;
   Uri get authUri => _authUri;
+  String get realAuthUri => Uri.encodeFull('https://accounts.spotify.com/authorize?' +
+    'client_id=$SPOTIFY_CLIENT_ID' +
+    '&response_type=code' +
+    '&redirect_uri=${Utils.REDIRECT_URI}' +
+    '&scope=${scopes.join(' ')}');
 
   Uri _responseUri;
   Uri get responseUri => _responseUri;
@@ -66,12 +70,6 @@ class SpotifyStore extends ChangeNotifier {
   spot.SpotifyApi get authedSpotify => loggedIn ? _spotify : null;
 
   SpotifyStore() {
-    _credentials =
-        spot.SpotifyApiCredentials(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET);
-    _grant = spot.SpotifyApi.authorizationCodeGrant(_credentials);
-    _authUri =
-        _grant.getAuthorizationUrl(Uri.parse(Utils.REDIRECT_URI), scopes: scopes);
-
     tryLoginFromCachedCreds();
   }
 
@@ -82,18 +80,32 @@ class SpotifyStore extends ChangeNotifier {
       return;
     }
 
-    _spotify = spot.SpotifyApi.withRefreshCallback(creds, (c) async {
-      await _cacheCreds(creds: c);
-    });
+    await loginFromCreds(creds);
+  }
+
+  Future<void> loginFromCreds(SerializableSpotifyCreds creds) async {
+
+    var cred = Credentials(creds.accessToken,
+      refreshToken: creds.refreshToken,
+      tokenEndpoint: Uri.parse('https://accounts.spotify.com/api/token'),
+    );
+    var client = new Client(
+      cred,
+      identifier: SPOTIFY_CLIENT_ID,
+    );
+    _spotify = spot.SpotifyApi.fromClient(client);
+    await _cacheCreds();
     await _afterLogin();
   }
 
   Future<void> loginFromRedirectUri(Uri responseUri) async {
-    _responseUri = responseUri;
-    _spotify = spot.SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
+    //TODO not supported
 
-    await _cacheCreds();
-    await _afterLogin();
+    // _responseUri = responseUri;
+    // _spotify = spot.SpotifyApi.fromAuthCodeGrant(_grant, _responseUri.toString());
+    //
+    // await _cacheCreds();
+    // await _afterLogin();
   }
 
   Future<void> logout() async {
@@ -166,14 +178,19 @@ class SpotifyStore extends ChangeNotifier {
     if (creds == null) {
       creds = await _spotify.getCredentials();
     }
+
+    var cacheableCreds = new SerializableSpotifyCreds(
+      refreshToken: creds.refreshToken,
+      accessToken: creds.accessToken
+    );
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool res = await prefs.setString(_cachedCredsKey, creds.toJson());
+    bool res = await prefs.setString(_cachedCredsKey, cacheableCreds.toString());
     if (!res) {
       log('Failed to save Spotify creds');
     }
   }
 
-  Future<spot.SpotifyApiCredentials> _retrieveCredsFromCache() async {
+  Future<SerializableSpotifyCreds> _retrieveCredsFromCache() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (!prefs.containsKey(_cachedCredsKey)) {
@@ -182,7 +199,7 @@ class SpotifyStore extends ChangeNotifier {
     }
 
     String json = prefs.getString(_cachedCredsKey);
-    var creds = SerializeableSpotifyApiCredentials.fromJson(json);
+    var creds = SerializableSpotifyCreds.fromString(json);
     return creds;
   }
 
@@ -224,7 +241,7 @@ class SpotifyStore extends ChangeNotifier {
   Future<List<TrackCacheItem>> search(String query, int page) async {
 
     List<TrackCacheItem> results = [];
-    var res = await spotify.search
+    var res = await _spotify.search
       .get(query, types: [spot.SearchType.track])
       .getPage(25, page);
     res.forEach((p) {
@@ -242,7 +259,7 @@ class SpotifyStore extends ChangeNotifier {
     List<TrackCacheItem> results = [];
     var res = await _spotify.me.recentlyPlayed();
     for (var p in res) {
-      var track = await spotify.tracks.get(p.track.id);
+      var track = await _spotify.tracks.get(p.track.id);
       var item = TrackCacheItem.fromSpotifyTrack(track);
       results.add(item);
     }

@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:tagify/src/state/firebase_store.dart';
+import 'package:tagify/src/state/log_store.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:flutter/foundation.dart';
@@ -12,9 +14,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SpotifyAccountWidget extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Consumer<SpotifyStore>(
-    builder: (_, store, child) {
-
+  Widget build(BuildContext context) => Consumer2<SpotifyStore, FirebaseStore>(
+    builder: (_, store, firebase, child) {
       if (!store.loggedIn) {
         var button = ElevatedButton.icon(
           icon: Icon(FontAwesome.spotify),
@@ -24,14 +25,24 @@ class SpotifyAccountWidget extends StatelessWidget {
             backgroundColor: MaterialStateProperty.all(Colors.green),
           ),
           onPressed: () async {
+            String authUri = store.realAuthUri;
             if (kIsWeb) {
               StreamSubscription<html.MessageEvent> sub;
-              sub = html.window.onMessage.listen((event) {
+              sub = html.window.onMessage.listen((event) async {
                 if (Utils.redirectUriForSpotify(event)) {
                   // the event.data is the callback url we need
                   // pass it to the store
                   var uri = Uri.parse(event.data.toString());
-                  store.loginFromRedirectUri(uri);
+                  String code = uri.queryParameters['code'];
+                  var creds = await firebase.connectSpotify(code, Utils.REDIRECT_URI);
+                  if (creds == null) {
+                    log('Could not connect to Spotify');
+                    sub.cancel();
+                    return;
+                  }
+
+                  await store.loginFromCreds(creds);
+
                   sub.cancel();
                 }
                 else {
@@ -39,16 +50,16 @@ class SpotifyAccountWidget extends StatelessWidget {
                 }
               });
 
-              if (await canLaunch(store.authUri.toString())) {
-                await launch(store.authUri.toString());
+              if (await canLaunch(authUri)) {
+                await launch(authUri);
               }
               else {
                 print('Could not launch url');
               }
             }
             else {
-              if (await canLaunch(store.authUri.toString())) {
-                await launch(store.authUri.toString());
+              if (await canLaunch(authUri)) {
+                await launch(authUri);
               }
               else {
                 print('Could not launch url');

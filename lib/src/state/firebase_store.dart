@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tagify/src/spotify/serializable_spotify_creds.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/state/spotify_store.dart';
@@ -16,6 +17,7 @@ class FirebaseStore extends ChangeNotifier {
   static const _GET_TAGS = 'getTags';
   static const _ADD_TAGS = 'addTags';
   static const _REMOVE_TAGS = 'removeTags';
+  static const _CONNECT_SPOTIFY = 'connectSpotify';
   static const _TAGS = 'tags';
   static const _TRACKS = 'tracks';
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -297,5 +299,30 @@ class FirebaseStore extends ChangeNotifier {
     _fetching = false;
     notifyListeners();
     return success;
+  }
+
+  Future<SerializableSpotifyCreds> connectSpotify(String code, String redirectUri) async {
+
+    SerializableSpotifyCreds creds;
+    String endpoint = _CONNECT_SPOTIFY;
+    var callable = _functions.httpsCallable(endpoint);
+
+    try {
+      final results = await callable.call({
+        'code': code,
+        'redirectUri': redirectUri,
+      });
+      creds = new SerializableSpotifyCreds(
+        accessToken: results.data['access_token'],
+        refreshToken: results.data['refresh_token'],
+      );
+      print(creds);
+    }
+    catch (ex) {
+      logError('Error when connecting to spotify: $ex');
+      creds = null;
+    }
+
+    return creds;
   }
 }

@@ -1,36 +1,22 @@
 import 'dart:convert';
 
-import 'package:spotify/spotify.dart' as spot;
+class SerializableSpotifyCreds {
+  final String accessToken;
+  final String refreshToken;
+  SerializableSpotifyCreds({
+    this.accessToken,
+    this.refreshToken,
+  });
 
-extension SerializeableSpotifyApiCredentials on spot.SpotifyApiCredentials {
-
-  static spot.SpotifyApiCredentials fromJson(String json) {
-    return fromMap(jsonDecode(json));
-  }
-
-  static spot.SpotifyApiCredentials fromMap(Map map) {
-    return new spot.SpotifyApiCredentials(
-      map['clientId'],
-      map['clientSecret'],
-      accessToken: map['accessToken'],
-      expiration: DateTime.parse(map['expiration']),
-      refreshToken: map['refreshToken'],
-      scopes: map['scopes'].cast<String>(),
-    );
-  }
-
-  String toJson() {
-    return jsonEncode(this.toMap());
-  }
-
-  Map toMap() {
-    return {
-      'clientId': clientId,
-      'clientSecret': clientSecret,
-      'accessToken': accessToken,
-      'expiration': expiration.toString(),
-      'refreshToken': refreshToken,
-      'scopes': scopes,
-    };
-  }
+  Map toMap() => {
+    'accessToken': accessToken,
+    'refreshToken': refreshToken,
+  };
+  static SerializableSpotifyCreds fromMap(Map map) => new SerializableSpotifyCreds(
+    accessToken: map['accessToken'],
+    refreshToken: map['refreshToken'],
+  );
+  @override
+  String toString() => jsonEncode(toMap());
+  static SerializableSpotifyCreds fromString(String json) => fromMap(jsonDecode(json));
 }
