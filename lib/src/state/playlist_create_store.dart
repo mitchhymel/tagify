@@ -1,12 +1,9 @@
-
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:tagify/src/state/log_store.dart';
 import 'package:tagify/src/state/models.dart';
-import 'package:tagify/src/state/spotify_store.dart';
 
 class PlaylistCreateStore extends ChangeNotifier {
 
@@ -84,7 +81,20 @@ class PlaylistCreateStore extends ChangeNotifier {
     });
 
     var list = tracks.toList();
-    list.sort((x, y) => cache[x].artist.compareTo(cache[y].artist));
+    list.sort((x, y) {
+      var a = cache[x];
+      var b = cache[y];
+
+      if (a.artist != b.artist) {
+        return a.artist.compareTo(b.artist);
+      }
+
+      if (a.album != b.album) {
+        return a.album.compareTo(b.album);
+      }
+
+      return a.trackNumber.compareTo(b.trackNumber);
+    });
     return list;
   }
 

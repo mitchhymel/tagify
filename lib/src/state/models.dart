@@ -11,6 +11,7 @@ class TrackCacheItem {
   final String album;
   final String imageUrl;
   final String externalUrl;
+  final int trackNumber;
 
   TrackCacheItem({
     this.id,
@@ -19,6 +20,7 @@ class TrackCacheItem {
     this.album,
     this.imageUrl,
     this.externalUrl,
+    this.trackNumber,
   });
 
   TrackCacheItem.fromSpotifyTrack(spot.Track track):
@@ -27,7 +29,8 @@ class TrackCacheItem {
     artist=track.artists.first.name,
     album=track.album.name,
     imageUrl=track.album.images[1].url,
-    externalUrl=track.uri;
+    externalUrl=track.uri,
+    trackNumber=track.trackNumber;
 
   TrackCacheItem copyWith({
     String id,
@@ -35,14 +38,16 @@ class TrackCacheItem {
     String artist,
     String album,
     String imageUrl,
-    String externalUrl
+    String externalUrl,
+    int trackNumber,
   }) => new TrackCacheItem(
     id: id ?? this.id,
     name: name ?? this.name,
     artist: artist ?? this.artist,
     album: album ?? this.album,
     imageUrl: imageUrl ?? this.imageUrl,
-    externalUrl: externalUrl ?? this.externalUrl
+    externalUrl: externalUrl ?? this.externalUrl,
+    trackNumber: trackNumber ?? this.trackNumber,
   );
 
 
@@ -55,5 +60,6 @@ class TrackCacheItem {
     'album': album,
     'imageUrl': imageUrl,
     'externalUrl': externalUrl,
+    'trackNumber': trackNumber,
   };
 }

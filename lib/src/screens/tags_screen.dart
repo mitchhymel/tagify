@@ -20,7 +20,7 @@ class TagsScreen extends StatelessWidget {
           ),
           Container(
             constraints: BoxConstraints(
-              maxHeight: 90,
+              maxHeight: 80,
             ),
             child: TagsList(scrollDirection: Axis.horizontal),
           ),

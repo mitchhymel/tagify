@@ -6,16 +6,18 @@ class CustomCard extends StatelessWidget {
   final Color color;
   final Widget child;
   final BoxConstraints constraints;
+  final EdgeInsets margin;
   CustomCard({
     @required this.child,
     this.color=Colors.black12,
     this.onTap,
     this.constraints,
+    this.margin=const EdgeInsets.all(10),
   });
 
   @override
   Widget build(BuildContext context) => Card(
-    margin: EdgeInsets.all(10),
+    margin: margin,
     color: color,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(8))

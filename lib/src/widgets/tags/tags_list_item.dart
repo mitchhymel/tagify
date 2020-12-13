@@ -12,25 +12,24 @@ class TagsListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FirebaseState((store) => CustomCard(
-      onTap: () => store.selectedTag = tag,
-      color: store.selectedTag == tag ? Colors.redAccent : Colors.black12,
-      child: Utils.isBigScreen(context) ? Row(
-        children: [
-          Text(tag),
-          Flexible(child: Container()),
-          Text(tagged.toString(),
-            textAlign: TextAlign.right,
-          ),
-        ],
-      ) : Column(
-        children: [
-          Text(tag),
-          Container(height: 5),
-          Text(tagged.toString(),
-            textAlign: TextAlign.right,
-          ),
-        ],
-      )
+    onTap: () => store.selectedTag = tag,
+    color: store.selectedTag == tag ? Colors.redAccent : Colors.black12,
+    child: Utils.isBigScreen(context) ? Row(
+      children: [
+        Text(tag),
+        Flexible(child: Container()),
+        Text(tagged.toString(),
+          textAlign: TextAlign.right,
+        ),
+      ],
+    ) : Column(
+      children: [
+        Text(tag),
+        Container(height: 5),
+        Text(tagged.toString(),
+          textAlign: TextAlign.right,
+        ),
+      ],
     )
-  );
+  ));
 }

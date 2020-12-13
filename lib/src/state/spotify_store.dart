@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/all.dart';
 import 'package:oauth2/oauth2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotify/spotify.dart' as spot;
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/spotify/secrets.dart';
 import 'package:tagify/src/spotify/serializable_spotify_creds.dart';
 import 'package:tagify/src/state/log_store.dart';
@@ -255,11 +257,15 @@ class SpotifyStore extends ChangeNotifier {
 
   Future<List<TrackCacheItem>> getHistory(int page) async {
     List<TrackCacheItem> results = [];
-    var res = await _spotify.me.recentlyPlayed();
+    final container = ProviderContainer();
+    final firebase = container.read(firebaseProvider);
+    var res = await _spotify.me.recentlyPlayed(limit: 50);
     for (var p in res) {
-      var track = await _spotify.tracks.get(p.track.id);
-      var item = TrackCacheItem.fromSpotifyTrack(track);
-      results.add(item);
+      if (!firebase.trackCache.containsKey(p.track.id)) {
+        var track = await _spotify.tracks.get(p.track.id);
+        var item = TrackCacheItem.fromSpotifyTrack(track);
+        results.add(item);
+      }
     }
     return results;
   }

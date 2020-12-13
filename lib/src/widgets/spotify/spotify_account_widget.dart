@@ -83,10 +83,20 @@ class SpotifyAccountWidget extends HookWidget {
               autofocus: false,
               textAlign: TextAlign.center,
               decoration: InputDecoration(
-                hintText: 'Paste the resulting redirect uri here',
+                hintText: 'Paste the resulting code here',
               ),
-              onSubmitted: (str) {
-                spotify.loginFromRedirectUri(Uri.parse(str));
+              onSubmitted: (code) async {
+                try {
+                  var creds = await firebase.connectSpotify(code, Utils.REDIRECT_URI);
+                  if (creds == null) {
+                    log('Could not connect to Spotify');
+                    return;
+                  }
+
+                  await spotify.loginFromCreds(creds);
+                } catch (ex) {
+                  log('Error when connecting to spotify: $ex');
+                }
               },
             ),
           )
