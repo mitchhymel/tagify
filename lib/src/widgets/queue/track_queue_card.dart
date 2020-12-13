@@ -1,25 +1,27 @@
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/firebase_store.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/state/models.dart';
-import 'package:tagify/src/state/queue_store.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 
-class TrackQueueCard extends StatelessWidget {
+class TrackQueueCard extends HookWidget {
 
   final String id;
   TrackQueueCard(this.id);
 
   @override
-  Widget build(BuildContext context) => Consumer2<FirebaseStore, QueueStore>(
-    builder: (_, firebase, queue, __) => _TrackQueueCardWidget(
+  Widget build(BuildContext context) {
+    final firebase = useProvider(firebaseProvider);
+    final queue = useProvider(queueProvider);
+    return _TrackQueueCardWidget(
       item: firebase.trackCache[id],
       processed: queue.trackQueue.containsKey(id) ?
         queue.trackQueue[id] : false,
       onPressed: () => queue.removeTrackFromQueue(id)
-    ),
-  );
+    );
+  }
 }
 
 class _TrackQueueCardWidget extends StatelessWidget {

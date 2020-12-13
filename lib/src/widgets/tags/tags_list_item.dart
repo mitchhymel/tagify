@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/firebase_store.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 
@@ -12,8 +11,7 @@ class TagsListItem extends StatelessWidget {
   TagsListItem(this.tag, this.tagged);
 
   @override
-  Widget build(BuildContext context) => Consumer<FirebaseStore>(
-    builder: (_, store, __) => CustomCard(
+  Widget build(BuildContext context) => FirebaseState((store) => CustomCard(
       onTap: () => store.selectedTag = tag,
       color: store.selectedTag == tag ? Colors.redAccent : Colors.black12,
       child: Utils.isBigScreen(context) ? Row(

@@ -12,7 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
   spotify:
-  provider:
   oauth2:
   shared_preferences:
   url_launcher:
@@ -26,7 +25,9 @@ dependencies:
   google_sign_in:
   flutter_signin_button:
   email_validator:
-  http:
+  riverpod:
+  flutter_riverpod:
+  hooks_riverpod:
 
 dev_dependencies:
   flutter_test:

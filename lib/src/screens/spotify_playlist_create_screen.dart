@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/playlist_create_store.dart';
+import 'package:flutter_riverpod/all.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';
 import 'package:tagify/src/widgets/playlist_create/playlist_create_controls.dart';
 import 'package:tagify/src/widgets/playlist_create/playlist_create_track_list.dart';
@@ -14,8 +14,8 @@ class SpotifyPlaylistCreateScreen extends StatelessWidget {
     children: [
       PlaylistCreateControls(),
       Container(height: 10),
-      Consumer<PlaylistCreateStore>(
-        builder: (_, store, __) => CustomLoadingIndicator(store.creatingPlaylist),
+      Consumer(builder: (_, watch, __) =>
+        CustomLoadingIndicator(watch(playlistProvider).creatingPlaylist),
       ),
       Expanded(
         child: PlaylistCreateTrackList()

@@ -2,8 +2,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/firebase_store.dart';
+import 'package:flutter_riverpod/all.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/utils/utils.dart';
 
 typedef SignInCallback = Future<String> Function(String, String);
@@ -38,8 +38,14 @@ class LoginWithEmailWidget extends HookWidget {
   Widget build(BuildContext context) {
     var emailController = useTextEditingController();
     var passController = useTextEditingController();
-    return  Consumer<FirebaseStore>(
-      builder: (_, store, __) => store.loggedIn ? Container() : Container(
+    return  Consumer(builder: (_, watch, __) {
+      final store = watch(firebaseProvider);
+
+      if (store.loggedIn) {
+        return Container();
+      }
+
+      return Container(
         constraints: BoxConstraints(
           maxWidth: 400,
         ),
@@ -49,7 +55,7 @@ class LoginWithEmailWidget extends HookWidget {
             TextField(
               controller: emailController,
               decoration: InputDecoration(
-                hintText: 'Email'
+                  hintText: 'Email'
               ),
             ),
             Container(height: 5),
@@ -57,10 +63,10 @@ class LoginWithEmailWidget extends HookWidget {
               controller: passController,
               obscureText: true,
               onSubmitted: (x) => _onSubmit(context, emailController.text,
-                passController.text, store.signInWithEmailPassword
+                  passController.text, store.signInWithEmailPassword
               ),
               decoration: InputDecoration(
-                hintText: 'Password'
+                  hintText: 'Password'
               ),
             ),
             Container(height: 10),
@@ -95,15 +101,14 @@ class LoginWithEmailWidget extends HookWidget {
                 onPressed: () => _onSubmit(context,
                   emailController.text,
                   'some non empty password',
-                  (email, _) => store.sendResetPasswordEmail(email),
+                      (email, _) => store.sendResetPasswordEmail(email),
                   showSuccessSnackBar: true,
                 )
               )
             )
           ],
         )
-      ),
-
-    );
+      );
+    });
   }
 }

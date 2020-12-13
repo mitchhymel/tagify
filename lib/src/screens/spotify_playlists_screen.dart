@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/spotify_store.dart';
+import 'package:flutter_riverpod/all.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';
 import 'package:tagify/src/widgets/spotify/spotify_account_required.dart';
@@ -46,12 +46,12 @@ class SpotifyPlaylistsScreen extends StatelessWidget {
             Flexible(
               flex: 3,
               child: Column(
-                  children: [
-                    PlaylistFetchLoadingIndicator(),
-                    Expanded(
-                      child: SpotifyPlaylistTrackList(),
-                    )
-                  ]
+                children: [
+                  PlaylistFetchLoadingIndicator(),
+                  Expanded(
+                    child: SpotifyPlaylistTrackList(),
+                  )
+                ]
               )
             )
           ],
@@ -59,12 +59,10 @@ class SpotifyPlaylistsScreen extends StatelessWidget {
         Positioned(
           right: 10,
           bottom: 10,
-          child: Consumer<SpotifyStore>(
-            builder: (_, store, __) => FloatingActionButton(
-              onPressed: store.refreshPlaylists,
-              child: Icon(Icons.refresh),
-            )
-          )
+          child: Consumer(builder: (_, watch, __) => FloatingActionButton(
+            onPressed: watch(spotifyProvider).refreshPlaylists,
+            child: Icon(Icons.refresh),
+          ))
         )
       ],
     )

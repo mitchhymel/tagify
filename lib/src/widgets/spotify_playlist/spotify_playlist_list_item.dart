@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:spotify/spotify.dart' as spot;
-import 'package:tagify/src/state/firebase_store.dart';
-import 'package:tagify/src/state/spotify_store.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 
-class SpotifyPlaylistListItem extends StatelessWidget {
+class SpotifyPlaylistListItem extends HookWidget {
 
   final spot.PlaylistSimple playlist;
   SpotifyPlaylistListItem({@required this.playlist});
@@ -49,29 +49,35 @@ class SpotifyPlaylistListItem extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => Consumer<SpotifyStore>(
-    builder: (_, store, __) => Utils.isBigScreen(context)
-        && store.playlistIdToTracks.containsKey(playlist.id) ?
-        Draggable(
+  Widget build(BuildContext context) {
+
+    final spotify = useProvider(spotifyProvider);
+    final firebase = useProvider(firebaseProvider);
+
+    if (Utils.isBigScreen(context)
+        && spotify.playlistIdToTracks.containsKey(playlist.id)) {
+      return Draggable(
           feedback: _getCard(
-            selected: store.selectedPlaylist == playlist,
-            onTap: () => store.setSelectedAndEnsureCached(playlist,
-              Provider.of<FirebaseStore>(context, listen: false).addAllToCache
+            selected: spotify.selectedPlaylist == playlist,
+            onTap: () => spotify.setSelectedAndEnsureCached(playlist,
+                firebase.addAllToCache
             )
           ),
-          data: store.playlistIdToTracks[playlist.id],
+          data: spotify.playlistIdToTracks[playlist.id],
           child: _getCard(
-            selected: store.selectedPlaylist == playlist,
-            onTap: () => store.setSelectedAndEnsureCached(playlist,
-              Provider.of<FirebaseStore>(context, listen: false).addAllToCache
+            selected: spotify.selectedPlaylist == playlist,
+            onTap: () => spotify.setSelectedAndEnsureCached(playlist,
+                firebase.addAllToCache
             )
           )
-        ) :
-        _getCard(
-          selected: store.selectedPlaylist == playlist,
-          onTap: () => store.setSelectedAndEnsureCached(playlist,
-            Provider.of<FirebaseStore>(context, listen: false).addAllToCache
-          )
-        )
-  );
+      );
+    }
+
+    return _getCard(
+      selected: spotify.selectedPlaylist == playlist,
+      onTap: () => spotify.setSelectedAndEnsureCached(playlist,
+          firebase.addAllToCache
+      )
+    );
+  }
 }

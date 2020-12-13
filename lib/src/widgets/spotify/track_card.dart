@@ -1,22 +1,21 @@
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/firebase_store.dart';
-import 'package:tagify/src/state/log_store.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/state/models.dart';
-import 'package:tagify/src/state/queue_store.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 import 'package:tagify/src/widgets/firebase/track_tags_list.dart';
 
-class TrackCard extends StatelessWidget {
+class TrackCard extends HookWidget {
 
   final String id;
   final bool draggable;
   TrackCard(this.id, {this.draggable=true});
 
   _onTap(BuildContext context) {
-    var store = Provider.of<QueueStore>(context, listen: false);
+    var store = context.read(queueProvider);
     if (!store.trackQueue.containsKey(id)) {
       store.addTrackToQueue(id);
     }
@@ -26,31 +25,36 @@ class TrackCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => Consumer2<FirebaseStore, QueueStore>(
-    builder: (_, store, queue,__) => draggable && Utils.isBigScreen(context) ?
-      Draggable(
+  Widget build(BuildContext context) {
+    final queue = useProvider(queueProvider);
+    final firebase = useProvider(firebaseProvider);
+
+    if (draggable && Utils.isBigScreen(context)) {
+      return Draggable(
         data: id,
         child: _TrackCardWidget(
-          item: store.trackCache[id],
+          item: firebase.trackCache[id],
           nowPlaying: false,
           inQueue: queue.trackQueue.containsKey(id),
           onTap: () => _onTap(context),
         ),
         feedback: _TrackCardWidget(
-          item: store.trackCache[id],
+          item: firebase.trackCache[id],
           nowPlaying: false,
           inQueue: queue.trackQueue.containsKey(id),
           feedback: true,
           onTap: () => _onTap(context),
         ),
-      ) :
-      _TrackCardWidget(
-        item: store.trackCache[id],
-        nowPlaying: false,
-        inQueue: queue.trackQueue.containsKey(id),
-        onTap: () => _onTap(context),
-      ),
-  );
+      );
+    }
+
+    return _TrackCardWidget(
+      item: firebase.trackCache[id],
+      nowPlaying: false,
+      inQueue: queue.trackQueue.containsKey(id),
+      onTap: () => _onTap(context),
+    );
+  }
 
 }
 

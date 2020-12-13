@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart';
 import 'package:tagify/src/state/log_store.dart';
+import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/state/spotify_store.dart';
 
 class PlaylistCreateStore extends ChangeNotifier {
@@ -51,7 +52,8 @@ class PlaylistCreateStore extends ChangeNotifier {
   }
 
   List<String> getTracks(Map<String, Set<String>> tagToTracks,
-    Map<String, Set<String>> trackToTags
+    Map<String, Set<String>> trackToTags,
+    Map<String, TrackCacheItem> cache,
   ) {
     Set<String> tracks = new Set<String>();
 
@@ -81,7 +83,9 @@ class PlaylistCreateStore extends ChangeNotifier {
       }
     });
 
-    return tracks.toList();
+    var list = tracks.toList();
+    list.sort((x, y) => cache[x].artist.compareTo(cache[y].artist));
+    return list;
   }
 
 

@@ -316,7 +316,6 @@ class FirebaseStore extends ChangeNotifier {
         accessToken: results.data['access_token'],
         refreshToken: results.data['refresh_token'],
       );
-      print(creds);
     }
     catch (ex) {
       logError('Error when connecting to spotify: $ex');

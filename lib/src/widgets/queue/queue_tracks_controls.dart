@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/firebase_store.dart';
-import 'package:tagify/src/state/queue_store.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/all.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/widgets/common/queue_controls.dart';
 
-class QueueTracksControls extends StatelessWidget {
+class QueueTracksControls extends HookWidget {
 
   @override
-  Widget build(BuildContext context) => Consumer2<QueueStore, FirebaseStore>(
-    builder: (_, queue, firebase, __) => QueueControls(
+  Widget build(BuildContext context) {
+    final queue = useProvider(queueProvider);
+    final firebase = useProvider(firebaseProvider);
+    return QueueControls(
       clearQueue: queue.clearQueue,
       onAddTag: queue.addTagToTagList,
       onRemoveTag: queue.removeTagFromTagList,
@@ -18,6 +20,6 @@ class QueueTracksControls extends StatelessWidget {
       totalProgress: queue.totalToTag,
       start: () => queue.startTagging(true, firebase.updateTags),
       startRemove: () => queue.startTagging(false, firebase.updateTags),
-    )
-  );
+    );
+  }
 }

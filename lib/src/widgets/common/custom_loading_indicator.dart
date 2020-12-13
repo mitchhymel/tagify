@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/spotify_store.dart';
+import 'package:tagify/src/app/app_state.dart';
 
 class CustomLoadingIndicator extends StatelessWidget {
 
@@ -18,7 +17,7 @@ class CustomLoadingIndicator extends StatelessWidget {
 
 class PlaylistFetchLoadingIndicator extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Consumer<SpotifyStore>(
-    builder: (_, store, __) => CustomLoadingIndicator(store.fetchingPlaylist)
+  Widget build(BuildContext context) => SpotifyState(
+      (store) => CustomLoadingIndicator(store.fetchingPlaylist)
   );
 }

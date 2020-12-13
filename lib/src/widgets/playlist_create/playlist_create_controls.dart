@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/playlist_create_store.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 import 'package:tagify/src/widgets/common/custom_text_field.dart';
 import 'package:tagify/src/widgets/common/tag_chip_list.dart';
@@ -14,27 +13,23 @@ class PlaylistCreateControls extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Consumer<PlaylistCreateStore>(
-          builder: (_, store, __) => IntrinsicWidth(
-            child: CheckboxListTile(
-              title: Text('Must have ALL tags'),
-              value: store.mustHaveAllIncludeTags,
-              onChanged: (v) => store.mustHaveAllIncludeTags = v,
-            ),
-          )
-        ),
+        PlaylistCreateState((store) => IntrinsicWidth(
+          child: CheckboxListTile(
+            title: Text('Must have ALL tags'),
+            value: store.mustHaveAllIncludeTags,
+            onChanged: (v) => store.mustHaveAllIncludeTags = v,
+          ),
+        )),
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text('Include tracks with tags:'),
             Container(width: 10),
-            Consumer<PlaylistCreateStore>(
-              builder: (_, store, __) => TagChipList(
-                tags: store.includeTags,
-                onAddTag: store.addIncludeTag,
-                onRemoveTag: store.removeIncludeTag,
-              )
-            )
+            PlaylistCreateState((store) => TagChipList(
+              tags: store.includeTags,
+              onAddTag: store.addIncludeTag,
+              onRemoveTag: store.removeIncludeTag,
+            ))
           ],
         ),
         Container(height: 10),
@@ -43,13 +38,11 @@ class PlaylistCreateControls extends StatelessWidget {
           children: [
             Text('Exclude tracks with tags:'),
             Container(width: 10),
-            Consumer<PlaylistCreateStore>(
-              builder: (_, store, __) => TagChipList(
-                tags: store.excludeTags,
-                onAddTag: store.addExcludeTag,
-                onRemoveTag: store.removeExcludeTag,
-              )
-            )
+            PlaylistCreateState((store) => TagChipList(
+              tags: store.excludeTags,
+              onAddTag: store.addExcludeTag,
+              onRemoveTag: store.removeExcludeTag,
+            ))
           ],
         ),
         Container(height: 10),
@@ -57,16 +50,14 @@ class PlaylistCreateControls extends StatelessWidget {
           children: [
             Text('Playlist name: '),
             Container(width: 10),
-            Consumer<PlaylistCreateStore>(
-              builder: (_, store, __) => Expanded(
-                child: CustomTextField(
-                  hint: 'Enter playlist name',
-                  onChanged: (x) => store.playlistName = x,
-                  onClear: () => store.playlistName = '',
-                  initialText: store.playlistName,
-                )
+            PlaylistCreateState((store) => Expanded(
+              child: CustomTextField(
+                hint: 'Enter playlist name',
+                onChanged: (x) => store.playlistName = x,
+                onClear: () => store.playlistName = '',
+                initialText: store.playlistName,
               )
-            )
+            ))
           ],
         ),
         Container(height: 10),

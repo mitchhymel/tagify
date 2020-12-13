@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/firebase_store.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/widgets/common/desktop_listview.dart';
 import 'package:tagify/src/widgets/tags/tags_list_item.dart';
 
@@ -11,8 +10,7 @@ class TagsList extends StatelessWidget {
   TagsList({this.scrollDirection=Axis.vertical});
 
   @override
-  Widget build(BuildContext context) => Consumer<FirebaseStore>(
-    builder: (_, store, __) => DesktopListView(
+  Widget build(BuildContext context) => FirebaseState((store) => DesktopListView(
       scrollDirection: scrollDirection,
       itemCount: store.filteredTags.length,
       itemBuilder: (___, index) => TagsListItem(

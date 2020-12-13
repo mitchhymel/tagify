@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tagify/src/state/firebase_store.dart';
+import 'package:flutter_riverpod/all.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_loading_indicator.dart';
 import 'package:tagify/src/widgets/tags/tags_controls.dart';
@@ -15,8 +15,8 @@ class TagsScreen extends StatelessWidget {
       if (!Utils.isBigScreen(context)) Column(
         children: [
           TagsControls(),
-          Consumer<FirebaseStore>(
-            builder: (_, store, __) => CustomLoadingIndicator(store.fetching),
+          Consumer(builder: (_, watch, __) =>
+            CustomLoadingIndicator(watch(firebaseProvider).fetching),
           ),
           Container(
             constraints: BoxConstraints(
@@ -47,8 +47,8 @@ class TagsScreen extends StatelessWidget {
             flex: 3,
             child: Column(
               children: [
-                Consumer<FirebaseStore>(
-                  builder: (_, store, __) => CustomLoadingIndicator(store.fetching),
+                Consumer(builder: (_, watch, __) =>
+                  CustomLoadingIndicator(watch(firebaseProvider).fetching),
                 ),
                 Expanded(
                   child: TagsTracksContainer()
@@ -61,9 +61,9 @@ class TagsScreen extends StatelessWidget {
       Positioned(
         right: 10,
         bottom: 10,
-        child: Consumer<FirebaseStore>(
-          builder: (_, store, __) => FloatingActionButton(
-            onPressed: store.getTags,
+        child: Consumer(
+          builder: (_, watch, __) => FloatingActionButton(
+            onPressed: watch(firebaseProvider).getTags,
             child: Icon(Icons.refresh),
           )
         )

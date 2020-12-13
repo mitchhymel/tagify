@@ -1,35 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/all.dart';
+import 'package:tagify/src/app/app_state.dart';
 import 'package:tagify/src/app/login_screen.dart';
 import 'package:tagify/src/app/main_container.dart';
-import 'package:tagify/src/state/firebase_store.dart';
-import 'package:tagify/src/state/history_store.dart';
-import 'package:tagify/src/state/log_store.dart';
-import 'package:tagify/src/state/playlist_create_store.dart';
-import 'package:tagify/src/state/queue_store.dart';
-import 'package:tagify/src/state/search_store.dart';
-import 'package:tagify/src/state/spotify_store.dart';
 
 class App extends StatelessWidget {
   final Color accentColor = Colors.redAccent;
 
   @override
-  Widget build(BuildContext context) => MultiProvider(
-    providers: [
-      ChangeNotifierProvider<LogStore>(create: (_) => logStore),
-      ChangeNotifierProvider<SpotifyStore>(create: (_) => SpotifyStore()),
-      ChangeNotifierProvider<FirebaseStore>(create: (_) => FirebaseStore()),
-      ChangeNotifierProvider<SearchStore>(create: (_) => SearchStore()),
-      ChangeNotifierProvider<HistoryStore>(create: (_) => HistoryStore()),
-      ChangeNotifierProvider<QueueStore>(create: (_) => QueueStore()),
-      ChangeNotifierProvider<PlaylistCreateStore>(create: (_) => PlaylistCreateStore()),
-    ],
+  Widget build(BuildContext context) => ProviderScope(
     child: MaterialApp(
       title: 'Tagify',
-      home: Consumer<FirebaseStore>(
-        builder: (_, store, __) => store.loggedIn
-          ? MainContainer() : LoginScreen()
-      ),
+      home: Consumer(builder: (_, watch, __) {
+       final store = watch(firebaseProvider);
+       return store.loggedIn ? MainContainer() : LoginScreen();
+      }),
       theme: ThemeData.dark().copyWith(
         accentColor: accentColor,
         indicatorColor: accentColor,
@@ -38,12 +23,12 @@ class App extends StatelessWidget {
           labelColor: accentColor,
         ),
         navigationRailTheme: NavigationRailThemeData(
-            selectedIconTheme: IconThemeData(
-              color: accentColor,
-            ),
-            selectedLabelTextStyle: TextStyle(
-              color: accentColor
-            )
+          selectedIconTheme: IconThemeData(
+            color: accentColor,
+          ),
+          selectedLabelTextStyle: TextStyle(
+            color: accentColor
+          )
         ),
         toggleableActiveColor: accentColor,
         floatingActionButtonTheme: FloatingActionButtonThemeData(
