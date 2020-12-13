@@ -10,13 +10,11 @@ import 'package:tagify/src/state/models.dart';
 import 'package:tagify/src/state/search_store.dart';
 import 'package:tagify/src/utils/utils.dart';
 
-spot.SpotifyApi spotify = spot.SpotifyApi(spot.SpotifyApiCredentials(SPOTIFY_CLIENT_ID, ''));
+spot.SpotifyApi spotify = spot.SpotifyApi(spot.SpotifyApiCredentials(
+    SPOTIFY_UNAUTH_CLIENT_ID, SPOTIFY_UNAUTH_CLIENT_SECRET));
 
 class SpotifyStore extends ChangeNotifier {
   String _cachedCredsKey = 'CACHED_SPOTIFY_CREDS';
-  spot.SpotifyApiCredentials _credentials;
-  AuthorizationCodeGrant _grant;
-
   String get codeVerifier => 'ABCDEFGH';
 
   final List<String> scopes = [
