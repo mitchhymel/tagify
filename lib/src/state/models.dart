@@ -10,7 +10,7 @@ class TrackCacheItem {
   final String artist;
   final String album;
   final String imageUrl;
-  final String externalUrl;
+  final String uri;
   final int trackNumber;
 
   TrackCacheItem({
@@ -19,7 +19,7 @@ class TrackCacheItem {
     this.artist,
     this.album,
     this.imageUrl,
-    this.externalUrl,
+    this.uri,
     this.trackNumber,
   });
 
@@ -29,7 +29,7 @@ class TrackCacheItem {
     artist=track.artists.first.name,
     album=track.album.name,
     imageUrl=track.album.images.length > 0 ? track.album.images[1].url : null,
-    externalUrl=track.uri,
+    uri=track.uri,
     trackNumber=track.trackNumber;
 
   TrackCacheItem copyWith({
@@ -46,7 +46,7 @@ class TrackCacheItem {
     artist: artist ?? this.artist,
     album: album ?? this.album,
     imageUrl: imageUrl ?? this.imageUrl,
-    externalUrl: externalUrl ?? this.externalUrl,
+    uri: externalUrl ?? this.uri,
     trackNumber: trackNumber ?? this.trackNumber,
   );
 
@@ -59,7 +59,7 @@ class TrackCacheItem {
     'artist': artist,
     'album': album,
     'imageUrl': imageUrl,
-    'externalUrl': externalUrl,
+    'externalUrl': uri,
     'trackNumber': trackNumber,
   };
 }

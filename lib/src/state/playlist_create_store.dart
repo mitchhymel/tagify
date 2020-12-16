@@ -103,7 +103,9 @@ class PlaylistCreateStore extends ChangeNotifier {
   }
 
 
-  Future<bool> createPlaylist(String userId, List<String> uris, SpotifyApi authedSpotify) async {
+  Future<bool> createPlaylist(String userId, List<String> uris,
+      SpotifyApi authedSpotify
+  ) async {
     _creatingPlaylist = true;
     notifyListeners();
 
@@ -120,15 +122,50 @@ class PlaylistCreateStore extends ChangeNotifier {
       return false;
     }
 
+    bool success = await addTracksToPlaylist(playlist.id, uris, authedSpotify);
+    if (!success) {
+      // addTracksToPlaylist will log error
+      return false;
+    }
+
+    log('Finished creating playlist "$_playlistName"');
+    _creatingPlaylist = false;
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> addTracksToPlaylist(String playlistId, List<String> uris,
+      SpotifyApi authedSpotify
+  ) async {
+
+    var playlist = await authedSpotify.playlists
+        .getTracksByPlaylistId(playlistId).all();
+
+    List<String> existingUris = playlist.map((x) => x.uri).toList();
+    List<String> urisToAdd = new List<String>.from(uris);
+    urisToAdd.removeWhere((x) => existingUris.contains(x));
+
+    if (urisToAdd.length == 0) {
+      log('All these tracks are already in the playlist.');
+      _creatingPlaylist = false;
+      notifyListeners();
+      return true;
+    }
+
+    int difference = uris.length - urisToAdd.length;
+    if (difference > 0) {
+      log('Found $difference tracks that are already in the playlist');
+    }
+
     // spotify only allows adding 100 tracks to a playlist per request
     int increment = 100;
-    for (int i = 0; i < uris.length; i+=increment) {
-      int maxTracksToAdd = min(increment, uris.length - i);
-      List<String> subset = uris.sublist(i, i + maxTracksToAdd);
+    for (int i = 0; i < urisToAdd.length; i+=increment) {
+      int maxTracksToAdd = min(increment, urisToAdd.length - i);
+      List<String> subset = urisToAdd.sublist(i, i + maxTracksToAdd);
       log('Adding ${subset.length} tracks to "$_playlistName"');
 
       try {
-        await authedSpotify.playlists.addTracks(subset, playlist.id);
+        await authedSpotify.playlists.addTracks(subset, playlistId);
       }
       catch (ex) {
         logError('Error when adding tracks to playlist: $ex');
@@ -138,7 +175,7 @@ class PlaylistCreateStore extends ChangeNotifier {
       }
     }
 
-    log('Finished creating playlist "$_playlistName"');
+    log('Finished adding ${urisToAdd.length} tracks to playlist $_playlistName');
     _creatingPlaylist = false;
     notifyListeners();
     return true;
