@@ -28,7 +28,7 @@ class TrackCacheItem {
     name=track.name,
     artist=track.artists.first.name,
     album=track.album.name,
-    imageUrl=track.album.images[1].url,
+    imageUrl=track.album.images.length > 0 ? track.album.images[1].url : null,
     externalUrl=track.uri,
     trackNumber=track.trackNumber;
 

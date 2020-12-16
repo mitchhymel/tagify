@@ -15,7 +15,9 @@ class PlaylistCreateButton extends HookWidget {
     final spotify = useProvider(spotifyProvider);
     List<String> tracks = playlistCreate.getTracks(
         firebase.tagToTracks, firebase.trackToTags, firebase.trackCache);
-    List<String> uris = tracks.map((x) => firebase.trackCache[x].externalUrl).toList();
+    List<String> uris = tracks
+        .where((x) => firebase.trackCache.containsKey(x))
+        .map((x) => firebase.trackCache[x].externalUrl).toList();
 
     return ElevatedButton(
       child: Text('Start creating playlist of ${tracks.length} tracks'),

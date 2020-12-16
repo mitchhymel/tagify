@@ -28,6 +28,35 @@ class TrackCard extends HookWidget {
   Widget build(BuildContext context) {
     final queue = useProvider(queueProvider);
     final firebase = useProvider(firebaseProvider);
+    final requested = useState(false);
+    final fetched = useState(false);
+    final isMounted = useIsMounted();
+
+    if (!firebase.trackCache.containsKey(id)) {
+
+      if (!(requested.value)) {
+        firebase.cacheTrackById(id).then((x) {
+          if (isMounted())
+            fetched.value = true;
+        });
+        requested.value = true;
+      }
+
+      return CustomCard(
+        constraints: BoxConstraints(
+          maxWidth: 800,
+          maxHeight: 300,
+        ),
+        color: Colors.black12,
+        child: Row(
+          children: [
+            CircularProgressIndicator(),
+            Container(width: 10, height: 100),
+            Text(id),
+          ],
+        )
+      );
+    }
 
     if (draggable && Utils.isBigScreen(context)) {
       return Draggable(
@@ -88,10 +117,20 @@ class _TrackCardWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Image.network(item.imageUrl,
+          if(item.imageUrl != null) Image.network(item.imageUrl,
             height: 100,
             width: 100,
             fit: BoxFit.fill,
+          ),
+          if(item.imageUrl == null) Container(
+            height: 100,
+            width: 100,
+            color: Colors.black26,
+            child: Center(
+              child: Text('No image available',
+                textAlign: TextAlign.center,
+              ),
+            )
           ),
           Container(width: 10),
           Expanded(

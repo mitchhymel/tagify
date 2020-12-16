@@ -198,19 +198,19 @@ class FirebaseStore extends ChangeNotifier {
           _trackToTags[track].add(e.key);
         }
 
-        for (var track in _trackToTags.keys) {
-          if (!_trackCache.containsKey(track)) {
-            try {
-              var t = await spotify.tracks.get(track);
-              _trackCache[track] = TrackCacheItem.fromSpotifyTrack(t);
-            }
-            catch (ex) {
-              logError('Error when fetching tags $ex');
-              success = false;
-              break;
-            }
-          }
-        }
+        // for (var track in _trackToTags.keys) {
+        //   if (!_trackCache.containsKey(track)) {
+        //     try {
+        //       var t = await spotify.tracks.get(track);
+        //       _trackCache[track] = TrackCacheItem.fromSpotifyTrack(t);
+        //     }
+        //     catch (ex) {
+        //       logError('Error when fetching tags $ex');
+        //       success = false;
+        //       break;
+        //     }
+        //   }
+        // }
       }
 
     } catch (ex) {
@@ -323,5 +323,17 @@ class FirebaseStore extends ChangeNotifier {
     }
 
     return creds;
+  }
+
+  Future<void> cacheTrackById(String track) async {
+    if (!_trackCache.containsKey(track)) {
+      try {
+        var t = await spotify.tracks.get(track);
+        _trackCache[track] = TrackCacheItem.fromSpotifyTrack(t);
+      }
+      catch (ex) {
+        logError('Error when fetching track with id $track: $ex');
+      }
+    }
   }
 }

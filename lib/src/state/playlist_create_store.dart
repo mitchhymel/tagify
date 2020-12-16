@@ -85,6 +85,10 @@ class PlaylistCreateStore extends ChangeNotifier {
       var a = cache[x];
       var b = cache[y];
 
+      if (a == null || b == null) {
+        return 1;
+      }
+
       if (a.artist != b.artist) {
         return a.artist.compareTo(b.artist);
       }
@@ -120,7 +124,7 @@ class PlaylistCreateStore extends ChangeNotifier {
     int increment = 100;
     for (int i = 0; i < uris.length; i+=increment) {
       int maxTracksToAdd = min(increment, uris.length - i);
-      List<String> subset = uris.sublist(i, maxTracksToAdd);
+      List<String> subset = uris.sublist(i, i + maxTracksToAdd);
       log('Adding ${subset.length} tracks to "$_playlistName"');
 
       try {
