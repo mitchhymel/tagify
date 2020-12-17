@@ -23,14 +23,43 @@ class TrackCacheItem {
     this.trackNumber,
   });
 
+  bool get onSpotify => !id.contains(name);
+
+  // assuming that no artist, track or album will have these characters...
+  static const String _delimiter = '##__##';
+
+  // if spotify id is null, then that means that this track was in a playlist,
+  // but is no longer on spotify... in which case we'll just use
+  // the name_artist_album as the id
   TrackCacheItem.fromSpotifyTrack(spot.Track track):
-    id=track.id,
+    id=track.id??'${track.name}$_delimiter${track.artists.first.name}$_delimiter${track.album.name}',
     name=track.name,
     artist=track.artists.first.name,
     album=track.album.name,
     imageUrl=track.album.images.length > 0 ? track.album.images[1].url : null,
     uri=track.uri,
     trackNumber=track.trackNumber;
+
+  static TrackCacheItem fromNonSpotifyId(String id) {
+    if (idIsOnSpotify(id)) {
+      throw new Exception('This track id is on spotify, why are you here?');
+    }
+
+    List<String> parts = id.split(_delimiter).toList();
+    return new TrackCacheItem(
+      id: id,
+      trackNumber: 0,
+      name: parts[0],
+      artist: parts[1],
+      album: parts[2],
+      imageUrl: null,
+      uri: null,
+    );
+  }
+
+  static bool idIsOnSpotify(String id) {
+    return !id.contains(_delimiter);
+  }
 
   TrackCacheItem copyWith({
     String id,

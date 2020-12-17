@@ -55,6 +55,8 @@ class FirebaseStore extends ChangeNotifier {
 
   Map<String, TrackCacheItem> _trackCache = {};
   Map<String, TrackCacheItem> get trackCache => _trackCache;
+  Map<String, bool> _tracksFetching = {};
+  Map<String, bool> get tracksFetching => _tracksFetching;
 
   void addToCache(TrackCacheItem item) {
     _trackCache[item.id] = item;
@@ -325,15 +327,36 @@ class FirebaseStore extends ChangeNotifier {
     return creds;
   }
 
-  Future<void> cacheTrackById(String track) async {
+  Future<TrackCacheItem> cacheTrackById(String track) async {
     if (!_trackCache.containsKey(track)) {
-      try {
-        var t = await spotify.tracks.get(track);
-        _trackCache[track] = TrackCacheItem.fromSpotifyTrack(t);
+
+      if (_tracksFetching.containsKey(track)) {
+        // already fetching, ignore
+        return null;
       }
-      catch (ex) {
-        logError('Error when fetching track with id $track: $ex');
+
+      _tracksFetching[track] = true;
+      notifyListeners();
+
+      if (!TrackCacheItem.idIsOnSpotify(track)) {
+        _trackCache[track] = TrackCacheItem.fromNonSpotifyId(track);
+        _tracksFetching.remove(track);
       }
+      else {
+        try {
+          var t = await spotify.tracks.get(track);
+          _trackCache[track] = TrackCacheItem.fromSpotifyTrack(t);
+          _tracksFetching.remove(track);
+        }
+        catch (ex) {
+          logError('Error when fetching track with id $track: $ex');
+          _tracksFetching[track] = false;
+        }
+      }
+
+      notifyListeners();
     }
+
+    return _trackCache[track];
   }
 }

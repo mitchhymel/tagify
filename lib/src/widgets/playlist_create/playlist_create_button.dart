@@ -13,15 +13,12 @@ class PlaylistCreateButton extends HookWidget {
     final firebase = useProvider(firebaseProvider);
     final playlistCreate = useProvider(playlistProvider);
     final spotify = useProvider(spotifyProvider);
-    List<String> tracks = playlistCreate.getTracks(
+    List<String> uris = playlistCreate.getUris(
         firebase.tagToTracks, firebase.trackToTags, firebase.trackCache);
-    List<String> uris = tracks
-        .where((x) => firebase.trackCache.containsKey(x))
-        .map((x) => firebase.trackCache[x].uri).toList();
 
     return ElevatedButton(
       child: Text('Start creating playlist of ${uris.length} tracks'),
-      onPressed: tracks.length == 0 || playlistCreate.playlistName.isEmpty ? null :
+      onPressed: uris.length == 0 || playlistCreate.playlistName.isEmpty ? null :
       () async {
         var playlists = spotify.playlists.where((p) =>
           p.name == playlistCreate.playlistName);
@@ -65,37 +62,6 @@ class PlaylistCreateButton extends HookWidget {
                   ),
                 ],
               ),
-              // actions: [
-              //   FlatButton(
-              //     child: Text('Cancel'),
-              //     onPressed: () => Navigator.pop(context, false),
-              //   ),
-              //   Container(width: 10),
-              //   FlatButton(
-              //     child: Text('Create new playlist with the same name'),
-              //     onPressed: () async {
-              //       Navigator.pop(context, false);
-              //
-              //       bool success = await playlistCreate.createPlaylist(
-              //           spotify.user.id, uris, spotify.authedSpotify);
-              //       if (success) {
-              //         Utils.showSnackBar(context, 'Successfully created playlist');
-              //       }
-              //     }
-              //   ),
-              //   FlatButton(
-              //     child: Text('Update existing playlist'),
-              //     onPressed: () async {
-              //       Navigator.pop(context, false);
-              //
-              //       bool success = await playlistCreate.addTracksToPlaylist(
-              //         existingPlaylist.id, uris, spotify.authedSpotify);
-              //       if (success) {
-              //         Utils.showSnackBar(context, 'Successfully added tracks to playlist');
-              //       }
-              //     }
-              //   )
-              // ]
             )
           );
         }

@@ -25,6 +25,9 @@ class PlaylistCreateStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _filteringOutNonSpotifyTracks = false;
+  bool get filteringOutNonSpotifyTracks => _filteringOutNonSpotifyTracks;
+
   bool _creatingPlaylist = false;
   bool get creatingPlaylist => _creatingPlaylist;
 
@@ -46,6 +49,27 @@ class PlaylistCreateStore extends ChangeNotifier {
   void removeExcludeTag(String tag) {
     _excludeTags.remove(tag);
     notifyListeners();
+  }
+
+  List<String> getUris(Map<String, Set<String>> tagToTracks,
+      Map<String, Set<String>> trackToTags,
+      Map<String, TrackCacheItem> cache,
+  ) {
+    List<String> tracks = getTracks(tagToTracks, trackToTags, cache);
+    List<String> uris = tracks
+        .map((x) => 'spotify:track:$x').toList();
+    List<String> urisToUse = uris
+        .where((x) => TrackCacheItem.idIsOnSpotify(x)).toList();
+
+    if (urisToUse.length < uris.length && !_filteringOutNonSpotifyTracks) {
+      _filteringOutNonSpotifyTracks = true;
+      notifyListeners();
+    } else if (urisToUse.length == uris.length && _filteringOutNonSpotifyTracks) {
+      _filteringOutNonSpotifyTracks = false;
+      notifyListeners();
+    }
+
+    return urisToUse;
   }
 
   List<String> getTracks(Map<String, Set<String>> tagToTracks,

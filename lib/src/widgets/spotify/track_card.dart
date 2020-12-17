@@ -8,11 +8,12 @@ import 'package:tagify/src/utils/utils.dart';
 import 'package:tagify/src/widgets/common/custom_card.dart';
 import 'package:tagify/src/widgets/firebase/track_tags_list.dart';
 
+
 class TrackCard extends HookWidget {
 
   final String id;
   final bool draggable;
-  TrackCard(this.id, {this.draggable=true});
+  TrackCard(this.id, {this.draggable=false});
 
   _onTap(BuildContext context) {
     var store = context.read(queueProvider);
@@ -28,20 +29,9 @@ class TrackCard extends HookWidget {
   Widget build(BuildContext context) {
     final queue = useProvider(queueProvider);
     final firebase = useProvider(firebaseProvider);
-    final requested = useState(false);
-    final fetched = useState(false);
-    final isMounted = useIsMounted();
 
     if (!firebase.trackCache.containsKey(id)) {
-
-      if (!(requested.value)) {
-        firebase.cacheTrackById(id).then((x) {
-          if (isMounted())
-            fetched.value = true;
-        });
-        requested.value = true;
-      }
-
+      WidgetsBinding.instance.addPostFrameCallback((_) => firebase.cacheTrackById(id));
       return CustomCard(
         constraints: BoxConstraints(
           maxWidth: 800,
@@ -55,6 +45,14 @@ class TrackCard extends HookWidget {
             Text(id),
           ],
         )
+      );
+    }
+
+    if (!TrackCacheItem.idIsOnSpotify(id)) {
+      return _TrackCardWidget(
+        item: firebase.trackCache[id],
+        nowPlaying: false,
+        inQueue: false,
       );
     }
 
@@ -103,60 +101,64 @@ class _TrackCardWidget extends StatelessWidget {
   });
 
   Color _getColor() => inQueue ? Colors.blueAccent :
-    nowPlaying ? Colors.blueGrey : Colors.black12;
+    nowPlaying ? Colors.blueGrey :
+    !item.onSpotify ? Colors.black26 : Colors.black12;
 
   @override
-  Widget build(BuildContext context) => CustomCard(
-    constraints: !feedback ? null : BoxConstraints(
-      maxWidth: 800,
-      maxHeight: 300,
-    ),
-    onTap: onTap,
-    color: _getColor(),
-    child: IntrinsicHeight(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          if(item.imageUrl != null) Image.network(item.imageUrl,
-            height: 100,
-            width: 100,
-            fit: BoxFit.fill,
-          ),
-          if(item.imageUrl == null) Container(
-            height: 100,
-            width: 100,
-            color: Colors.black26,
-            child: Center(
-              child: Text('No image available',
-                textAlign: TextAlign.center,
+  Widget build(BuildContext context) {
+    return CustomCard(
+      constraints: !feedback ? null : BoxConstraints(
+        maxWidth: 800,
+        maxHeight: 300,
+      ),
+      onTap: item.onSpotify ? onTap : null,
+      color: _getColor(),
+      child: IntrinsicHeight(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            if(item.imageUrl != null) Image.network(item.imageUrl,
+              height: 100,
+              width: 100,
+              fit: BoxFit.fill,
+            ),
+            if(item.imageUrl == null) Container(
+              height: 100,
+              width: 100,
+              color: Colors.black26,
+              child: Center(
+                child: Text('No image available',
+                  textAlign: TextAlign.center,
+                ),
+              )
+            ),
+            Container(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: Text(item.name,
+                    style: TextStyle(
+                      fontSize: 20,
+                    )
+                  )),
+                  Container(height: 10),
+                  Expanded(child: Text(item.artist)),
+                ],
+              )
+            ),
+            Expanded(
+              child:  Wrap(
+                alignment: WrapAlignment.end,
+                children: [
+                  if (item.onSpotify)TrackTagsList(item.id),
+                  if (!item.onSpotify) Text('Track not found on Spotify'),
+                ],
               ),
             )
-          ),
-          Container(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: Text(item.name,
-                  style: TextStyle(
-                    fontSize: 20,
-                  )
-                )),
-                Container(height: 10),
-                Expanded(child: Text(item.artist)),
-              ],
-            )
-          ),
-          Expanded(
-            child:  Wrap(
-              alignment: WrapAlignment.end,
-              children: [
-                TrackTagsList(item.id),
-              ],
-            ),
-          )
-        ],
-      ),
-    )
-  );
+          ],
+        ),
+      )
+    );
+  }
 }
