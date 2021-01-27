@@ -2,9 +2,7 @@
 
 Flutter app for bulk tagging songs on lastfm and then making playlists on spotify based on tags.
 
-Very much a work in progress, but a demo is available at
-
-https://tagify-4882e.web.app/#/
+Very much a work in progress
 
 # Features
 
